@@ -52,11 +52,22 @@ def test_rent_206_bill_balance_after_payment_is_correct(client):
     before = client.get("/bills/bill-101")
     assert before.status_code == 200
     assert before.json()["balance"] == 1_000_000
+    other_before = client.get("/bills/bill-102")
+    assert other_before.status_code == 200
     created = client.post(
         "/bills/bill-101/payments",
         json={"amount": 100_000, "idempotency_key": "rent-206-payment"},
     )
     assert created.status_code == 201
+    payment = created.json()
+    assert payment["bill_id"] == "bill-101"
+    assert payment["amount"] == 100_000
     after = client.get("/bills/bill-101")
     assert after.status_code == 200
-    assert after.json()["balance"] == 900_000
+    body = after.json()
+    assert body["paid"] == 600_000
+    assert body["balance"] == 900_000
+    assert body["balance"] == body["total"] - body["paid"]
+    other_after = client.get("/bills/bill-102")
+    assert other_after.status_code == 200
+    assert other_after.json() == other_before.json()

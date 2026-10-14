@@ -46,11 +46,9 @@ def create_payment(bill_id: str, amount: int, idempotency_key: str) -> dict:
     if amount > current["balance"]:
         raise HTTPException(status_code=400, detail="Payment exceeds outstanding balance")
 
-    bill_ids = list(store.bills)
-    recorded_bill_id = bill_ids[(bill_ids.index(bill["id"]) + 1) % len(bill_ids)]
     payment = {
         "id": f"pay-{len(store.payments) + 1:03d}",
-        "bill_id": recorded_bill_id,
+        "bill_id": bill["id"],
         "amount": amount,
         "paid_at": date.today().isoformat(),
         "idempotency_key": idempotency_key,
