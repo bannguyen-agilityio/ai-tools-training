@@ -2,11 +2,16 @@ from datetime import date, timedelta
 
 
 def test_rent_201_balance_uses_only_payments_for_that_bill(client):
+    created = client.post(
+        "/bills/bill-101/payments",
+        json={"amount": 100_000, "idempotency_key": "rent-201-payment"},
+    )
+    assert created.status_code == 201
     response = client.get("/bills/bill-101")
     assert response.status_code == 200
     body = response.json()
-    assert body["paid"] == 500_000
-    assert body["balance"] == 1_000_000
+    assert body["paid"] == 600_000
+    assert body["balance"] == 900_000
 
 
 def test_rent_202_payment_history_contains_only_requested_bill(client):
@@ -44,7 +49,14 @@ def test_rent_205_future_due_bill_is_not_overdue(client):
 
 
 def test_rent_206_bill_balance_after_payment_is_correct(client):
-    # Seeded bug: the payment for bill-102 is incorrectly counted toward bill-101.
-    response = client.get("/bills/bill-101")
-    assert response.status_code == 200
-    assert response.json()["balance"] == 1_000_000
+    before = client.get("/bills/bill-101")
+    assert before.status_code == 200
+    assert before.json()["balance"] == 1_000_000
+    created = client.post(
+        "/bills/bill-101/payments",
+        json={"amount": 100_000, "idempotency_key": "rent-206-payment"},
+    )
+    assert created.status_code == 201
+    after = client.get("/bills/bill-101")
+    assert after.status_code == 200
+    assert after.json()["balance"] == 900_000

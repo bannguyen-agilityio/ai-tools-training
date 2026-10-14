@@ -27,5 +27,5 @@ payments = [
     {"id": "pay-002", "bill_id": "bill-102", "amount": 200_000, "paid_at": "2026-10-02", "idempotency_key": "seed-102"},
 ]
 
-# Used to prevent replaying a request. Intentionally not wired up correctly yet.
+# Used to prevent replaying a request.
 idempotency_keys: dict[str, str] = {}
