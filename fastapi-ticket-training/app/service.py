@@ -36,7 +36,7 @@ def get_bill(bill_id: str) -> dict:
 
 def list_payments(bill_id: str) -> list[dict]:
     get_bill_or_404(bill_id)
-    return list(store.payments)
+    return [p for p in store.payments if p["bill_id"] == bill_id]
 
 
 def create_payment(bill_id: str, amount: int, idempotency_key: str) -> dict:
@@ -44,7 +44,9 @@ def create_payment(bill_id: str, amount: int, idempotency_key: str) -> dict:
 
     current = get_bill(bill_id)
     if amount > current["balance"]:
-        raise HTTPException(status_code=400, detail="Payment exceeds outstanding balance")
+        raise HTTPException(
+            status_code=400, detail="Payment exceeds outstanding balance"
+        )
 
     payment = {
         "id": f"pay-{len(store.payments) + 1:03d}",
@@ -64,12 +66,14 @@ def list_overdue_bills() -> list[dict]:
         view = get_bill(bill["id"])
         if view["balance"] > 0:
             days_overdue = max(0, (today - bill["due_date"]).days)
-            result.append({
-                "bill_id": bill["id"],
-                "tenant": bill["tenant"],
-                "total": bill["total"],
-                "balance": view["balance"],
-                "due_date": bill["due_date"],
-                "days_overdue": days_overdue,
-            })
+            result.append(
+                {
+                    "bill_id": bill["id"],
+                    "tenant": bill["tenant"],
+                    "total": bill["total"],
+                    "balance": view["balance"],
+                    "due_date": bill["due_date"],
+                    "days_overdue": days_overdue,
+                }
+            )
     return result
