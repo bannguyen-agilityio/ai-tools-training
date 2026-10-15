@@ -22,6 +22,30 @@ def test_rent_202_payment_history_contains_only_requested_bill(client):
     assert all(payment["bill_id"] == "bill-101" for payment in payments)
 
 
+def test_rent_202_payment_history_includes_new_payments_with_amount_and_date(client):
+    client.post(
+        "/bills/bill-102/payments",
+        json={"amount": 50_000, "idempotency_key": "rent-202-other-bill"},
+    )
+    created = client.post(
+        "/bills/bill-101/payments",
+        json={"amount": 100_000, "idempotency_key": "rent-202-payment"},
+    )
+    assert created.status_code == 201
+    response = client.get("/bills/bill-101/payments")
+    assert response.status_code == 200
+    payments = response.json()
+    assert [p["id"] for p in payments] == ["pay-001", created.json()["id"]]
+    assert [p["amount"] for p in payments] == [500_000, 100_000]
+    assert all(p["paid_at"] for p in payments)
+    assert all(p["bill_id"] == "bill-101" for p in payments)
+
+
+def test_rent_202_payment_history_unknown_bill_returns_404(client):
+    response = client.get("/bills/bill-999/payments")
+    assert response.status_code == 404
+
+
 def test_rent_203_same_idempotency_key_does_not_duplicate_payment(client):
     payload = {"amount": 100_000, "idempotency_key": "request-abc"}
     first = client.post("/bills/bill-101/payments", json=payload)
