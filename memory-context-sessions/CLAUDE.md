@@ -38,7 +38,7 @@ Routes are registered centrally in `app/api/v1/router.py` under the `/api/v1` pr
 
 ## Authentication
 
-Stateless JWT auth via `OAuth2PasswordBearer` (tokenUrl: `/api/v1/auth/login`). Tokens are signed with `APP_SECRET_KEY` (HS256, configurable expiry via `APP_ACCESS_TOKEN_EXPIRE_MINUTES`). The `get_current_user` dependency extracts the `Authorization: Bearer <token>` header, decodes the JWT, and returns the username — no token storage. Passwords are hashed with PBKDF2-SHA256 + per-user salt (`app/core/security.py`).
+Stateless JWT auth via `HTTPBearer.` (tokenUrl: `/api/v1/auth/login`). Tokens are signed with `APP_SECRET_KEY` (HS256, configurable expiry via `APP_ACCESS_TOKEN_EXPIRE_MINUTES`). The `get_current_user` dependency extracts the `Authorization: Bearer <token>` header, decodes the JWT, and returns the username — no token storage. Passwords are hashed with PBKDF2-SHA256 + per-user salt (`app/core/security.py`).
 
 ## Error Handling
 

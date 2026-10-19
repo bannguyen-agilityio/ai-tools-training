@@ -8,10 +8,11 @@ All handlers convert exceptions into a consistent JSON structure::
 import logging
 import uuid
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import RequestResponseEndpoint
 
 from app.core.exceptions import AppError
 
@@ -59,8 +60,9 @@ def _error_response(
     )
 
 
-async def _app_error_handler(request: Request, exc: AppError) -> JSONResponse:
+async def _app_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Convert domain exceptions to the standard error envelope."""
+    assert isinstance(exc, AppError)
     headers = {"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None
     return _error_response(
         status_code=exc.status_code,
@@ -72,10 +74,9 @@ async def _app_error_handler(request: Request, exc: AppError) -> JSONResponse:
     )
 
 
-async def _validation_error_handler(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def _validation_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Normalize Pydantic validation errors into the standard envelope."""
+    assert isinstance(exc, RequestValidationError)
     details: list[dict[str, str]] = []
     for error in exc.errors():
         field = ".".join(str(loc) for loc in error["loc"] if loc != "body")
@@ -95,10 +96,9 @@ async def _validation_error_handler(
     )
 
 
-async def _http_exception_handler(
-    request: Request, exc: StarletteHTTPException
-) -> JSONResponse:
+async def _http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Wrap Starlette/FastAPI HTTP exceptions in the standard envelope."""
+    assert isinstance(exc, StarletteHTTPException)
     code = _STATUS_TO_CODE.get(exc.status_code, "UNKNOWN_ERROR")
     message = str(exc.detail) if exc.detail else "An error occurred."
     headers = {"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None
@@ -125,10 +125,12 @@ async def _unhandled_exception_handler(
     )
 
 
-async def _request_id_middleware(request: Request, call_next: object) -> object:
+async def _request_id_middleware(
+    request: Request, call_next: RequestResponseEndpoint
+) -> Response:
     """Attach a unique request ID to every incoming request."""
     request.state.request_id = f"req_{uuid.uuid4().hex[:12]}"
-    return await call_next(request)  # type: ignore[operator]
+    return await call_next(request)
 
 
 def register_error_handlers(app: FastAPI) -> None:
@@ -138,13 +140,7 @@ def register_error_handlers(app: FastAPI) -> None:
         app: The FastAPI application instance.
     """
     app.middleware("http")(_request_id_middleware)
-    app.add_exception_handler(AppError, _app_error_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(
-        RequestValidationError,
-        _validation_error_handler,  # type: ignore[arg-type]
-    )
-    app.add_exception_handler(
-        StarletteHTTPException,
-        _http_exception_handler,  # type: ignore[arg-type]
-    )
-    app.add_exception_handler(Exception, _unhandled_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(AppError, _app_error_handler)
+    app.add_exception_handler(RequestValidationError, _validation_error_handler)
+    app.add_exception_handler(StarletteHTTPException, _http_exception_handler)
+    app.add_exception_handler(Exception, _unhandled_exception_handler)
