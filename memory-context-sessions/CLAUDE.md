@@ -1,69 +1,50 @@
 # CLAUDE.md
 
-## Commands
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Setup
 
 ```bash
-uv sync --all-groups            # Install all dependencies
-uv run uvicorn app.main:app --reload  # Dev server (auto-reloads)
-uv run pytest                   # Run tests
-uv run ruff check .             # Lint
-uv run ruff check . --fix       # Auto-fix lint issues
-uv run ruff format .            # Format code
-uv run pyright                  # Type check
-
-# Run all quality checks (run after every change)
-uv run ruff check . && uv run ruff format --check . && uv run pyright && uv run pytest
+cp .env.sample .env           # Then edit — at minimum set APP_SECRET_KEY and APP_SEED_PASSWORD
+uv sync --all-groups          # Install all dependencies (including dev)
 ```
 
-## Environment
+## Build & Run Commands
 
-Copy `.env.sample` to `.env`. All variables use the `APP_` prefix (see `app/core/config.py`).
-The database is async SQLite via SQLAlchemy + aiosqlite. Tables are auto-created on startup—no migration tool.
+```bash
+uv run uvicorn app.main:app --reload   # Dev server at http://localhost:8000
+uv run pytest                 # Run all tests
+uv run pytest app/tests/modules/auth/test_service.py  # Single test file
+uv run pytest -k test_login   # Single test by name
+uv run ruff check .           # Lint
+uv run ruff format .          # Format
+uv run pyright                # Type check
+uv run ruff check . && uv run ruff format --check . && uv run pyright && uv run pytest  # All checks
+```
 
 ## Architecture
 
-Feature modules live under `app/modules/<feature>/` with this layering:
+FastAPI app with async SQLAlchemy (aiosqlite), structured as vertical modules under `app/modules/`. Each module follows the same layered pattern:
 
-| Layer | Responsibility | Why |
-|---|---|---|
-| **Router** | HTTP handling, status codes, DI wiring | Keeps transport concerns out of business logic |
-| **Service** | Business rules, raises domain exceptions | Testable without HTTP or DB |
-| **Repository** | Data access via `AsyncSession` | Isolates query details; services only see the interface |
-| **Models** | SQLAlchemy ORM entities | Single source of truth for table shape |
-| **Schemas** | Pydantic request/response models | Decouples API shape from DB shape |
+- **router.py** — HTTP endpoints, delegates to the service layer
+- **service.py** — Business logic, raises domain exceptions from `app.core.exceptions`
+- **repository.py** — Data access via async SQLAlchemy session
+- **models.py** — SQLAlchemy ORM models inheriting `app.infrastructure.database.Base`
+- **schemas.py** — Pydantic request/response models
+- **dependencies.py** — FastAPI dependency injection wiring (repository → service → router)
 
-Shared code: `app/core/` (config, exceptions, error schemas, security). Infrastructure: `app/infrastructure/` (engine, session factory, `Base`).
+Modules: `auth` (user registration, JWT login, token resolution) and `todo` (CRUD, scoped to the authenticated user).
 
-Routes are registered centrally in `app/api/v1/router.py` under the `/api/v1` prefix—never scattered across modules. This keeps versioning in one place and makes it possible to add `/api/v2` without hunting for hardcoded prefixes.
+### Key conventions
 
-## Authentication
-
-Stateless JWT auth via `HTTPBearer.` (tokenUrl: `/api/v1/auth/login`). Tokens are signed with `APP_SECRET_KEY` (HS256, configurable expiry via `APP_ACCESS_TOKEN_EXPIRE_MINUTES`). The `get_current_user` dependency extracts the `Authorization: Bearer <token>` header, decodes the JWT, and returns the username — no token storage. Passwords are hashed with PBKDF2-SHA256 + per-user salt (`app/core/security.py`).
-
-## Error Handling
-
-All errors use the envelope defined in `app/core/schemas.py`:
-
-```json
-{"error": {"code": "UPPER_SNAKE_CODE", "message": "...", "details": null, "request_id": "..."}}
-```
-
-- Services raise domain exceptions from `app/core/exceptions.py` (e.g., `AuthenticationError`, `ConflictError`). They never return HTTP responses.
-- `app/core/error_handlers.py` converts those exceptions into the envelope. Validation errors (422) include per-field `details`.
-- New error types: subclass `AppError`, pick a stable code and appropriate status. The handler picks it up automatically.
-
-## Conventions
-
-- **Docstrings:** Google-style, enforced by Ruff `D` rules. Every module, public class, and public function needs one. Keep them short—don't repeat what type hints already say.
-- **Async:** Use `async def` for any I/O operation. The DB session, engine, and all repository methods are async.
-- **Transactions:** The session's request-scoped `get_db_session` generator commits on success and rolls back on error. Repositories call `flush()`, not `commit()`.
-- **Tests:** pytest + pytest-asyncio (`asyncio_mode = "auto"`). Use FastAPI `TestClient` for endpoint tests; test services directly for business logic.
-
-## Never Do
-
-- Put business logic or SQL in routers. *Routers only wire things together.*
-- Let services import FastAPI, `Request`, or concrete DB types. *Breaks testability and the dependency rule.*
-- Return HTTP responses from services or repositories. *Raise an `AppError` subclass; let the handler convert it.*
-- Expose stack traces, SQL, or internal paths in error responses. *Security risk; log them server-side instead.*
-- Hardcode secrets or skip auth to make tests pass. *Use `.env` and dependency overrides.*
-- Introduce breaking changes to `/api/v1` without approval. *Clients depend on stable codes and shapes.*
+- All API routes are versioned under `/api/v1` via `app.api.v1.router`
+- Domain errors extend `AppError` (`app.core.exceptions`) and are converted to a standard JSON error envelope `{"error": {"code", "message", "details", "request_id"}}` by handlers in `app.core.error_handlers`
+- A request-ID middleware (`req_<hex>`) is attached to every request
+- Auth uses PBKDF2-SHA256 password hashing with per-user salts, and HS256 JWT tokens
+- The `todo` module resolves the current user's DB ID via `get_current_user_id` dependency, which chains through the auth module's `get_current_user` (bearer token → username)
+- Pagination uses `PaginationParams` / `PaginatedResponse[T]` from `app.core.pagination`
+- Settings load from `APP_`-prefixed env vars via pydantic-settings (`app.core.config`)
+- Database tables are auto-created on startup in the lifespan handler; a seed user is inserted from env vars
+- Tests use an in-memory SQLite database with `StaticPool`; the `conftest.py` overrides `get_db_session` and provides `client`, `auth_token`, `auth_headers`, and `db_session` fixtures. The `conftest.py` sets `APP_*` env vars via `os.environ.setdefault` **before** importing any app modules — new test helpers must preserve this ordering
+- `asyncio_mode = "auto"` in `pyproject.toml` — async test functions run without explicit `@pytest.mark.asyncio`
+- Python 3.14+, ruff lint uses Google-style docstrings (`extend-select = ["D"]`)
