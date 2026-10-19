@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from app.core.pagination import (
     PaginatedResponse,
@@ -103,6 +103,26 @@ async def create_todo(
         completed=todo.completed,
         created_at=todo.created_at,
     )
+
+
+@router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_todo(
+    todo_id: int,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    todo_service: Annotated[TodoService, Depends(get_todo_service)],
+) -> Response:
+    """Delete a todo by ID for the authenticated user.
+
+    Args:
+        todo_id: The ID of the todo to delete.
+        user_id: The current user's database ID.
+        todo_service: The todo service.
+
+    Returns:
+        An empty 204 response.
+    """
+    await todo_service.delete_todo(todo_id, user_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch("/{todo_id}", response_model=TodoOut)
