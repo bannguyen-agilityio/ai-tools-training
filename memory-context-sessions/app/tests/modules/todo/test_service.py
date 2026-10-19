@@ -71,6 +71,34 @@ class TestTodoService:
         assert total == 1
         assert items[0].title == "Mine"
 
+    async def test_get_todo(self, db_session: AsyncSession) -> None:
+        """get_todo returns the todo detail."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        created = await service.create_todo(user_id, "Fetch me", "Details here")
+
+        todo = await service.get_todo(created.id, user_id)
+        assert todo.id == created.id
+        assert todo.title == "Fetch me"
+        assert todo.description == "Details here"
+
+    async def test_get_todo_not_found(self, db_session: AsyncSession) -> None:
+        """get_todo raises NotFoundError for a nonexistent todo."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+
+        with pytest.raises(NotFoundError):
+            await service.get_todo(9999, user_id)
+
+    async def test_get_todo_other_user(self, db_session: AsyncSession) -> None:
+        """get_todo raises NotFoundError when the todo belongs to another user."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        todo = await service.create_todo(user_id, "Private", None)
+
+        with pytest.raises(NotFoundError):
+            await service.get_todo(todo.id, 9999)
+
     async def test_list_with_pagination(self, db_session: AsyncSession) -> None:
         """Offset and limit control which items are returned."""
         service = self._make_service(db_session)

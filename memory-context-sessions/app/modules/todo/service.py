@@ -33,6 +33,24 @@ class TodoService:
         total = await self._todo_repo.count_by_user(user_id)
         return items, total
 
+    async def get_todo(self, todo_id: int, user_id: int) -> Todo:
+        """Return a single todo owned by the user.
+
+        Args:
+            todo_id: The todo's primary key.
+            user_id: The owner's user ID.
+
+        Returns:
+            The todo record.
+
+        Raises:
+            NotFoundError: If the todo does not exist or is not owned by the user.
+        """
+        todo = await self._todo_repo.get_by_id_and_user(todo_id, user_id)
+        if not todo:
+            raise NotFoundError(message="Todo not found", code="TODO_NOT_FOUND")
+        return todo
+
     async def create_todo(
         self, user_id: int, title: str, description: str | None
     ) -> Todo:

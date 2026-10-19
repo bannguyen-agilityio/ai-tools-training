@@ -121,6 +121,47 @@ class TestListTodos:
         assert response.status_code == 401
 
 
+class TestGetTodo:
+    """Verify GET /api/v1/todos/{todo_id}."""
+
+    def _create_todo(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> dict[str, object]:
+        """Create a todo and return its response body."""
+        response = client.post(
+            "/api/v1/todos",
+            json={"title": "Detail test", "description": "Check detail"},
+            headers=auth_headers,
+        )
+        assert response.status_code == 201
+        return response.json()
+
+    def test_get_success(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Fetching a todo by ID returns the full detail."""
+        todo = self._create_todo(client, auth_headers)
+        response = client.get(f"/api/v1/todos/{todo['id']}", headers=auth_headers)
+        assert response.status_code == 200
+        body = response.json()
+        assert body["id"] == todo["id"]
+        assert body["title"] == "Detail test"
+        assert body["description"] == "Check detail"
+        assert body["completed"] is False
+        assert "created_at" in body
+
+    def test_not_found(self, client: TestClient, auth_headers: dict[str, str]) -> None:
+        """Nonexistent todo ID returns 404."""
+        response = client.get("/api/v1/todos/9999", headers=auth_headers)
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "TODO_NOT_FOUND"
+
+    def test_unauthenticated(self, client: TestClient) -> None:
+        """Request without a token returns 401."""
+        response = client.get("/api/v1/todos/1")
+        assert response.status_code == 401
+
+
 class TestCreateTodo:
     """Verify POST /api/v1/todos."""
 

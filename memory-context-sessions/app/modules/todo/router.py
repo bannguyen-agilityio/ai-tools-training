@@ -53,6 +53,32 @@ async def list_todos(
     return PaginatedResponse(items=items, meta=meta)
 
 
+@router.get("/{todo_id}", response_model=TodoOut)
+async def get_todo(
+    todo_id: int,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    todo_service: Annotated[TodoService, Depends(get_todo_service)],
+) -> TodoOut:
+    """Return a single todo by ID for the authenticated user.
+
+    Args:
+        todo_id: The todo's primary key.
+        user_id: The current user's database ID.
+        todo_service: The todo service.
+
+    Returns:
+        The todo detail.
+    """
+    todo = await todo_service.get_todo(todo_id, user_id)
+    return TodoOut(
+        id=todo.id,
+        title=todo.title,
+        description=todo.description,
+        completed=todo.completed,
+        created_at=todo.created_at,
+    )
+
+
 @router.post("", response_model=TodoOut, status_code=status.HTTP_201_CREATED)
 async def create_todo(
     body: CreateTodoRequest,
