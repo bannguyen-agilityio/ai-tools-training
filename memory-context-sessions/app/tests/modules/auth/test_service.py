@@ -3,6 +3,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.exceptions import AuthenticationError, ConflictError
 from app.modules.auth.repository import UserRepository
 from app.modules.auth.service import AuthService
@@ -27,7 +28,9 @@ class TestAuthService:
         """Duplicate username raises ConflictError."""
         service = self._make_service(db_session)
         with pytest.raises(ConflictError) as exc_info:
-            await service.register("admin", "securepass", "Another Admin")
+            await service.register(
+                settings.seed_username, "securepass", "Another Admin"
+            )
         assert exc_info.value.code == "USERNAME_ALREADY_EXISTS"
 
     async def test_register_then_authenticate(self, db_session: AsyncSession) -> None:
@@ -40,14 +43,16 @@ class TestAuthService:
     async def test_authenticate_valid(self, db_session: AsyncSession) -> None:
         """Valid credentials return a token."""
         service = self._make_service(db_session)
-        token = await service.authenticate("admin", "admin123")
+        token = await service.authenticate(
+            settings.seed_username, settings.seed_password
+        )
         assert len(token) > 0
 
     async def test_authenticate_wrong_password(self, db_session: AsyncSession) -> None:
         """Wrong password raises AuthenticationError with INVALID_CREDENTIALS."""
         service = self._make_service(db_session)
         with pytest.raises(AuthenticationError) as exc_info:
-            await service.authenticate("admin", "wrong")
+            await service.authenticate(settings.seed_username, "wrong!!!")
         assert exc_info.value.code == "INVALID_CREDENTIALS"
         assert exc_info.value.message == "Incorrect username or password"
 
@@ -55,14 +60,16 @@ class TestAuthService:
         """Unknown user raises AuthenticationError with INVALID_CREDENTIALS."""
         service = self._make_service(db_session)
         with pytest.raises(AuthenticationError) as exc_info:
-            await service.authenticate("nobody", "admin123")
+            await service.authenticate("nobody", "somepassword")
         assert exc_info.value.code == "INVALID_CREDENTIALS"
 
     async def test_resolve_token(self, db_session: AsyncSession) -> None:
         """A valid token resolves to its username."""
         service = self._make_service(db_session)
-        token = await service.authenticate("admin", "admin123")
-        assert service.resolve_token(token) == "admin"
+        token = await service.authenticate(
+            settings.seed_username, settings.seed_password
+        )
+        assert service.resolve_token(token) == settings.seed_username
 
     async def test_resolve_invalid_token(self, db_session: AsyncSession) -> None:
         """An invalid token raises AuthenticationError with INVALID_TOKEN."""
@@ -74,9 +81,9 @@ class TestAuthService:
     async def test_get_user(self, db_session: AsyncSession) -> None:
         """Existing user returns their data."""
         service = self._make_service(db_session)
-        user = await service.get_user("admin")
+        user = await service.get_user(settings.seed_username)
         assert user is not None
-        assert user.full_name == "Admin User"
+        assert user.full_name == settings.seed_full_name
 
     async def test_get_user_not_found(self, db_session: AsyncSession) -> None:
         """Non-existent user returns None."""

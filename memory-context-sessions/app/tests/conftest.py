@@ -14,7 +14,11 @@ from sqlalchemy.pool import StaticPool
 
 os.environ.setdefault("APP_SECRET_KEY", "test-secret-key-for-testing-only")
 os.environ.setdefault("APP_DATABASE_URL", "sqlite+aiosqlite://")
+os.environ.setdefault("APP_SEED_USERNAME", "admin")
+os.environ.setdefault("APP_SEED_PASSWORD", "admin123!")
+os.environ.setdefault("APP_SEED_FULL_NAME", "Admin User")
 
+from app.core.config import settings
 from app.core.security import generate_salt, hash_password
 from app.infrastructure.database import Base, get_db_session
 from app.main import app
@@ -36,7 +40,7 @@ async def _override_get_db_session() -> AsyncGenerator[AsyncSession]:
 
 @pytest.fixture(autouse=True)
 async def _setup_test_db() -> AsyncGenerator[None]:
-    """Create tables, seed admin user, and clean up after each test."""
+    """Create tables, seed user from settings, and clean up after each test."""
     async with _test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -44,10 +48,10 @@ async def _setup_test_db() -> AsyncGenerator[None]:
         salt = generate_salt()
         session.add(
             User(
-                username="admin",
-                password_hash=hash_password("admin123", salt),
+                username=settings.seed_username,
+                password_hash=hash_password(settings.seed_password, salt),
                 salt=salt,
-                full_name="Admin User",
+                full_name=settings.seed_full_name,
             )
         )
         await session.commit()
@@ -68,10 +72,13 @@ def client() -> TestClient:
 
 @pytest.fixture
 def auth_token(client: TestClient) -> str:
-    """Authenticate as admin and return a valid access token."""
+    """Authenticate as the seed user and return a valid access token."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"username": "admin", "password": "admin123"},
+        json={
+            "username": settings.seed_username,
+            "password": settings.seed_password,
+        },
     )
     return response.json()["access_token"]
 

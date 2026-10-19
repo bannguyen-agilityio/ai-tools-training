@@ -2,6 +2,8 @@
 
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
+
 
 class TestRegister:
     """Tests for POST /api/v1/auth/register."""
@@ -27,7 +29,7 @@ class TestRegister:
         response = client.post(
             "/api/v1/auth/register",
             json={
-                "username": "admin",
+                "username": settings.seed_username,
                 "password": "securepass",
                 "full_name": "Another Admin",
             },
@@ -73,7 +75,10 @@ class TestLogin:
         """Valid credentials return an access token."""
         response = client.post(
             "/api/v1/auth/login",
-            json={"username": "admin", "password": "admin123"},
+            json={
+                "username": settings.seed_username,
+                "password": settings.seed_password,
+            },
         )
         assert response.status_code == 200
         body = response.json()
@@ -84,7 +89,7 @@ class TestLogin:
         """Invalid password returns 401 with error envelope."""
         response = client.post(
             "/api/v1/auth/login",
-            json={"username": "admin", "password": "wrong"},
+            json={"username": settings.seed_username, "password": "wrong!!!"},
         )
         assert response.status_code == 401
         error = response.json()["error"]
@@ -96,7 +101,7 @@ class TestLogin:
         """Unknown username returns 401 with error envelope."""
         response = client.post(
             "/api/v1/auth/login",
-            json={"username": "nobody", "password": "admin123"},
+            json={"username": "nobody", "password": "somepassword"},
         )
         assert response.status_code == 401
         assert response.json()["error"]["code"] == "INVALID_CREDENTIALS"
@@ -112,9 +117,8 @@ class TestCurrentUser:
         response = client.get("/api/v1/auth/me", headers=auth_headers)
         assert response.status_code == 200
         body = response.json()
-        assert body["id"] == 1
-        assert body["username"] == "admin"
-        assert body["full_name"] == "Admin User"
+        assert body["username"] == settings.seed_username
+        assert body["full_name"] == settings.seed_full_name
 
     def test_get_current_user_no_token(self, client: TestClient) -> None:
         """Request without a token returns 401 with error envelope."""

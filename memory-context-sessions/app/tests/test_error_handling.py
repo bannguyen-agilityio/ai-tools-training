@@ -2,6 +2,8 @@
 
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
+
 
 class TestErrorEnvelope:
     """Verify that all error responses follow the standard envelope."""
@@ -10,7 +12,7 @@ class TestErrorEnvelope:
         """Domain error response contains all envelope fields."""
         response = client.post(
             "/api/v1/auth/login",
-            json={"username": "admin", "password": "wrong"},
+            json={"username": settings.seed_username, "password": "wrong!!!"},
         )
         assert response.status_code == 401
         body = response.json()
@@ -26,7 +28,7 @@ class TestErrorEnvelope:
         """Authentication errors include the WWW-Authenticate header."""
         response = client.post(
             "/api/v1/auth/login",
-            json={"username": "admin", "password": "wrong"},
+            json={"username": settings.seed_username, "password": "wrong!!!"},
         )
         assert response.headers.get("www-authenticate") == "Bearer"
 
