@@ -33,9 +33,14 @@ _test_session_factory = async_sessionmaker(_test_engine, expire_on_commit=False)
 
 
 async def _override_get_db_session() -> AsyncGenerator[AsyncSession]:
-    """Provide a test database session."""
+    """Provide a test database session that commits on success."""
     async with _test_session_factory() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 
 @pytest.fixture(autouse=True)
