@@ -82,6 +82,29 @@ class TodoService:
             raise NotFoundError(message="Todo not found", code="TODO_NOT_FOUND")
         await self._todo_repo.delete(todo)
 
+    async def copy_todo(self, todo_id: int, user_id: int) -> Todo:
+        """Create a copy of an existing todo.
+
+        Args:
+            todo_id: The source todo's primary key.
+            user_id: The owner's user ID.
+
+        Returns:
+            The newly created copy.
+
+        Raises:
+            NotFoundError: If the source todo does not exist or is not owned by the user.
+        """
+        source = await self._todo_repo.get_by_id_and_user(todo_id, user_id)
+        if not source:
+            raise NotFoundError(message="Todo not found", code="TODO_NOT_FOUND")
+        copy = Todo(
+            title=source.title,
+            description=source.description,
+            user_id=user_id,
+        )
+        return await self._todo_repo.create(copy)
+
     async def update_todo(
         self,
         todo_id: int,

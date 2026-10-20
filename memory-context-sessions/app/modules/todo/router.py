@@ -105,6 +105,34 @@ async def create_todo(
     )
 
 
+@router.post(
+    "/{todo_id}/copy", response_model=TodoOut, status_code=status.HTTP_201_CREATED
+)
+async def copy_todo(
+    todo_id: int,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    todo_service: Annotated[TodoService, Depends(get_todo_service)],
+) -> TodoOut:
+    """Create a copy of an existing todo.
+
+    Args:
+        todo_id: The ID of the todo to copy.
+        user_id: The current user's database ID.
+        todo_service: The todo service.
+
+    Returns:
+        The newly created copy.
+    """
+    todo = await todo_service.copy_todo(todo_id, user_id)
+    return TodoOut(
+        id=todo.id,
+        title=todo.title,
+        description=todo.description,
+        completed=todo.completed,
+        created_at=todo.created_at,
+    )
+
+
 @router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo(
     todo_id: int,

@@ -211,6 +211,66 @@ class TestCreateTodo:
         assert response.status_code == 401
 
 
+class TestCopyTodo:
+    """Verify POST /api/v1/todos/{todo_id}/copy."""
+
+    def _create_todo(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> dict[str, object]:
+        """Create a todo and return its response body."""
+        response = client.post(
+            "/api/v1/todos",
+            json={"title": "Original", "description": "To be copied"},
+            headers=auth_headers,
+        )
+        assert response.status_code == 201
+        return response.json()
+
+    def test_copy_success(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Copying a todo returns 201 with duplicated title and description."""
+        original = self._create_todo(client, auth_headers)
+        response = client.post(
+            f"/api/v1/todos/{original['id']}/copy", headers=auth_headers
+        )
+        assert response.status_code == 201
+        body = response.json()
+        assert body["id"] != original["id"]
+        assert body["title"] == "Original"
+        assert body["description"] == "To be copied"
+        assert body["completed"] is False
+
+    def test_copy_resets_completed(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Copying a completed todo creates an incomplete copy."""
+        original = self._create_todo(client, auth_headers)
+        client.patch(
+            f"/api/v1/todos/{original['id']}",
+            json={"completed": True},
+            headers=auth_headers,
+        )
+        response = client.post(
+            f"/api/v1/todos/{original['id']}/copy", headers=auth_headers
+        )
+        assert response.status_code == 201
+        assert response.json()["completed"] is False
+
+    def test_copy_not_found(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Copying a nonexistent todo returns 404."""
+        response = client.post("/api/v1/todos/9999/copy", headers=auth_headers)
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "TODO_NOT_FOUND"
+
+    def test_copy_unauthenticated(self, client: TestClient) -> None:
+        """Request without a token returns 401."""
+        response = client.post("/api/v1/todos/1/copy")
+        assert response.status_code == 401
+
+
 class TestDeleteTodo:
     """Verify DELETE /api/v1/todos/{todo_id}."""
 
