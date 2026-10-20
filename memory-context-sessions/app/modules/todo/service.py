@@ -95,15 +95,8 @@ class TodoService:
         Raises:
             NotFoundError: If the source todo does not exist or is not owned by the user.
         """
-        source = await self._todo_repo.get_by_id_and_user(todo_id, user_id)
-        if not source:
-            raise NotFoundError(message="Todo not found", code="TODO_NOT_FOUND")
-        copy = Todo(
-            title=source.title,
-            description=source.description,
-            user_id=user_id,
-        )
-        return await self._todo_repo.create(copy)
+        source = await self.get_todo(todo_id, user_id)
+        return await self.create_todo(user_id, source.title, source.description)
 
     async def update_todo(
         self,

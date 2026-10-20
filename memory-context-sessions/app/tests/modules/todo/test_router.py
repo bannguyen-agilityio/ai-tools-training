@@ -3,6 +3,22 @@
 from fastapi.testclient import TestClient
 
 
+def _create_todo(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    title: str = "Test todo",
+    description: str | None = "Test description",
+) -> dict[str, object]:
+    """Create a todo via the API and return its response body."""
+    response = client.post(
+        "/api/v1/todos",
+        json={"title": title, "description": description},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 class TestListTodos:
     """Verify GET /api/v1/todos."""
 
@@ -124,23 +140,11 @@ class TestListTodos:
 class TestGetTodo:
     """Verify GET /api/v1/todos/{todo_id}."""
 
-    def _create_todo(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> dict[str, object]:
-        """Create a todo and return its response body."""
-        response = client.post(
-            "/api/v1/todos",
-            json={"title": "Detail test", "description": "Check detail"},
-            headers=auth_headers,
-        )
-        assert response.status_code == 201
-        return response.json()
-
     def test_get_success(
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Fetching a todo by ID returns the full detail."""
-        todo = self._create_todo(client, auth_headers)
+        todo = _create_todo(client, auth_headers, "Detail test", "Check detail")
         response = client.get(f"/api/v1/todos/{todo['id']}", headers=auth_headers)
         assert response.status_code == 200
         body = response.json()
@@ -214,23 +218,11 @@ class TestCreateTodo:
 class TestCopyTodo:
     """Verify POST /api/v1/todos/{todo_id}/copy."""
 
-    def _create_todo(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> dict[str, object]:
-        """Create a todo and return its response body."""
-        response = client.post(
-            "/api/v1/todos",
-            json={"title": "Original", "description": "To be copied"},
-            headers=auth_headers,
-        )
-        assert response.status_code == 201
-        return response.json()
-
     def test_copy_success(
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Copying a todo returns 201 with duplicated title and description."""
-        original = self._create_todo(client, auth_headers)
+        original = _create_todo(client, auth_headers, "Original", "To be copied")
         response = client.post(
             f"/api/v1/todos/{original['id']}/copy", headers=auth_headers
         )
@@ -245,12 +237,13 @@ class TestCopyTodo:
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Copying a completed todo creates an incomplete copy."""
-        original = self._create_todo(client, auth_headers)
-        client.patch(
+        original = _create_todo(client, auth_headers, "Original", "To be copied")
+        patch_response = client.patch(
             f"/api/v1/todos/{original['id']}",
             json={"completed": True},
             headers=auth_headers,
         )
+        assert patch_response.status_code == 200
         response = client.post(
             f"/api/v1/todos/{original['id']}/copy", headers=auth_headers
         )
@@ -274,23 +267,11 @@ class TestCopyTodo:
 class TestDeleteTodo:
     """Verify DELETE /api/v1/todos/{todo_id}."""
 
-    def _create_todo(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> dict[str, object]:
-        """Create a todo and return its response body."""
-        response = client.post(
-            "/api/v1/todos",
-            json={"title": "To delete", "description": "Will be removed"},
-            headers=auth_headers,
-        )
-        assert response.status_code == 201
-        return response.json()
-
     def test_delete_success(
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Deleting an existing todo returns 204 and removes it."""
-        todo = self._create_todo(client, auth_headers)
+        todo = _create_todo(client, auth_headers, "To delete", "Will be removed")
         response = client.delete(f"/api/v1/todos/{todo['id']}", headers=auth_headers)
         assert response.status_code == 204
 
@@ -314,23 +295,11 @@ class TestDeleteTodo:
 class TestUpdateTodo:
     """Verify PATCH /api/v1/todos/{todo_id}."""
 
-    def _create_todo(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> dict[str, object]:
-        """Create a todo and return its response body."""
-        response = client.post(
-            "/api/v1/todos",
-            json={"title": "Original", "description": "Original desc"},
-            headers=auth_headers,
-        )
-        assert response.status_code == 201
-        return response.json()
-
     def test_update_title(
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Updating title returns the modified todo."""
-        todo = self._create_todo(client, auth_headers)
+        todo = _create_todo(client, auth_headers, "Original", "Original desc")
         response = client.patch(
             f"/api/v1/todos/{todo['id']}",
             json={"title": "Updated"},
@@ -346,7 +315,7 @@ class TestUpdateTodo:
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Marking a todo as completed returns the updated state."""
-        todo = self._create_todo(client, auth_headers)
+        todo = _create_todo(client, auth_headers, "Original", "Original desc")
         response = client.patch(
             f"/api/v1/todos/{todo['id']}",
             json={"completed": True},
@@ -359,7 +328,7 @@ class TestUpdateTodo:
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Updating description leaves other fields unchanged."""
-        todo = self._create_todo(client, auth_headers)
+        todo = _create_todo(client, auth_headers, "Original", "Original desc")
         response = client.patch(
             f"/api/v1/todos/{todo['id']}",
             json={"description": "New desc"},
@@ -385,7 +354,7 @@ class TestUpdateTodo:
         self, client: TestClient, auth_headers: dict[str, str]
     ) -> None:
         """Empty title returns 422 validation error."""
-        todo = self._create_todo(client, auth_headers)
+        todo = _create_todo(client, auth_headers, "Original", "Original desc")
         response = client.patch(
             f"/api/v1/todos/{todo['id']}",
             json={"title": ""},
