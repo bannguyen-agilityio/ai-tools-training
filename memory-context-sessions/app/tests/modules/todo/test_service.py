@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.exceptions import NotFoundError
+from app.core.security import generate_salt, hash_password
+from app.modules.auth.models import User
 from app.modules.auth.repository import UserRepository
 from app.modules.todo.repository import TodoRepository
 from app.modules.todo.service import TodoService
@@ -15,13 +17,26 @@ class TestTodoService:
 
     def _make_service(self, session: AsyncSession) -> TodoService:
         """Build a service backed by the given session."""
-        return TodoService(TodoRepository(session))
+        return TodoService(TodoRepository(session), UserRepository(session))
 
     async def _get_seed_user_id(self, session: AsyncSession) -> int:
         """Look up the seed user's ID."""
         user_repo = UserRepository(session)
         user = await user_repo.get_by_username(settings.seed_username)
         assert user is not None
+        return user.id
+
+    async def _create_second_user(self, session: AsyncSession) -> int:
+        """Create a second user and return their ID."""
+        salt = generate_salt()
+        user = User(
+            username="other_user",
+            password_hash=hash_password("password123!", salt),
+            salt=salt,
+            full_name="Other User",
+        )
+        session.add(user)
+        await session.flush()
         return user.id
 
     async def test_list_empty(self, db_session: AsyncSession) -> None:
@@ -225,3 +240,58 @@ class TestTodoService:
 
         with pytest.raises(NotFoundError):
             await service.update_todo(todo.id, 9999, title="Stolen")
+
+    async def test_move_todo(self, db_session: AsyncSession) -> None:
+        """move_todo transfers ownership to the target user."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        target_id = await self._create_second_user(db_session)
+        todo = await service.create_todo(user_id, "Movable", "Move me")
+
+        moved = await service.move_todo(todo.id, user_id, target_id)
+        assert moved.id == todo.id
+        assert moved.user_id == target_id
+        assert moved.title == "Movable"
+        assert moved.description == "Move me"
+
+    async def test_move_todo_no_longer_in_source_list(
+        self, db_session: AsyncSession
+    ) -> None:
+        """After moving, the todo no longer appears in the source user's list."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        target_id = await self._create_second_user(db_session)
+        todo = await service.create_todo(user_id, "Movable", None)
+
+        await service.move_todo(todo.id, user_id, target_id)
+        items, total = await service.list_todos(user_id)
+        assert total == 0
+        assert items == []
+
+    async def test_move_todo_not_found(self, db_session: AsyncSession) -> None:
+        """move_todo raises NotFoundError for a nonexistent todo."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        target_id = await self._create_second_user(db_session)
+
+        with pytest.raises(NotFoundError):
+            await service.move_todo(9999, user_id, target_id)
+
+    async def test_move_todo_other_user(self, db_session: AsyncSession) -> None:
+        """move_todo raises NotFoundError when the todo belongs to another user."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        target_id = await self._create_second_user(db_session)
+        todo = await service.create_todo(user_id, "Private", None)
+
+        with pytest.raises(NotFoundError):
+            await service.move_todo(todo.id, 9999, target_id)
+
+    async def test_move_todo_target_not_found(self, db_session: AsyncSession) -> None:
+        """move_todo raises NotFoundError when the target user does not exist."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        todo = await service.create_todo(user_id, "Movable", None)
+
+        with pytest.raises(NotFoundError):
+            await service.move_todo(todo.id, user_id, 9999)

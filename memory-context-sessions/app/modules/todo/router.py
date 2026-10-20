@@ -14,6 +14,7 @@ from app.modules.todo.schemas import (
     BulkDeleteRequest,
     BulkDeleteResponse,
     CreateTodoRequest,
+    MoveTodoRequest,
     TodoOut,
     UpdateTodoRequest,
 )
@@ -150,6 +151,34 @@ async def copy_todo(
         The newly created copy.
     """
     todo = await todo_service.copy_todo(todo_id, user_id)
+    return TodoOut(
+        id=todo.id,
+        title=todo.title,
+        description=todo.description,
+        completed=todo.completed,
+        created_at=todo.created_at,
+    )
+
+
+@router.put("/{todo_id}/move", response_model=TodoOut)
+async def move_todo(
+    todo_id: int,
+    body: MoveTodoRequest,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    todo_service: Annotated[TodoService, Depends(get_todo_service)],
+) -> TodoOut:
+    """Move a todo to a different user.
+
+    Args:
+        todo_id: The ID of the todo to move.
+        body: The move request containing the target user ID.
+        user_id: The current user's database ID.
+        todo_service: The todo service.
+
+    Returns:
+        The moved todo with updated ownership.
+    """
+    todo = await todo_service.move_todo(todo_id, user_id, body.target_user_id)
     return TodoOut(
         id=todo.id,
         title=todo.title,

@@ -32,6 +32,12 @@ class BulkDeleteResponse(BaseModel):
     deleted: int
 
 
+class MoveTodoRequest(BaseModel):
+    """Data required to move a todo to another user."""
+
+    target_user_id: int
+
+
 class TodoOut(BaseModel):
     """Public todo item response."""
 
