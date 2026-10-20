@@ -10,7 +10,13 @@ from app.core.pagination import (
     build_pagination_meta,
 )
 from app.modules.todo.dependencies import get_current_user_id, get_todo_service
-from app.modules.todo.schemas import CreateTodoRequest, TodoOut, UpdateTodoRequest
+from app.modules.todo.schemas import (
+    BulkDeleteRequest,
+    BulkDeleteResponse,
+    CreateTodoRequest,
+    TodoOut,
+    UpdateTodoRequest,
+)
 from app.modules.todo.service import TodoService
 
 router = APIRouter()
@@ -51,6 +57,26 @@ async def list_todos(
         total_items=total,
     )
     return PaginatedResponse(items=items, meta=meta)
+
+
+@router.post("/bulk-delete", response_model=BulkDeleteResponse)
+async def bulk_delete_todos(
+    body: BulkDeleteRequest,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    todo_service: Annotated[TodoService, Depends(get_todo_service)],
+) -> BulkDeleteResponse:
+    """Delete multiple todos by ID for the authenticated user.
+
+    Args:
+        body: The IDs of the todos to delete.
+        user_id: The current user's database ID.
+        todo_service: The todo service.
+
+    Returns:
+        The count of deleted todos.
+    """
+    deleted = await todo_service.bulk_delete_todos(body.ids, user_id)
+    return BulkDeleteResponse(deleted=deleted)
 
 
 @router.get("/{todo_id}", response_model=TodoOut)

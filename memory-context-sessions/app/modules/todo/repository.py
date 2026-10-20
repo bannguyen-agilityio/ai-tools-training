@@ -90,6 +90,26 @@ class TodoRepository:
         await self._session.delete(todo)
         await self._session.flush()
 
+    async def delete_many_by_ids_and_user(
+        self, todo_ids: list[int], user_id: int
+    ) -> int:
+        """Delete todos matching the given IDs and user.
+
+        Args:
+            todo_ids: The primary keys of the todos to delete.
+            user_id: The owner's user ID.
+
+        Returns:
+            The number of rows actually deleted.
+        """
+        from sqlalchemy import delete
+
+        result = await self._session.execute(
+            delete(Todo).where(Todo.id.in_(todo_ids), Todo.user_id == user_id)
+        )
+        await self._session.flush()
+        return result.rowcount  # type: ignore[return-value]
+
     async def flush(self) -> None:
         """Flush pending changes to the database."""
         await self._session.flush()

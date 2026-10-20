@@ -20,6 +20,18 @@ class UpdateTodoRequest(BaseModel):
     completed: bool | None = None
 
 
+class BulkDeleteRequest(BaseModel):
+    """IDs of todos to delete in bulk."""
+
+    ids: list[int] = Field(min_length=1, max_length=100)
+
+
+class BulkDeleteResponse(BaseModel):
+    """Result of a bulk delete operation."""
+
+    deleted: int
+
+
 class TodoOut(BaseModel):
     """Public todo item response."""
 

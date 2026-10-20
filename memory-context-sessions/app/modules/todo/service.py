@@ -98,6 +98,18 @@ class TodoService:
         source = await self.get_todo(todo_id, user_id)
         return await self.create_todo(user_id, source.title, source.description)
 
+    async def bulk_delete_todos(self, todo_ids: list[int], user_id: int) -> int:
+        """Delete multiple todos owned by the user.
+
+        Args:
+            todo_ids: The primary keys of the todos to delete.
+            user_id: The owner's user ID.
+
+        Returns:
+            The number of todos actually deleted.
+        """
+        return await self._todo_repo.delete_many_by_ids_and_user(todo_ids, user_id)
+
     async def update_todo(
         self,
         todo_id: int,

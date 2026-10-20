@@ -292,6 +292,95 @@ class TestDeleteTodo:
         assert response.status_code == 401
 
 
+class TestBulkDeleteTodos:
+    """Verify POST /api/v1/todos/bulk-delete."""
+
+    def _create_todo(
+        self,
+        client: TestClient,
+        auth_headers: dict[str, str],
+        title: str = "Bulk item",
+    ) -> dict[str, object]:
+        """Create a todo and return its response body."""
+        response = client.post(
+            "/api/v1/todos",
+            json={"title": title},
+            headers=auth_headers,
+        )
+        assert response.status_code == 201
+        return response.json()
+
+    def test_bulk_delete_success(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Deleting multiple todos returns the count and removes them."""
+        t1 = self._create_todo(client, auth_headers, "First")
+        t2 = self._create_todo(client, auth_headers, "Second")
+        t3 = self._create_todo(client, auth_headers, "Third")
+
+        response = client.post(
+            "/api/v1/todos/bulk-delete",
+            json={"ids": [t1["id"], t3["id"]]},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        assert response.json()["deleted"] == 2
+
+        assert (
+            client.get(f"/api/v1/todos/{t1['id']}", headers=auth_headers).status_code
+            == 404
+        )
+        assert (
+            client.get(f"/api/v1/todos/{t2['id']}", headers=auth_headers).status_code
+            == 200
+        )
+        assert (
+            client.get(f"/api/v1/todos/{t3['id']}", headers=auth_headers).status_code
+            == 404
+        )
+
+    def test_bulk_delete_some_not_found(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Non-existent IDs are silently skipped; only existing ones are deleted."""
+        t1 = self._create_todo(client, auth_headers, "Exists")
+        response = client.post(
+            "/api/v1/todos/bulk-delete",
+            json={"ids": [t1["id"], 9999]},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        assert response.json()["deleted"] == 1
+
+    def test_bulk_delete_all_not_found(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """When none of the IDs exist, deleted count is zero."""
+        response = client.post(
+            "/api/v1/todos/bulk-delete",
+            json={"ids": [9998, 9999]},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        assert response.json()["deleted"] == 0
+
+    def test_bulk_delete_empty_ids(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Empty IDs list returns 422."""
+        response = client.post(
+            "/api/v1/todos/bulk-delete",
+            json={"ids": []},
+            headers=auth_headers,
+        )
+        assert response.status_code == 422
+
+    def test_bulk_delete_unauthenticated(self, client: TestClient) -> None:
+        """Request without a token returns 401."""
+        response = client.post("/api/v1/todos/bulk-delete", json={"ids": [1]})
+        assert response.status_code == 401
+
+
 class TestUpdateTodo:
     """Verify PATCH /api/v1/todos/{todo_id}."""
 
