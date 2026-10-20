@@ -1,8 +1,12 @@
 """Tests for authentication endpoints."""
 
+from datetime import UTC, datetime, timedelta
+
+import jwt
 from fastapi.testclient import TestClient
 
 from app.core.config import settings
+from app.core.security import create_access_token
 
 
 class TestRegister:
@@ -138,6 +142,44 @@ class TestCurrentUser:
         assert error["code"] == "INVALID_TOKEN"
         assert error["message"] == "Invalid or expired token"
         assert error["request_id"] is not None
+
+
+class TestTokenRejection:
+    """Expired, tampered, or orphaned tokens are rejected."""
+
+    def test_expired_token(self, client: TestClient) -> None:
+        """A token past its expiry is rejected with INVALID_TOKEN."""
+        token = jwt.encode(
+            {"sub": settings.seed_username, "exp": datetime.now(UTC) - timedelta(1)},
+            settings.secret_key,
+            algorithm="HS256",
+        )
+        response = client.get(
+            "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response.status_code == 401
+        assert response.json()["error"]["code"] == "INVALID_TOKEN"
+
+    def test_tampered_token(self, client: TestClient) -> None:
+        """A token signed with the wrong key is rejected."""
+        token = jwt.encode(
+            {"sub": settings.seed_username, "exp": datetime.now(UTC) + timedelta(1)},
+            "not-the-real-secret-key-0123456789",
+            algorithm="HS256",
+        )
+        response = client.get(
+            "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response.status_code == 401
+
+    def test_token_for_deleted_user(self, client: TestClient) -> None:
+        """A valid token whose user no longer exists yields USER_NOT_FOUND."""
+        token = create_access_token("ghost_user")
+        response = client.get(
+            "/api/v1/todos", headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "USER_NOT_FOUND"
 
 
 class TestRoot:

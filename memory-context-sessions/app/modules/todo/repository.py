@@ -1,6 +1,8 @@
 """Data access for the todo module."""
 
-from sqlalchemy import func, select
+from typing import Any, cast
+
+from sqlalchemy import CursorResult, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.todo.models import Todo
@@ -33,7 +35,7 @@ class TodoRepository:
         result = await self._session.execute(
             select(Todo)
             .where(Todo.user_id == user_id)
-            .order_by(Todo.created_at.desc())
+            .order_by(Todo.created_at.desc(), Todo.id.desc())
             .offset(offset)
             .limit(limit)
         )
@@ -102,13 +104,14 @@ class TodoRepository:
         Returns:
             The number of rows actually deleted.
         """
-        from sqlalchemy import delete
-
-        result = await self._session.execute(
-            delete(Todo).where(Todo.id.in_(todo_ids), Todo.user_id == user_id)
+        result = cast(
+            "CursorResult[Any]",
+            await self._session.execute(
+                delete(Todo).where(Todo.id.in_(todo_ids), Todo.user_id == user_id)
+            ),
         )
         await self._session.flush()
-        return result.rowcount  # type: ignore[return-value]
+        return result.rowcount
 
     async def update_user(self, todo: Todo, new_user_id: int) -> Todo:
         """Change the owner of a todo record.

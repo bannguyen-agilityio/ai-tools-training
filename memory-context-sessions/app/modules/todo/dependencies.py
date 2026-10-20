@@ -7,7 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
 from app.infrastructure.database import get_db_session
-from app.modules.auth.dependencies import get_auth_service, get_current_user
+from app.modules.auth.dependencies import (
+    get_auth_service,
+    get_current_user,
+    get_user_repository,
+)
 from app.modules.auth.repository import UserRepository
 from app.modules.auth.service import AuthService
 from app.modules.todo.repository import TodoRepository
@@ -19,13 +23,6 @@ def get_todo_repository(
 ) -> TodoRepository:
     """Provide a todo repository backed by the request database session."""
     return TodoRepository(session)
-
-
-def get_user_repository(
-    session: Annotated[AsyncSession, Depends(get_db_session)],
-) -> UserRepository:
-    """Provide a user repository backed by the request database session."""
-    return UserRepository(session)
 
 
 def get_todo_service(

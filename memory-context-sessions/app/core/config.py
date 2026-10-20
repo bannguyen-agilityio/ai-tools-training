@@ -1,7 +1,7 @@
 """Application configuration and settings."""
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     seed_password: str = Field(min_length=8)
     seed_full_name: str = Field(min_length=1, max_length=100)
 
-    model_config = {"env_prefix": "APP_", "env_file": ".env"}
+    model_config = SettingsConfigDict(env_prefix="APP_", env_file=".env")
 
 
 settings = Settings()  # type: ignore[reportCallIssue]  # populated from env

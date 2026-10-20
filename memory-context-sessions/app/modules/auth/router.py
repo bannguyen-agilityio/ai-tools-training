@@ -30,7 +30,7 @@ async def register(
         ConflictError: If the username is already taken.
     """
     user = await auth_service.register(body.username, body.password, body.full_name)
-    return UserOut(id=user.id, username=user.username, full_name=user.full_name)
+    return UserOut.model_validate(user)
 
 
 @router.post("/login", response_model=Token)
@@ -71,4 +71,4 @@ async def read_current_user(
     user = await auth_service.get_user(username)
     if not user:
         raise NotFoundError(message="User not found", code="USER_NOT_FOUND")
-    return UserOut(id=user.id, username=user.username, full_name=user.full_name)
+    return UserOut.model_validate(user)

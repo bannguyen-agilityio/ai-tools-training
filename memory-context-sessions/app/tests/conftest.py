@@ -19,10 +19,8 @@ os.environ.setdefault("APP_SEED_PASSWORD", "admin123!")
 os.environ.setdefault("APP_SEED_FULL_NAME", "Admin User")
 
 from app.core.config import settings
-from app.core.security import generate_salt, hash_password
 from app.infrastructure.database import Base, get_db_session
-from app.main import app
-from app.modules.auth.models import User
+from app.main import app, build_seed_user
 
 _test_engine = create_async_engine(
     "sqlite+aiosqlite://",
@@ -50,15 +48,7 @@ async def _setup_test_db() -> AsyncGenerator[None]:
         await conn.run_sync(Base.metadata.create_all)
 
     async with _test_session_factory() as session:
-        salt = generate_salt()
-        session.add(
-            User(
-                username=settings.seed_username,
-                password_hash=hash_password(settings.seed_password, salt),
-                salt=salt,
-                full_name=settings.seed_full_name,
-            )
-        )
+        session.add(build_seed_user())
         await session.commit()
 
     app.dependency_overrides[get_db_session] = _override_get_db_session
@@ -85,6 +75,7 @@ def auth_token(client: TestClient) -> str:
             "password": settings.seed_password,
         },
     )
+    response.raise_for_status()
     return response.json()["access_token"]
 
 

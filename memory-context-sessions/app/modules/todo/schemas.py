@@ -2,7 +2,7 @@
 
 import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CreateTodoRequest(BaseModel):
@@ -18,6 +18,18 @@ class UpdateTodoRequest(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=1000)
     completed: bool | None = None
+
+    @field_validator("title", "completed")
+    @classmethod
+    def _reject_explicit_null(cls, value: object) -> object:
+        """Reject an explicit ``null`` for fields that cannot be cleared.
+
+        Omitting a field keeps its value; only ``description`` may be set to
+        ``null`` to clear it.
+        """
+        if value is None:
+            raise ValueError("This field cannot be null.")
+        return value
 
 
 class BulkDeleteRequest(BaseModel):
@@ -40,6 +52,8 @@ class MoveTodoRequest(BaseModel):
 
 class TodoOut(BaseModel):
     """Public todo item response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     title: str

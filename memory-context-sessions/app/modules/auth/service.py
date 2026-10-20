@@ -1,5 +1,7 @@
 """Business logic for authentication."""
 
+import asyncio
+
 from app.core.exceptions import AuthenticationError, ConflictError
 from app.core.security import (
     create_access_token,
@@ -10,6 +12,11 @@ from app.core.security import (
 )
 from app.modules.auth.models import User
 from app.modules.auth.repository import UserRepository
+
+# Verified against when a username is unknown, so response time does not reveal
+# whether the account exists.
+_DUMMY_SALT = generate_salt()
+_DUMMY_HASH = hash_password("dummy-password", _DUMMY_SALT)
 
 
 class AuthService:
@@ -44,9 +51,10 @@ class AuthService:
                 code="USERNAME_ALREADY_EXISTS",
             )
         salt = generate_salt()
+        password_hash = await asyncio.to_thread(hash_password, password, salt)
         user = User(
             username=username,
-            password_hash=hash_password(password, salt),
+            password_hash=password_hash,
             salt=salt,
             full_name=full_name,
         )
@@ -66,7 +74,13 @@ class AuthService:
             AuthenticationError: If the credentials are invalid.
         """
         user = await self._user_repo.get_by_username(username)
-        if not user or not verify_password(password, user.salt, user.password_hash):
+        salt, stored_hash = (
+            (user.salt, user.password_hash) if user else (_DUMMY_SALT, _DUMMY_HASH)
+        )
+        password_ok = await asyncio.to_thread(
+            verify_password, password, salt, stored_hash
+        )
+        if not user or not password_ok:
             raise AuthenticationError(
                 message="Incorrect username or password",
                 code="INVALID_CREDENTIALS",
