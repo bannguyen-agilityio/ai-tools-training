@@ -155,6 +155,40 @@ class TestTodoService:
         with pytest.raises(NotFoundError):
             await service.copy_todo(source.id, 9999)
 
+    async def test_bulk_delete(self, db_session: AsyncSession) -> None:
+        """bulk_delete_todos removes the specified todos and returns the count."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        t1 = await service.create_todo(user_id, "One", None)
+        t2 = await service.create_todo(user_id, "Two", None)
+        await service.create_todo(user_id, "Three", None)
+
+        deleted = await service.bulk_delete_todos([t1.id, t2.id], user_id)
+        assert deleted == 2
+
+        items, total = await service.list_todos(user_id)
+        assert total == 1
+        assert items[0].title == "Three"
+
+    async def test_bulk_delete_ignores_other_users(
+        self, db_session: AsyncSession
+    ) -> None:
+        """bulk_delete_todos only deletes todos owned by the requesting user."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        own = await service.create_todo(user_id, "Mine", None)
+        other = await service.create_todo(9999, "Not mine", None)
+
+        deleted = await service.bulk_delete_todos([own.id, other.id], user_id)
+        assert deleted == 1
+
+    async def test_bulk_delete_nonexistent(self, db_session: AsyncSession) -> None:
+        """bulk_delete_todos returns 0 when none of the IDs exist."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        deleted = await service.bulk_delete_todos([9998, 9999], user_id)
+        assert deleted == 0
+
     async def test_update_title(self, db_session: AsyncSession) -> None:
         """update_todo changes the title and preserves other fields."""
         service = self._make_service(db_session)
