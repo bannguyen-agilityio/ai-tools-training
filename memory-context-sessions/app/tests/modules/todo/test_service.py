@@ -115,6 +115,46 @@ class TestTodoService:
         assert len(items) == 1
         assert total == 5
 
+    async def test_copy_todo(self, db_session: AsyncSession) -> None:
+        """copy_todo duplicates the title and description."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        source = await service.create_todo(user_id, "Source", "Source desc")
+
+        copy = await service.copy_todo(source.id, user_id)
+        assert copy.id != source.id
+        assert copy.title == "Source"
+        assert copy.description == "Source desc"
+        assert copy.completed is False
+        assert copy.user_id == user_id
+
+    async def test_copy_todo_resets_completed(self, db_session: AsyncSession) -> None:
+        """copy_todo always produces an incomplete copy."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        source = await service.create_todo(user_id, "Done task", None)
+        await service.update_todo(source.id, user_id, completed=True)
+
+        copy = await service.copy_todo(source.id, user_id)
+        assert copy.completed is False
+
+    async def test_copy_todo_not_found(self, db_session: AsyncSession) -> None:
+        """copy_todo raises NotFoundError for a nonexistent todo."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+
+        with pytest.raises(NotFoundError):
+            await service.copy_todo(9999, user_id)
+
+    async def test_copy_todo_other_user(self, db_session: AsyncSession) -> None:
+        """copy_todo raises NotFoundError when the todo belongs to another user."""
+        service = self._make_service(db_session)
+        user_id = await self._get_seed_user_id(db_session)
+        source = await service.create_todo(user_id, "Private", None)
+
+        with pytest.raises(NotFoundError):
+            await service.copy_todo(source.id, 9999)
+
     async def test_update_title(self, db_session: AsyncSession) -> None:
         """update_todo changes the title and preserves other fields."""
         service = self._make_service(db_session)
