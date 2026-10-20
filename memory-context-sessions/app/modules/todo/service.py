@@ -67,20 +67,21 @@ class TodoService:
         todo = Todo(title=title, description=description, user_id=user_id)
         return await self._todo_repo.create(todo)
 
-    async def delete_todo(self, todo_id: int, user_id: int) -> None:
-        """Delete a todo owned by the user.
+    async def copy_todo(self, todo_id: int, user_id: int) -> Todo:
+        """Create a copy of an existing todo.
 
         Args:
-            todo_id: The todo's primary key.
+            todo_id: The source todo's primary key.
             user_id: The owner's user ID.
 
+        Returns:
+            The newly created copy.
+
         Raises:
-            NotFoundError: If the todo does not exist or is not owned by the user.
+            NotFoundError: If the source todo does not exist or is not owned by the user.
         """
-        todo = await self._todo_repo.get_by_id_and_user(todo_id, user_id)
-        if not todo:
-            raise NotFoundError(message="Todo not found", code="TODO_NOT_FOUND")
-        await self._todo_repo.delete(todo)
+        source = await self.get_todo(todo_id, user_id)
+        return await self.create_todo(user_id, source.title, source.description)
 
     async def update_todo(
         self,

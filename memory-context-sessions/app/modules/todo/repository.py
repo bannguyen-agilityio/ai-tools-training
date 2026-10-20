@@ -81,15 +81,6 @@ class TodoRepository:
         await self._session.flush()
         return todo
 
-    async def delete(self, todo: Todo) -> None:
-        """Remove a todo record from the database.
-
-        Args:
-            todo: The todo entity to delete.
-        """
-        await self._session.delete(todo)
-        await self._session.flush()
-
     async def flush(self) -> None:
         """Flush pending changes to the database."""
         await self._session.flush()

@@ -211,46 +211,6 @@ class TestCreateTodo:
         assert response.status_code == 401
 
 
-class TestDeleteTodo:
-    """Verify DELETE /api/v1/todos/{todo_id}."""
-
-    def _create_todo(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> dict[str, object]:
-        """Create a todo and return its response body."""
-        response = client.post(
-            "/api/v1/todos",
-            json={"title": "To delete", "description": "Will be removed"},
-            headers=auth_headers,
-        )
-        assert response.status_code == 201
-        return response.json()
-
-    def test_delete_success(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> None:
-        """Deleting an existing todo returns 204 and removes it."""
-        todo = self._create_todo(client, auth_headers)
-        response = client.delete(f"/api/v1/todos/{todo['id']}", headers=auth_headers)
-        assert response.status_code == 204
-
-        get_response = client.get(f"/api/v1/todos/{todo['id']}", headers=auth_headers)
-        assert get_response.status_code == 404
-
-    def test_delete_not_found(
-        self, client: TestClient, auth_headers: dict[str, str]
-    ) -> None:
-        """Deleting a nonexistent todo returns 404."""
-        response = client.delete("/api/v1/todos/9999", headers=auth_headers)
-        assert response.status_code == 404
-        assert response.json()["error"]["code"] == "TODO_NOT_FOUND"
-
-    def test_delete_unauthenticated(self, client: TestClient) -> None:
-        """Request without a token returns 401."""
-        response = client.delete("/api/v1/todos/1")
-        assert response.status_code == 401
-
-
 class TestUpdateTodo:
     """Verify PATCH /api/v1/todos/{todo_id}."""
 
