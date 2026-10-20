@@ -2,6 +2,7 @@
 
 import hashlib
 import hmac
+import secrets
 from datetime import UTC, datetime, timedelta
 
 import jwt
@@ -44,8 +45,6 @@ def verify_password(plain: str, salt: str, hashed: str) -> bool:
 
 def generate_salt() -> str:
     """Generate a cryptographically secure random salt."""
-    import secrets
-
     return secrets.token_hex(16)
 
 

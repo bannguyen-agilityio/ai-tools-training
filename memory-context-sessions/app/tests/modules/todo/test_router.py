@@ -547,3 +547,47 @@ class TestMoveTodo:
         """Request without a token returns 401."""
         response = client.post("/api/v1/todos/1/move", json={"target_user_id": 2})
         assert response.status_code == 401
+
+
+class TestPaginationOrdering:
+    """Pagination must be stable when todos share a creation timestamp."""
+
+    def test_pages_do_not_overlap_or_skip(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Paging through same-second todos returns each exactly once."""
+        created = {_create_todo(client, auth_headers, f"T{i}")["id"] for i in range(5)}
+        seen: list[object] = []
+        for page in (1, 2, 3):
+            response = client.get(
+                f"/api/v1/todos?page={page}&page_size=2", headers=auth_headers
+            )
+            seen += [item["id"] for item in response.json()["items"]]
+        assert len(seen) == len(set(seen))
+        assert set(seen) == created
+
+
+class TestPatchNullHandling:
+    """PATCH treats omitted fields as unchanged and rejects a null title."""
+
+    def test_omitted_description_is_kept(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Omitting description leaves it unchanged."""
+        todo = _create_todo(client, auth_headers, description="Keep me")
+        response = client.patch(
+            f"/api/v1/todos/{todo['id']}",
+            json={"title": "Renamed"},
+            headers=auth_headers,
+        )
+        assert response.json()["description"] == "Keep me"
+
+    def test_null_title_rejected(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """A null title is a validation error rather than a silent no-op."""
+        todo = _create_todo(client, auth_headers)
+        response = client.patch(
+            f"/api/v1/todos/{todo['id']}", json={"title": None}, headers=auth_headers
+        )
+        assert response.status_code == 422

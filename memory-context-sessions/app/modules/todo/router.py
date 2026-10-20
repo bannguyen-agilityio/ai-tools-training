@@ -42,16 +42,7 @@ async def list_todos(
     todos, total = await todo_service.list_todos(
         user_id, offset=pagination.offset, limit=pagination.page_size
     )
-    items = [
-        TodoOut(
-            id=t.id,
-            title=t.title,
-            description=t.description,
-            completed=t.completed,
-            created_at=t.created_at,
-        )
-        for t in todos
-    ]
+    items = [TodoOut.model_validate(t) for t in todos]
     meta = build_pagination_meta(
         page=pagination.page,
         page_size=pagination.page_size,
@@ -97,13 +88,7 @@ async def get_todo(
         The todo detail.
     """
     todo = await todo_service.get_todo(todo_id, user_id)
-    return TodoOut(
-        id=todo.id,
-        title=todo.title,
-        description=todo.description,
-        completed=todo.completed,
-        created_at=todo.created_at,
-    )
+    return TodoOut.model_validate(todo)
 
 
 @router.post("", response_model=TodoOut, status_code=status.HTTP_201_CREATED)
@@ -123,13 +108,7 @@ async def create_todo(
         The newly created todo.
     """
     todo = await todo_service.create_todo(user_id, body.title, body.description)
-    return TodoOut(
-        id=todo.id,
-        title=todo.title,
-        description=todo.description,
-        completed=todo.completed,
-        created_at=todo.created_at,
-    )
+    return TodoOut.model_validate(todo)
 
 
 @router.post(
@@ -151,13 +130,7 @@ async def copy_todo(
         The newly created copy.
     """
     todo = await todo_service.copy_todo(todo_id, user_id)
-    return TodoOut(
-        id=todo.id,
-        title=todo.title,
-        description=todo.description,
-        completed=todo.completed,
-        created_at=todo.created_at,
-    )
+    return TodoOut.model_validate(todo)
 
 
 @router.post("/{todo_id}/move", response_model=TodoOut)
@@ -179,13 +152,7 @@ async def move_todo(
         The moved todo with updated ownership.
     """
     todo = await todo_service.move_todo(todo_id, user_id, body.target_user_id)
-    return TodoOut(
-        id=todo.id,
-        title=todo.title,
-        description=todo.description,
-        completed=todo.completed,
-        created_at=todo.created_at,
-    )
+    return TodoOut.model_validate(todo)
 
 
 @router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -233,10 +200,4 @@ async def update_todo(
         description=body.description,
         completed=body.completed,
     )
-    return TodoOut(
-        id=todo.id,
-        title=todo.title,
-        description=todo.description,
-        completed=todo.completed,
-        created_at=todo.created_at,
-    )
+    return TodoOut.model_validate(todo)

@@ -3,6 +3,7 @@
 from fastapi.testclient import TestClient
 
 from app.core.config import settings
+from app.main import app
 
 
 class TestErrorEnvelope:
@@ -80,3 +81,25 @@ class TestRequestId:
         id1 = r1.json()["error"]["request_id"]
         id2 = r2.json()["error"]["request_id"]
         assert id1 != id2
+
+
+class TestUnhandledException:
+    """Verify that unexpected exceptions produce a generic 500 envelope."""
+
+    def test_unhandled_exception_returns_500_envelope(self) -> None:
+        """An unexpected error is wrapped without leaking details."""
+
+        @app.get("/_boom")
+        def _boom() -> None:
+            raise RuntimeError("secret internal detail")
+
+        try:
+            response = TestClient(app, raise_server_exceptions=False).get("/_boom")
+        finally:
+            app.router.routes.pop()
+
+        assert response.status_code == 500
+        error = response.json()["error"]
+        assert error["code"] == "INTERNAL_SERVER_ERROR"
+        assert error["request_id"].startswith("req_")
+        assert "secret internal detail" not in response.text

@@ -1,6 +1,6 @@
 """Request and response schemas for authentication."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LoginRequest(BaseModel):
@@ -27,6 +27,8 @@ class Token(BaseModel):
 
 class UserOut(BaseModel):
     """Public user profile response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     username: str

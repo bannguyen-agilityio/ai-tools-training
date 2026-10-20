@@ -31,6 +31,17 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     await engine.dispose()
 
 
+def build_seed_user() -> User:
+    """Build the seed user record from application settings."""
+    salt = generate_salt()
+    return User(
+        username=settings.seed_username,
+        password_hash=hash_password(settings.seed_password, salt),
+        salt=salt,
+        full_name=settings.seed_full_name,
+    )
+
+
 async def _seed_initial_user() -> None:
     """Create the seed user if it does not already exist.
 
@@ -44,15 +55,7 @@ async def _seed_initial_user() -> None:
         if result.scalar_one_or_none():
             return
 
-        salt = generate_salt()
-        session.add(
-            User(
-                username=settings.seed_username,
-                password_hash=hash_password(settings.seed_password, salt),
-                salt=salt,
-                full_name=settings.seed_full_name,
-            )
-        )
+        session.add(build_seed_user())
         try:
             await session.commit()
         except IntegrityError:
