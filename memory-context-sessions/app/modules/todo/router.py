@@ -160,7 +160,7 @@ async def copy_todo(
     )
 
 
-@router.put("/{todo_id}/move", response_model=TodoOut)
+@router.post("/{todo_id}/move", response_model=TodoOut)
 async def move_todo(
     todo_id: int,
     body: MoveTodoRequest,

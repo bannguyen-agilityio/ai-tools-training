@@ -35,7 +35,7 @@ class BulkDeleteResponse(BaseModel):
 class MoveTodoRequest(BaseModel):
     """Data required to move a todo to another user."""
 
-    target_user_id: int
+    target_user_id: int = Field(gt=0)
 
 
 class TodoOut(BaseModel):
