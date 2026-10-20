@@ -110,6 +110,20 @@ class TodoRepository:
         await self._session.flush()
         return result.rowcount  # type: ignore[return-value]
 
+    async def update_user(self, todo: Todo, new_user_id: int) -> Todo:
+        """Change the owner of a todo record.
+
+        Args:
+            todo: The todo entity to reassign.
+            new_user_id: The new owner's user ID.
+
+        Returns:
+            The updated todo.
+        """
+        todo.user_id = new_user_id
+        await self._session.flush()
+        return todo
+
     async def flush(self) -> None:
         """Flush pending changes to the database."""
         await self._session.flush()

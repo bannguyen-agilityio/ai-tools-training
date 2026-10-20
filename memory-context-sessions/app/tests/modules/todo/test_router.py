@@ -19,6 +19,20 @@ def _create_todo(
     return response.json()
 
 
+def _register_user(
+    client: TestClient,
+    username: str = "other_user",
+    password: str = "password123!",
+) -> dict[str, object]:
+    """Register a new user and return the response body (includes 'id')."""
+    response = client.post(
+        "/api/v1/auth/register",
+        json={"username": username, "password": password, "full_name": "Other User"},
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 class TestListTodos:
     """Verify GET /api/v1/todos."""
 
@@ -454,4 +468,82 @@ class TestUpdateTodo:
     def test_unauthenticated(self, client: TestClient) -> None:
         """Request without a token returns 401."""
         response = client.patch("/api/v1/todos/1", json={"title": "Nope"})
+        assert response.status_code == 401
+
+
+class TestMoveTodo:
+    """Verify POST /api/v1/todos/{todo_id}/move."""
+
+    def test_move_success(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Moving a todo returns 200 with the updated item."""
+        todo = _create_todo(client, auth_headers, "To move", "Moving this")
+        target = _register_user(client)
+        response = client.post(
+            f"/api/v1/todos/{todo['id']}/move",
+            json={"target_user_id": target["id"]},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["id"] == todo["id"]
+        assert body["title"] == "To move"
+        assert body["description"] == "Moving this"
+
+    def test_move_removes_from_source_list(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """After moving, the todo no longer appears in the source user's list."""
+        todo = _create_todo(client, auth_headers, "To move", None)
+        target = _register_user(client)
+        client.post(
+            f"/api/v1/todos/{todo['id']}/move",
+            json={"target_user_id": target["id"]},
+            headers=auth_headers,
+        )
+        response = client.get("/api/v1/todos", headers=auth_headers)
+        assert response.json()["meta"]["total_items"] == 0
+
+    def test_move_not_found(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Moving a nonexistent todo returns 404."""
+        target = _register_user(client)
+        response = client.post(
+            "/api/v1/todos/9999/move",
+            json={"target_user_id": target["id"]},
+            headers=auth_headers,
+        )
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "TODO_NOT_FOUND"
+
+    def test_move_target_user_not_found(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """Moving to a nonexistent user returns 404."""
+        todo = _create_todo(client, auth_headers, "To move", None)
+        response = client.post(
+            f"/api/v1/todos/{todo['id']}/move",
+            json={"target_user_id": 9999},
+            headers=auth_headers,
+        )
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "TARGET_USER_NOT_FOUND"
+
+    def test_move_invalid_target_user_id(
+        self, client: TestClient, auth_headers: dict[str, str]
+    ) -> None:
+        """target_user_id <= 0 returns 422."""
+        todo = _create_todo(client, auth_headers, "To move", None)
+        response = client.post(
+            f"/api/v1/todos/{todo['id']}/move",
+            json={"target_user_id": 0},
+            headers=auth_headers,
+        )
+        assert response.status_code == 422
+
+    def test_move_unauthenticated(self, client: TestClient) -> None:
+        """Request without a token returns 401."""
+        response = client.post("/api/v1/todos/1/move", json={"target_user_id": 2})
         assert response.status_code == 401
