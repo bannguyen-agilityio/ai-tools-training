@@ -1,4 +1,5 @@
 from fastmcp import FastMCP
+from pydantic import Field
 
 mcp = FastMCP("DocumentMCP")
 
@@ -10,3 +11,14 @@ docs = {
     "plan.md": "The plan outlines the steps for the project's implementation.",
     "spec.txt": "These specifications define the technical requirements for the equipment",
 }
+
+
+@mcp.tool(
+    name="read_doc_contents",
+    description="Read the contents of a document and return it as a string.",
+)
+def read_document(doc_id: str = Field(description="Id of the document to read")):
+    if doc_id not in docs:
+        raise ValueError(f"Doc with id {doc_id} not found")
+
+    return docs[doc_id]
