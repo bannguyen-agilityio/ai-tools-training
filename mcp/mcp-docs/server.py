@@ -14,15 +14,19 @@ docs = {
 }
 
 
+def get_doc(doc_id: str) -> str:
+    if doc_id not in docs:
+        raise ValueError(f"Doc with id {doc_id} not found")
+
+    return docs[doc_id]
+
+
 @mcp.tool(
     name="read_doc_contents",
     description="Read the contents of a document and return it as a string.",
 )
 def read_document(doc_id: str = Field(description="Id of the document to read")):
-    if doc_id not in docs:
-        raise ValueError(f"Doc with id {doc_id} not found")
-
-    return docs[doc_id]
+    return get_doc(doc_id)
 
 
 @mcp.tool(
@@ -38,10 +42,7 @@ def edit_document(
         description="The new text to insert in place of the old text."
     ),
 ):
-    if doc_id not in docs:
-        raise ValueError(f"Doc with id {doc_id} not found")
-
-    docs[doc_id] = docs[doc_id].replace(old_str, new_str)
+    docs[doc_id] = get_doc(doc_id).replace(old_str, new_str)
 
 
 @mcp.prompt(
@@ -68,14 +69,12 @@ Use the 'edit_document' tool to edit the document. After the document has been r
 
 @mcp.resource("docs://documents", mime_type="application/json")
 def list_docs() -> list[str]:
-    return list(docs.keys())
+    return list(docs)
 
 
 @mcp.resource("docs://documents/{doc_id}", mime_type="text/plain")
 def fetch_doc(doc_id: str) -> str:
-    if doc_id not in docs:
-        raise ValueError(f"Doc with id {doc_id} not found")
-    return docs[doc_id]
+    return get_doc(doc_id)
 
 
 if __name__ == "__main__":
