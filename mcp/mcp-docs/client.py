@@ -1,7 +1,9 @@
 import asyncio
+import json
+from typing import Any
 
 from fastmcp import Client
-from mcp.types import TextContent
+from mcp.types import TextContent, TextResourceContents
 
 client = Client("server.py")
 
@@ -18,6 +20,16 @@ async def edit_doc(doc_id: str, old_str: str, new_str: str) -> None:
         "edit_document",
         {"doc_id": doc_id, "old_str": old_str, "new_str": new_str},
     )
+
+
+async def read_resource(uri: str) -> Any:
+    resource = (await client.read_resource(uri))[0]
+    assert isinstance(resource, TextResourceContents)
+
+    if resource.mime_type == "application/json":
+        return json.loads(resource.text)
+
+    return resource.text
 
 
 async def main():
@@ -39,6 +51,12 @@ async def main():
 
         print(f"\n[READ] {doc_id} (after edit)")
         print(f"  {await read_doc(doc_id)}")
+
+        print("\n[RESOURCE] docs://documents (JSON is parsed into a list)")
+        print(f"  {await read_resource('docs://documents')}")
+
+        print(f"\n[RESOURCE] docs://documents/{doc_id} (plain text)")
+        print(f"  {await read_resource(f'docs://documents/{doc_id}')}")
 
 
 if __name__ == "__main__":
