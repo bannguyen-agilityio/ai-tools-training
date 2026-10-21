@@ -4,7 +4,7 @@ from typing import Any
 
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
-from mcp.types import TextContent, TextResourceContents
+from mcp.types import Prompt, PromptMessage, TextContent, TextResourceContents
 
 client = Client("server.py")
 
@@ -33,6 +33,15 @@ async def read_resource(uri: str) -> Any:
     return resource.text
 
 
+async def list_prompts() -> list[Prompt]:
+    return await client.list_prompts()
+
+
+async def get_prompt(name: str, args: dict[str, str]) -> list[PromptMessage]:
+    result = await client.get_prompt(name, args)
+    return result.messages
+
+
 async def main():
     # One session for everything, so edits persist between calls.
     async with client:
@@ -58,6 +67,16 @@ async def main():
 
         print(f"\n[RESOURCE] docs://documents/{doc_id} (plain text)")
         print(f"  {await read_resource(f'docs://documents/{doc_id}')}")
+
+        print("\n[PROMPT] list prompts")
+        prompts = await list_prompts()
+        for prompt in prompts:
+            print(f"  - {prompt.name}: {prompt.description}")
+
+        print("\n[PROMPT] get format prompt")
+        for message in await get_prompt("format", {"doc_id": doc_id}):
+            assert isinstance(message.content, TextContent)
+            print(f"  [{message.role}] {message.content.text.strip()}")
 
         missing = "missing.md"
         print(f"\n[READ] {missing} (does not exist)")
