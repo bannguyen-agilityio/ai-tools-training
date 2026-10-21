@@ -3,6 +3,7 @@ import json
 from typing import Any
 
 from fastmcp import Client
+from fastmcp.exceptions import ToolError
 from mcp.types import TextContent, TextResourceContents
 
 client = Client("server.py")
@@ -57,6 +58,13 @@ async def main():
 
         print(f"\n[RESOURCE] docs://documents/{doc_id} (plain text)")
         print(f"  {await read_resource(f'docs://documents/{doc_id}')}")
+
+        missing = "missing.md"
+        print(f"\n[READ] {missing} (does not exist)")
+        try:
+            await read_doc(missing)
+        except ToolError as e:
+            print(f"ToolError: {e}")
 
 
 if __name__ == "__main__":
