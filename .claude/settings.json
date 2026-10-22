@@ -6,13 +6,16 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git push*)",
             "command": "cd \"$PWD\" && uv run pytest && uv run ruff check . && uv run ruff format --check . && uv run pyright",
+            "if": "Bash(git push*)",
             "timeout": 120,
             "statusMessage": "Running quality checks before push..."
           }
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "pr-review-toolkit@anthropic-plugin-directory": true
   }
 }
