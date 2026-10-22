@@ -75,6 +75,43 @@ const openapi: OpenAPIV3.Document = {
           hasPrev: { type: 'boolean' },
         },
       },
+      User: {
+        type: 'object',
+        required: ['id', 'email', 'name', 'role', 'createdAt'],
+        properties: {
+          id: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          name: { type: 'string' },
+          role: { type: 'string', enum: ['CUSTOMER', 'ADMIN'] },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      AuthResult: {
+        type: 'object',
+        required: ['user', 'accessToken', 'tokenType'],
+        properties: {
+          user: { $ref: '#/components/schemas/User' },
+          accessToken: { type: 'string', description: 'JWT signed with HS256' },
+          tokenType: { type: 'string', enum: ['Bearer'] },
+        },
+      },
+      RegisterRequest: {
+        type: 'object',
+        required: ['email', 'password', 'name'],
+        properties: {
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string', minLength: 8, description: 'At most 72 bytes (bcrypt limit)' },
+          name: { type: 'string', minLength: 1, maxLength: 100 },
+        },
+      },
+      LoginRequest: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string' },
+        },
+      },
       Health: {
         type: 'object',
         required: ['status'],
@@ -165,6 +202,90 @@ const openapi: OpenAPIV3.Document = {
     },
   },
   paths: {
+    '/auth/register': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Register a new account',
+        description: 'Always creates a CUSTOMER account. Returns a JWT so the client is signed in immediately.',
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/RegisterRequest' } } },
+        },
+        responses: {
+          '201': {
+            description: 'Account created',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/SuccessResponse' },
+                    { type: 'object', properties: { data: { $ref: '#/components/schemas/AuthResult' } } },
+                  ],
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/ValidationError' },
+          '409': {
+            description: 'Email already registered (EMAIL_TAKEN)',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
+          },
+        },
+      },
+    },
+    '/auth/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Log in',
+        description:
+          'Rate-limited per IP (LOGIN_RATE_LIMIT_MAX attempts per LOGIN_RATE_LIMIT_WINDOW_MS). Exceeding it returns 429 with a Retry-After header.',
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginRequest' } } },
+        },
+        responses: {
+          '200': {
+            description: 'Authenticated',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/SuccessResponse' },
+                    { type: 'object', properties: { data: { $ref: '#/components/schemas/AuthResult' } } },
+                  ],
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/ValidationError' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+          '429': { $ref: '#/components/responses/RateLimited' },
+        },
+      },
+    },
+    '/auth/me': {
+      get: {
+        tags: ['Auth'],
+        summary: 'Current user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Current user',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/SuccessResponse' },
+                    { type: 'object', properties: { data: { $ref: '#/components/schemas/User' } } },
+                  ],
+                },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
     '/health': {
       get: {
         tags: ['Health'],

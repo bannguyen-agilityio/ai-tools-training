@@ -30,6 +30,21 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mini-ecommerce-app/package-lock.json
+
+      - name: Install and prepare app
+        working-directory: mini-ecommerce-app
+        run: |
+          npm ci
+          cp .env.example .env
+          npx prisma generate
+          npx prisma migrate deploy
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -47,5 +62,6 @@ jobs:
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr *)'
-
+          # The app lives in mini-ecommerce-app/ and is installed/prepared by the steps above,
+          # so Claude only needs to test, build and run it.
+          claude_args: '--allowedTools "Bash(npm --prefix mini-ecommerce-app test),Bash(npm --prefix mini-ecommerce-app run typecheck),Bash(npm --prefix mini-ecommerce-app run lint),Bash(npm --prefix mini-ecommerce-app run build),Bash(npm --prefix mini-ecommerce-app start),Bash(curl http://localhost:*)"'

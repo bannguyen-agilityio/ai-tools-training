@@ -96,3 +96,9 @@ export class RateLimitError extends AppError {
     super(ERROR_CODES.RATE_LIMITED, 429, message, details);
   }
 }
+
+export class EmailTakenError extends AppError {
+  constructor(message = 'An account with this email already exists') {
+    super(ERROR_CODES.EMAIL_TAKEN, 409, message);
+  }
+}
