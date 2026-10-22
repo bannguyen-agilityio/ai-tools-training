@@ -16,6 +16,7 @@
     ]
   },
   "enabledPlugins": {
-    "pr-review-toolkit@anthropic-plugin-directory": true
+    "pr-review-toolkit@anthropic-plugin-directory": true,
+    "playwright@anthropic-plugin-directory": true
   }
 }
