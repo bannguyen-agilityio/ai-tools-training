@@ -7,6 +7,7 @@ import { env } from './config/env';
 import { logger } from './core/logger';
 import { errorHandler, notFoundHandler } from './core/error-handler';
 import { requestContext } from './middleware/request-context';
+import { createAuthRouter } from './modules/auth/auth.routes';
 import { healthRouter } from './modules/health/health.routes';
 import { setupDocs } from './docs/swagger';
 
@@ -52,10 +53,10 @@ export function createApp(): Express {
 
   setupDocs(app);
   app.use('/api/v1', healthRouter);
+  app.use('/api/v1', createAuthRouter());
 
   app.use(notFoundHandler);
   app.use(errorHandler);
 
   return app;
 }
-
