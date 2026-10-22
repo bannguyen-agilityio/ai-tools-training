@@ -1,0 +1,55 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mini-ecommerce-api:latest
+    container_name: mini-ecommerce-api
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: 'file:/app/data/production.db?connection_limit=1'
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in your shell or .env file}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      LOGIN_RATE_LIMIT_WINDOW_MS: ${LOGIN_RATE_LIMIT_WINDOW_MS:-900000}
+      LOGIN_RATE_LIMIT_MAX: ${LOGIN_RATE_LIMIT_MAX:-5}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      # The SQLite file lives on a named volume so data survives `docker compose down`.
+      - api-data:/app/data
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # One-off test runner: `docker compose --profile test run --rm test`
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mini-ecommerce-api:latest
+    profiles: ['test']
+    environment:
+      NODE_ENV: test
+      JWT_SECRET: 'integration-test-secret-at-least-32-chars-long'
+      LOG_LEVEL: silent
+    command: ['npm', 'test']
+    volumes:
+      - api-data:/app/data
+
+volumes:
+  api-data:

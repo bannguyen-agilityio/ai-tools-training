@@ -1,0 +1,96 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - link [ref=e8] [cursor=pointer]:
+          - /url: https://modelcontextprotocol.io
+          - img "MCP" [ref=e9]
+        - paragraph [ref=e93]: DocumentMCP
+      - radiogroup [ref=e95]:
+        - generic [ref=e97]:
+          - radio "Servers"
+          - generic [ref=e98] [cursor=pointer]: Servers
+        - generic [ref=e100]:
+          - radio "Tools"
+          - generic [ref=e101] [cursor=pointer]: Tools
+        - generic [ref=e103]:
+          - radio "Prompts"
+          - generic [ref=e104] [cursor=pointer]: Prompts
+        - generic [ref=e106]:
+          - radio "Resources" [checked]
+          - generic [ref=e107] [cursor=pointer]: Resources
+      - generic [ref=e13]:
+        - generic [ref=e109]:
+          - paragraph [ref=e112]: Connected (2992ms)
+          - button "Disconnect from server" [ref=e113] [cursor=pointer]
+        - button "Client settings" [ref=e14] [cursor=pointer]
+        - button "Toggle color scheme" [ref=e19] [cursor=pointer]
+        - button "Close monitoring sidebar" [ref=e118] [cursor=pointer]
+  - main [ref=e24]:
+    - generic [ref=e25]:
+      - generic [ref=e164]:
+        - generic [ref=e167]:
+          - heading "Resources" [level=4] [ref=e169]
+          - generic [ref=e170]:
+            - textbox "Search..." [ref=e173]
+            - button "Collapse all" [ref=e174] [cursor=pointer]
+          - generic [ref=e181]:
+            - switch "Fetch lists one page at a time" [ref=e182]
+            - generic [aria-hidden] [ref=e183] [cursor=pointer]
+            - generic [ref=e186] [cursor=pointer]: Paginated
+          - generic [ref=e188]:
+            - generic [ref=e189]:
+              - button "URIs (1)" [expanded] [ref=e190] [cursor=pointer]
+              - region "URIs (1)" [ref=e195]:
+                - button [ref=e198] [cursor=pointer]:
+                  - paragraph [ref=e199]: list_docs
+            - generic [ref=e200]:
+              - button "Templates (1)" [expanded] [ref=e201] [cursor=pointer]
+              - region "Templates (1)" [ref=e206]:
+                - button [ref=e209] [cursor=pointer]:
+                  - paragraph [ref=e210]: fetch_doc
+        - generic [ref=e232]:
+          - generic [ref=e233]:
+            - generic [ref=e234]:
+              - button "Close preview" [ref=e235] [cursor=pointer]
+              - heading "Resource" [level=4] [ref=e238]
+            - generic [ref=e239]:
+              - paragraph [ref=e240]: docs://documents/deposition.md
+              - button "Copy" [ref=e241] [cursor=pointer]:
+                - generic [ref=e242]: ⎘
+          - generic [ref=e248]:
+            - generic [ref=e249]: This deposition covers the testimony of Angela Smith, P.E.
+            - button "Copy" [ref=e251] [cursor=pointer]:
+              - generic [ref=e252]: ⎘
+          - generic [ref=e253]:
+            - paragraph [ref=e254]: "Last updated: 10/22/2026, 11:01:40 AM"
+            - paragraph [ref=e255]: text/plain
+          - button "Refresh" [ref=e258] [cursor=pointer]
+      - generic [ref=e129]:
+        - separator "Resize monitoring sidebar" [ref=e130]
+        - generic [ref=e132]:
+          - generic [ref=e133]:
+            - radiogroup "Monitoring screen" [ref=e134]:
+              - generic [ref=e136]:
+                - radio "Logs" [checked]
+                - generic [ref=e137] [cursor=pointer]: Logs
+              - generic [ref=e138]:
+                - radio "Protocol"
+                - generic [ref=e139] [cursor=pointer]: Protocol
+              - generic [ref=e140]:
+                - radio "Console"
+                - generic [ref=e141] [cursor=pointer]: Console
+            - textbox "Search" [ref=e144]:
+              - /placeholder: Search...
+          - generic [ref=e148]:
+            - generic [ref=e149]:
+              - heading "Log Stream" [level=4] [ref=e150]
+              - generic [ref=e151]:
+                - textbox "Logs sort direction" [ref=e154] [cursor=pointer]: Newest First
+                - button "Clear" [disabled] [ref=e155]
+                - button "Export" [disabled] [ref=e158]
+            - paragraph [ref=e162]: No log entries
+  - contentinfo [ref=e44]:
+    - generic [ref=e45]:
+      - paragraph [ref=e92]: v2.12.0
+      - paragraph [ref=e46]: Copyright © Model Context Protocol a Series of LF Projects, LLC.
