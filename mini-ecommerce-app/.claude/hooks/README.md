@@ -42,3 +42,11 @@ Test (safe, runs no git commands): `node --test .claude/hooks/block-force-push.t
 - **Disable permanently:** delete the `block-force-push.mjs` entry (the `Bash` matcher block) from `.claude/settings.json`.
 - **Recover a blocked legitimate push:** run it yourself in your terminal (or via `! git push ...` in the prompt); hooks only gate Claude's tool calls. Then fix the pattern in `isForcePush` and add a case to the test file.
 - **Hook crashes:** a non-zero exit other than 2 is non-blocking, so a broken script never wedges Claude; fix or remove it.
+
+# Completion notification hook
+
+`notify.mjs` is a `Stop` hook (fires when Claude finishes responding). It rings the terminal bell, then tries a desktop notification: `osascript` on macOS, a Windows toast via `powershell.exe` on WSL, `notify-send` on Linux. All steps are best-effort and failures are ignored, so it never blocks Claude.
+
+Test: `echo '{}' | CLAUDE_PROJECT_DIR=$PWD node .claude/hooks/notify.mjs`
+
+Remove it by deleting the `Stop` entry from `.claude/settings.json`.
