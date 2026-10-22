@@ -18,10 +18,17 @@ export function createApp(): Express {
 
   // Drop `upgrade-insecure-requests` so Swagger UI assets and "Try it out" calls
   // are not rewritten to https when the API is served over plain http.
+  // Outside production, also let the docs page call the API through any local
+  // hostname (localhost vs 127.0.0.1), which are different origins to the CSP.
   app.use(
     helmet({
       contentSecurityPolicy: {
-        directives: { 'upgrade-insecure-requests': null },
+        directives: {
+          'upgrade-insecure-requests': null,
+          ...(env.NODE_ENV !== 'production' && {
+            'connect-src': ["'self'", 'http://localhost:*', 'http://127.0.0.1:*'],
+          }),
+        },
       },
     }),
   );
