@@ -1,8 +1,10 @@
 """Data access for the authentication module."""
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import ConflictError
 from app.modules.auth.models import User
 
 
@@ -51,6 +53,17 @@ class UserRepository:
 
         Returns:
             The persisted user with its generated id.
+
+        Raises:
+            ConflictError: If the username is already taken.
         """
         self._session.add(user)
+        try:
+            await self._session.flush()
+        except IntegrityError as exc:
+            await self._session.rollback()
+            raise ConflictError(
+                message="Username already exists",
+                code="USERNAME_ALREADY_EXISTS",
+            ) from exc
         return user
