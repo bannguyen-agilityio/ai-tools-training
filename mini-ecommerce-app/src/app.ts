@@ -16,7 +16,15 @@ export function createApp(): Express {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
 
-  app.use(helmet());
+  // Drop `upgrade-insecure-requests` so Swagger UI assets and "Try it out" calls
+  // are not rewritten to https when the API is served over plain http.
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: { 'upgrade-insecure-requests': null },
+      },
+    }),
+  );
   app.use(
     cors({
       origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
