@@ -1,0 +1,17 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+*.log
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
+data
+.env
+.env.*
+!.env.example
+tests
+docs
+README.md
