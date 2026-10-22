@@ -8,6 +8,7 @@ import { logger } from './core/logger';
 import { errorHandler, notFoundHandler } from './core/error-handler';
 import { requestContext } from './middleware/request-context';
 import { healthRouter } from './modules/health/health.routes';
+import { setupDocs } from './docs/swagger';
 
 export function createApp(): Express {
   const app = express();
@@ -34,6 +35,7 @@ export function createApp(): Express {
     }),
   );
 
+  setupDocs(app);
   app.use('/api/v1', healthRouter);
 
   app.use(notFoundHandler);
@@ -41,3 +43,4 @@ export function createApp(): Express {
 
   return app;
 }
+
