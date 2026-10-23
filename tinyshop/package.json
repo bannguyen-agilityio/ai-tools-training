@@ -1,0 +1,11 @@
+{
+  "name": "tinyshop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tiny shop API used for code-review practice",
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/server.js"
+  },
+  "engines": { "node": ">=20" }
+}

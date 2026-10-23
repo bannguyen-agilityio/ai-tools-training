@@ -1,0 +1,18 @@
+name: tinyshop practice
+on:
+  push:
+    paths: ['tinyshop/**', '.github/workflows/tinyshop-practice.yml']
+  pull_request:
+    paths: ['tinyshop/**', '.github/workflows/tinyshop-practice.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tinyshop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test
