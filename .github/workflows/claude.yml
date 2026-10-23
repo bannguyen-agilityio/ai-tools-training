@@ -40,7 +40,7 @@ jobs:
       - name: Install and prepare app
         working-directory: mini-ecommerce-app
         run: |
-          npm ci
+          npm i
           cp .env.example .env
           npx prisma generate
           npx prisma migrate deploy
