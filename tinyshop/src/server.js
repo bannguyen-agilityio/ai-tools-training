@@ -2,6 +2,7 @@ const http = require('node:http');
 const db = require('./db');
 const { isAdmin } = require('./auth');
 const { saveOrder } = require('./orders');
+const { paginate } = require('./paginate');
 
 function send(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -21,7 +22,11 @@ async function handler(req, res) {
 
   if (url.pathname === '/health') return send(res, 200, { ok: true });
 
-  if (url.pathname === '/products') return send(res, 200, db.products);
+  if (url.pathname === '/products') {
+    const page = Number(url.searchParams.get('page')) || 1;
+    const size = Number(url.searchParams.get('size')) || 10;
+    return send(res, 200, paginate(db.products, page, size));
+  }
 
   if (url.pathname === '/products/search') {
     const q = url.searchParams.get('q') || '';
