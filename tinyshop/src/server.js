@@ -2,6 +2,8 @@ const http = require('node:http');
 const db = require('./db');
 const { isAdmin } = require('./auth');
 const { saveOrder } = require('./orders');
+const { searchProducts } = require('./search');
+const { applyCoupon } = require('./discount');
 
 function send(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -28,13 +30,27 @@ async function handler(req, res) {
     return send(res, 200, db.query('SELECT * FROM products WHERE name LIKE ?', [q]));
   }
 
+  if (url.pathname === '/search') {
+    const q = url.searchParams.get('q') || '';
+    const results = searchProducts(q);
+    res.writeHead(200, { 'content-type': 'text/html' });
+    return res.end(`<h1>Results for ${q}</h1><ul>${results.map((p) => `<li>${p.name}</li>`).join('')}</ul>`);
+  }
+
+  if (url.pathname === '/quote') {
+    const items = JSON.parse(url.searchParams.get('items') || '[]');
+    return send(res, 200, { totalCents: applyCoupon(items, url.searchParams.get('coupon')) });
+  }
+
   if (url.pathname === '/orders' && req.method === 'POST') {
-    try {
-      const order = await saveOrder(await readJson(req));
-      return send(res, 201, order);
-    } catch (e) {
-      return send(res, 400, { error: e.message });
-    }
+    const body = await readJson(req);
+    saveOrder(body);
+    return send(res, 201, { status: 'accepted' });
+  }
+
+  if (url.pathname === '/admin/report') {
+    const revenue = db.orders.reduce((s, o) => s + o.totalCents, 0);
+    return send(res, 200, { orders: db.orders.length, revenueCents: revenue });
   }
 
   if (url.pathname === '/admin/orders') {
