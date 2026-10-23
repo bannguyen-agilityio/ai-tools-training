@@ -1,7 +1,7 @@
-const { lineTotal, subtotal } = require('./cart');
+const { subtotal } = require('./cart');
 
 const COUPONS = {
-  SAVE10: { type: 'percent', value: 15, expires: '2026-12-31' },
+  SAVE10: { type: 'percent', value: 10, expires: '2026-12-31' },
   FIVEOFF: { type: 'fixed', valueCents: 500, expires: '2026-12-31' },
 };
 
@@ -11,17 +11,16 @@ function applyCoupon(items, code, now = new Date()) {
   if (!coupon) return subtotal(items);
   if (new Date(coupon.expires) < now) return subtotal(items);
 
-  let total = 0;
-  for (const item of items) {
-    let line = lineTotal(item);
-    if (coupon.type === 'percent') {
-      line = line * (1 - coupon.value / 100);
-    } else {
-      line = line - coupon.valueCents;
-    }
-    total += line;
+  const sub = subtotal(items);
+  let discount;
+  if (coupon.type === 'percent') {
+    // Round once on the whole order so the result stays integer cents.
+    discount = Math.round((sub * coupon.value) / 100);
+  } else {
+    // Fixed amount comes off the order once, never below zero.
+    discount = Math.min(coupon.valueCents, sub);
   }
-  return total;
+  return sub - discount;
 }
 
 module.exports = { applyCoupon, COUPONS };
