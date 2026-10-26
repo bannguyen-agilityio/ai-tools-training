@@ -1,6 +1,3 @@
-from datetime import date, timedelta
-
-
 def test_rent_201_balance_uses_only_payments_for_that_bill(client):
     created = client.post(
         "/bills/bill-101/payments",
