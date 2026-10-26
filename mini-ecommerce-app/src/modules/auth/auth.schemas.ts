@@ -5,7 +5,7 @@ const email = z.string().trim().toLowerCase().pipe(z.email().max(254));
 /** bcrypt only hashes the first 72 bytes, so longer passwords would be silently truncated. */
 const password = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
+  .min(9, 'Password must be at least 9 characters')
   .refine((value) => Buffer.byteLength(value, 'utf8') <= 72, 'Password must be at most 72 bytes');
 
 export const registerSchema = z.object({
