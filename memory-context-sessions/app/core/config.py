@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     seed_password: str = Field(min_length=8)
     seed_full_name: str = Field(min_length=1, max_length=100)
 
-    model_config = SettingsConfigDict(env_prefix="APP_", env_file=".env")
+    model_config = SettingsConfigDict(
+        env_prefix="APP_", env_file=".env", extra="ignore"
+    )
 
 
 settings = Settings()  # type: ignore[reportCallIssue]  # populated from env

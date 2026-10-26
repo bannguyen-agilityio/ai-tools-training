@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 
-from app.schemas import (
-    BillOut, OverdueBillOut, PaymentCreate, PaymentOut
-)
-from app.service import (
-    create_payment, get_bill, list_overdue_bills, list_payments
-)
+from app.schemas import BillOut, OverdueBillOut, PaymentCreate, PaymentOut
+from app.service import create_payment, get_bill, list_overdue_bills, list_payments
 
 app = FastAPI(title="Room Rental Billing API", version="0.1.0")
 
