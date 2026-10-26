@@ -214,7 +214,7 @@
           },
           "password": {
             "type": "string",
-            "minLength": 8,
+            "minLength": 9,
             "description": "At most 72 bytes (bcrypt limit)"
           },
           "name": {

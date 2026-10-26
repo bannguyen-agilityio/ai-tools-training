@@ -49,6 +49,7 @@ describe('POST /api/v1/auth/register', () => {
   it.each([
     ['invalid email', { ...credentials, email: 'nope' }],
     ['short password', { ...credentials, password: 'short' }],
+    ['password of 8 characters', { ...credentials, password: 'a'.repeat(8) }],
     ['password over 72 bytes', { ...credentials, password: 'a'.repeat(73) }],
     ['missing name', { email: credentials.email, password: credentials.password }],
   ])('rejects %s', async (_label, body) => {
@@ -56,6 +57,23 @@ describe('POST /api/v1/auth/register', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('requires at least 9 characters: rejects 8 with a clear message, accepts 9', async () => {
+    const app = createApp();
+
+    const tooShort = await request(app)
+      .post('/api/v1/auth/register')
+      .send({ ...credentials, password: 'a'.repeat(8) });
+    expect(tooShort.status).toBe(400);
+    expect(tooShort.body.error.details).toEqual([
+      { path: 'password', message: 'Password must be at least 9 characters' },
+    ]);
+
+    const longEnough = await request(app)
+      .post('/api/v1/auth/register')
+      .send({ ...credentials, password: 'a'.repeat(9) });
+    expect(longEnough.status).toBe(201);
   });
 });
 

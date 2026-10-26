@@ -100,7 +100,7 @@ const openapi: OpenAPIV3.Document = {
         required: ['email', 'password', 'name'],
         properties: {
           email: { type: 'string', format: 'email' },
-          password: { type: 'string', minLength: 8, description: 'At most 72 bytes (bcrypt limit)' },
+          password: { type: 'string', minLength: 9, description: 'At most 72 bytes (bcrypt limit)' },
           name: { type: 'string', minLength: 1, maxLength: 100 },
         },
       },
