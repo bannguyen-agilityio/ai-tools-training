@@ -1,0 +1,68 @@
+name: AI support agent evals autofix
+
+on:
+  workflow_run:
+    workflows: ["AI support agent evaluations"]
+    types: [completed]
+
+concurrency:
+  group: evals-autofix-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  autofix:
+    # Only same-repo PR runs that failed, and never re-fire on Claude's own fix
+    # commit (it carries the [claude-autofix] marker), which prevents loops.
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      !contains(github.event.workflow_run.head_commit.message, '[claude-autofix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: read
+      id-token: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: ai-support-agent-evals/uv.lock
+
+      - name: Install dependencies
+        working-directory: ai-support-agent-evals
+        run: uv sync --locked
+
+      - name: Fix failing evals with Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          additional_permissions: |
+            actions: read
+          prompt: |
+            The "AI support agent evaluations" workflow failed on PR #${{ github.event.workflow_run.pull_requests[0].number }}
+            (run ${{ github.event.workflow_run.html_url }}), branch ${{ github.event.workflow_run.head_branch }}.
+
+            1. Read the failed run's logs and find the root cause.
+            2. Fix it, changing only files under ai-support-agent-evals/ and only what the failure requires.
+            3. Follow ai-support-agent-evals/CLAUDE.md: never weaken or delete tests to make them pass,
+               never invent refund policy, never log customer data.
+            4. From ai-support-agent-evals/, verify with: uv run pytest -q, uv run ruff check src tests,
+               uv run bash evals/check.sh evals/refund-policy.json and evals/no-sensitive-logs.json.
+            5. Commit with a message that ends with the marker [claude-autofix], and push to the same branch.
+            6. Comment on the PR with the cause and what you changed. If you cannot fix it safely,
+               comment with the diagnosis instead of pushing.
+          claude_args: >-
+            --allowedTools "Bash(uv run:*),Bash(uv sync:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(gh run view:*),Bash(gh pr comment:*),Edit,Read,Grep,Glob"
