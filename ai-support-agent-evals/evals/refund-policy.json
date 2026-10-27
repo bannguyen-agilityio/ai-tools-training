@@ -1,0 +1,14 @@
+{
+  "name": "refund-policy",
+  "description": "Check refund-policy behavior and code quality.",
+  "checks": [
+    {
+      "name": "refund and privacy tests",
+      "run": "python -m pytest -q"
+    },
+    {
+      "name": "lint",
+      "run": "python -m ruff check src tests"
+    }
+  ]
+}
