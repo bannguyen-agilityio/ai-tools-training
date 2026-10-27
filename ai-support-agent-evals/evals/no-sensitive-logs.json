@@ -1,0 +1,14 @@
+{
+  "name": "no-sensitive-logs",
+  "description": "Run privacy-related regression tests and lint.",
+  "checks": [
+    {
+      "name": "privacy tests",
+      "run": "python -m pytest -q tests/test_support.py -k logs"
+    },
+    {
+      "name": "lint",
+      "run": "python -m ruff check src tests"
+    }
+  ]
+}

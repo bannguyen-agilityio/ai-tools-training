@@ -1,0 +1,60 @@
+name: AI support agent evaluations
+
+on:
+  pull_request:
+    paths:
+      - "ai-support-agent-evals/CLAUDE.md"
+      - "ai-support-agent-evals/.claude/**"
+      - "ai-support-agent-evals/evals/**"
+      - "ai-support-agent-evals/src/**"
+      - "ai-support-agent-evals/tests/**"
+      - "ai-support-agent-evals/pyproject.toml"
+      - "ai-support-agent-evals/uv.lock"
+      - ".github/workflows/ai-support-agent-evals.yml"
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ai-support-agent-evals
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: ai-support-agent-evals/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes jq
+
+      - name: Run deterministic tests
+        run: uv run pytest -q
+
+      - name: Run lint
+        run: uv run ruff check src tests
+
+      - name: Run refund policy evaluation
+        run: uv run bash evals/check.sh evals/refund-policy.json
+
+      - name: Run sensitive logging evaluation
+        run: uv run bash evals/check.sh evals/no-sensitive-logs.json
