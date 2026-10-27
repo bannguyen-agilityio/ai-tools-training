@@ -25,7 +25,9 @@ def test_negative_purchase_age_is_rejected() -> None:
         answer_refund_question(-1)
 
 
-def test_customer_message_is_not_written_to_logs(caplog: pytest.LogCaptureFixture) -> None:
+def test_customer_message_is_not_written_to_logs(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     secret_text = "CUSTOMER_SECRET_123 customer@example.test"
     with caplog.at_level(logging.INFO):
         log_customer_message(secret_text)
