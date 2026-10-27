@@ -1,16 +1,16 @@
-name: Agent evaluations
+name: AI support agent evaluations
 
 on:
   pull_request:
     paths:
-      - "CLAUDE.md"
-      - ".claude/**"
-      - "evals/**"
-      - "src/**"
-      - "tests/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/agent-evals.yml"
+      - "ai-support-agent-evals/CLAUDE.md"
+      - "ai-support-agent-evals/.claude/**"
+      - "ai-support-agent-evals/evals/**"
+      - "ai-support-agent-evals/src/**"
+      - "ai-support-agent-evals/tests/**"
+      - "ai-support-agent-evals/pyproject.toml"
+      - "ai-support-agent-evals/uv.lock"
+      - ".github/workflows/ai-support-agent-evals.yml"
   push:
     branches: [main]
   schedule:
@@ -24,6 +24,9 @@ jobs:
   evals:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ai-support-agent-evals
 
     steps:
       - name: Checkout repository
@@ -34,6 +37,7 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
+          cache-dependency-glob: ai-support-agent-evals/uv.lock
 
       - name: Install dependencies
         run: uv sync --locked

@@ -49,10 +49,9 @@ ai-support-agent-evals/
 │   ├── refund-policy.json
 │   ├── no-sensitive-logs.json
 │   └── check.sh
-└── .github/
-    └── workflows/
-        └── agent-evals.yml
 ```
+
+The CI workflow lives at the repository root: `.github/workflows/ai-support-agent-evals.yml`.
 
 ## Evaluation limitations
 The shell checker runs commands declared in JSON. Treat evaluation files as trusted repository code: never execute untrusted commands from user-supplied JSON. The included checks are deterministic; they do not establish that an LLM's free-form response is semantically correct. Extend with rubric-based or model-graded evaluations for an actual AI agent.
