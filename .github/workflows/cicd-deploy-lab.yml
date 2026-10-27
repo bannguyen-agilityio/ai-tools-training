@@ -1,0 +1,53 @@
+name: cicd-deploy-lab
+
+on:
+  pull_request:
+    paths: ["cicd-deploy-lab/**", ".github/workflows/cicd-deploy-lab.yml"]
+  push:
+    branches: [main]
+    paths: ["cicd-deploy-lab/**", ".github/workflows/cicd-deploy-lab.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: cicd-deploy-lab
+
+jobs:
+  # Stage 1: every PR - fast, deterministic checks
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m unittest -v
+      - run: pip install ruff && ruff check .
+      - run: python3 scripts/deploy.py production --dry-run
+
+  # Stage 2: merge to main -> staging automatically
+  deploy-staging:
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/deploy.py staging
+      - run: python3 scripts/smoke.py staging
+
+  # Stage 3: production waits for a human. Configure required reviewers on
+  # the "production" environment (Settings > Environments) - that IS the gate.
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency: production-deploy
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/deploy.py production
+      - run: python3 scripts/smoke.py production
