@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from app.version import health  # noqa: E402
+from app.version import health
 
 env = sys.argv[1] if len(sys.argv) > 1 else "staging"
 dry = "--dry-run" in sys.argv
