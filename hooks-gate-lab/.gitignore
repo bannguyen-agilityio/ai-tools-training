@@ -1,0 +1,3 @@
+__pycache__/
+.claude/gate-audit.log
+.claude/settings.local.json

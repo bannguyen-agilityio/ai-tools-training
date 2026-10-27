@@ -1,0 +1,4 @@
+# Protected path: edits need a change ticket (see .claude/hooks/protected_paths_gate.py)
+# Dummy file - not real infrastructure.
+replicas: 2
+region: ap-southeast-1

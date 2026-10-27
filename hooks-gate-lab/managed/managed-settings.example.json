@@ -1,0 +1,19 @@
+{
+  "_comment": "Reference only (Exercise 5). In a real org the platform/IT team deploys this as managed settings; engineers cannot override it. With allowManagedHooksOnly, project hooks are ignored, so the gates must live here.",
+  "permissions": {
+    "deny": ["Read(.env*)", "Read(./secrets/**)", "WebFetch", "Bash(curl *)", "Bash(wget *)"],
+    "allow": ["Bash(git *)", "Bash(python3 -m unittest*)"],
+    "disableBypassPermissionsMode": "disable"
+  },
+  "allowManagedHooksOnly": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "python3 /opt/company/hooks/production_gate.py" }
+        ]
+      }
+    ]
+  }
+}
