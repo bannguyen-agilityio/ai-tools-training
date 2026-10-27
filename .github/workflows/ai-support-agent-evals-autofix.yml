@@ -65,4 +65,4 @@ jobs:
             6. Comment on the PR with the cause and what you changed. If you cannot fix it safely,
                comment with the diagnosis instead of pushing.
           claude_args: >-
-            --allowedTools "Bash(uv run:*),Bash(uv sync:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(gh run view:*),Bash(gh pr comment:*),Edit,Read,Grep,Glob"
+            --allowedTools "Bash(uv run:*),Bash(uv sync:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(gh run view:*),Bash(gh pr create:*),Bash(gh pr comment:*),Edit,Read,Grep,Glob"
