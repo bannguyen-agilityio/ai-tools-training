@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeaveDesk: New request</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mockbar">MOCKUP · New request (P1) · shows a long-leave notice warning and a live day count</div>
+<header class="app"><div class="bar">
+  <span class="brand">LeaveDesk</span>
+  <nav class="main" aria-label="Main">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="new-request.html" aria-current="page">New request</a>
+    <a href="approvals.html">Approvals <span class="badge" aria-label="3 waiting">3</span></a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+  <button class="bell" aria-label="Notifications, 2 unread">🔔 <span class="badge">2</span></button>
+</div></header>
+
+<main>
+  <h1>New leave request</h1>
+  <p class="muted">Your request goes to your manager, Minh Pham.</p>
+
+  <div class="grid cols-2">
+    <form class="card" novalidate aria-labelledby="f">
+      <h2 id="f">Details</h2>
+
+      <div class="field">
+        <label for="type">Leave type</label>
+        <select id="type">
+          <option selected>Annual (8.5 days available)</option>
+          <option>Sick (6.0 days available)</option>
+          <option>Unpaid (no limit)</option>
+        </select>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="start">Start date</label>
+          <input id="start" type="text" value="Mon 9 Nov 2026" aria-describedby="start-h">
+          <div class="hint" id="start-h">Format: Mon 2 Nov 2026</div>
+        </div>
+        <div class="field">
+          <label for="end">End date</label>
+          <input id="end" type="text" value="Fri 20 Nov 2026">
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>Part of day</legend>
+        <div class="radios" role="radiogroup">
+          <label><input type="radio" name="part" checked> Full days</label>
+          <label><input type="radio" name="part" disabled> Morning only</label>
+          <label><input type="radio" name="part" disabled> Afternoon only</label>
+        </div>
+        <div class="hint">Morning or afternoon only is for a single day. For a longer range you can also start in the afternoon of the first day or end in the morning of the last day.</div>
+      </fieldset>
+
+      <div class="row2">
+        <div class="field"><label><input type="checkbox" style="width:auto;min-height:0"> First day is afternoon only</label></div>
+        <div class="field"><label><input type="checkbox" style="width:auto;min-height:0"> Last day is morning only</label></div>
+      </div>
+
+      <div class="field">
+        <label for="note">Note for your manager (optional)</label>
+        <textarea id="note" maxlength="500" aria-describedby="note-h"></textarea>
+        <div class="hint" id="note-h">Up to 500 characters. Notes are never included in emails.</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="submit">Submit request</button>
+        <a class="btn secondary" href="dashboard.html">Cancel</a>
+      </div>
+    </form>
+
+    <aside class="card" aria-labelledby="sum" aria-live="polite">
+      <h2 id="sum">Summary</h2>
+      <p class="big">10.0 <span class="small muted">working days</span></p>
+      <dl class="bal">
+        <dt>Range</dt><dd>Mon 9 Nov to Fri 20 Nov</dd>
+        <dt>Weekends / holidays removed</dt><dd>0 holidays</dd>
+        <dt>Available now</dt><dd>8.5</dd>
+        <dt>After this request</dt><dd><strong>−1.5</strong></dd>
+      </dl>
+
+      <div class="alert err" role="alert">
+        <strong>Not enough Annual leave.</strong> You are short by 1.5 days. Shorten the range, or choose Unpaid for the remaining days.
+      </div>
+      <div class="alert warn" role="status">
+        <strong>Short notice (example).</strong> Leave longer than 5 working days should be requested at least 1 week ahead. Shown when the start is less than 7 days away; you can still submit and your manager sees the same warning.
+      </div>
+      <p class="hint">Carried days (4.0, expire Thu 31 Dec 2026) are used first.</p>
+    </aside>
+  </div>
+
+  <section class="card" style="margin-top:16px" aria-labelledby="ex">
+    <h2 id="ex">Other states of this form (reference)</h2>
+    <ul class="small">
+      <li><strong>End before start:</strong> “End date must be on or after the start date.” shown under the End field, focus moves to it.</li>
+      <li><strong>Weekend or holiday only:</strong> “This range has no working days.”</li>
+      <li><strong>Overlap:</strong> “This overlaps your Annual request for Mon 16 Nov to Tue 17 Nov.”</li>
+      <li><strong>Single day, less than 1 day notice (Annual or Unpaid):</strong> blocked: “Single days need at least 1 day notice.”</li>
+      <li><strong>Sick:</strong> notice rule hidden; start date may be up to 7 days in the past.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
