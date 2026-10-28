@@ -82,25 +82,53 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 ### Stage 2 — Design → skills + `spec.md`
 **Hat:** Product owner, with the tech lead consulted
 
-1. **Write three policy skills** under `.claude/skills/<name>/SKILL.md`. Each needs frontmatter saying *when* it triggers and a body saying *what to do*.
+1. **Write three policy skills**
+
+      Prompt:
+      ```
+      Do not read or reference any files under @ref/.
+      Use @intent/leave-management-tool.md as the source of truth for this task.
+
+      Before creating `spec.md`, analyze the intent document and suggest a set of reusable skills that will help maintain consistency between the requirements and the specification I will define later.
+
+      For each proposed skill, explain:
+      1. **Skill name** — a clear, descriptive name.
+      2. **Purpose** — what problem or risk the skill addresses.
+      3. **Scope** — which requirements, workflows, or design decisions it applies to.
+      4. **Rules and guidelines** — what Claude should follow when using this skill.
+      5. **Trigger conditions** — when the skill should be activated.
+      6. **Consistency checks** — how the skill helps ensure the requirements and specification remain consistent.
+
+      Prioritize cross-cutting concerns such as security, privacy, data integrity, business rules, accessibility, and UX, but only recommend skills that are justified by the intent document.
+
+      Keep the skill set small, focused, and non-overlapping. Explain why each skill should be a reusable skill rather than a one-off requirement in the specification.
+
+      **Important constraints:**
+      - Do not create `spec.md` yet.
+      - Do not implement any code.
+      - Do not invent requirements or business decisions that are not supported by the intent document.
+      - Identify ambiguities, missing information, and potential conflicts that should be resolved before writing the specification.
+      - Present your proposed skills and rationale for my review and approval before creating any skill files.
+
+      The goal is to establish reusable policies and guidelines first so that the requirements and specification I define later are consistent, complete, and aligned with the agreed product intent.
+      ```
+   (OPTIONAL) Under `.claude/skills/<name>/SKILL.md`. Each needs frontmatter saying *when* it triggers and a body saying *what to do*.
    - `secure-api`: rules for every API endpoint (authentication, authorization, validation, audit, logging)
    - `hr-privacy`: who may see what (sick leave, reasons, exports)
    - `ux-standard`: mobile, accessibility, form errors, date format, destructive actions
 2. **Run the design session** in Claude Code:
    ```
-   Read intent/leave-requests/intent.md and produce a requirements and design spec.
+   Read intent/leave-management-tool.md and produce a requirements and design spec.
    Apply the skills available to you so the spec conforms to our security, privacy and UX standards.
    Number every requirement (R1, R2, …) with Given/When/Then acceptance criteria.
-   Include: tech stack, data model, API list, screens, how each intent constraint is met,
-   open questions carried forward, and an "Areas of concern" section — especially where
-   policies contradict each other. Save as intent/leave-requests/spec.md.
+   Include: tech stack, data model, API list, screens, how each intent constraint is met, open questions carried forward, and an "Areas of concern" section — especially where policies contradict each other. Save as intent/leave-management-tool/spec.md.
    ```
 3. **Review the spec** against the intent:
    - Does it solve the problem?
    - Is every open question answered or carried forward?
    - Is every rule in Part B covered by an acceptance criterion?
 4. **Resolve every area of concern** and write each decision into the spec.
-5. *(Optional)* Have Claude mock up 4 screens (Dashboard, New Request, Approvals, Calendar) and save them in `intent/leave-requests/mocks/`.
+5. *(Optional)* Have Claude mock up 4 screens (Dashboard, New Request, Approvals, Calendar) and save them in `intent/leave-management-tool/mocks/`.
 6. Commit `spec.md` in a PR and merge it. **Merging means you've decided to build.**
 
 **Deliverable:** 3 skills + `spec.md` merged.
