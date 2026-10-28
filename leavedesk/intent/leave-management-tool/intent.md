@@ -10,14 +10,14 @@ A simple web tool where staff request leave, managers approve or reject it, and 
 - **Requests:** full or half days (morning/afternoon). Notice: 1 day for a single day off; 1–2 weeks for leave longer than a week.
 - **Approval:** direct manager approves or rejects (rejection needs a reason). Any other manager can approve if the direct manager is away. Managers' own requests go to HR.
 - **Cancellation:** employee while Pending; only HR once Approved (days refunded).
-- **Working days:** Mon–Fri excluding US public holidays (preloaded, HR-editable).
+- **Working days:** Mon–Fri excluding Vietnamese public holidays (preloaded, HR-editable).
 - **Calendar (phase 2):** team members see their team's approved and pending leave; HR sees all teams; sick leave shows as "Off".
 - **Report (phase 2):** monthly Excel/CSV with leave taken per employee by type, remaining balances, and who was off and when.
 
 ## Affected users and systems
 - **Employees (~250 staff in total):** request leave, view balance and team calendar.
 - **Managers (16):** approve or reject requests for their reports.
-- **HR (1 person):** manages employees, teams, managers, holidays and starting balances; sees all leave; cancels approved leave; approves managers' requests.
+- **HR (2 people: HR owner and a deputy):** manages employees, teams, managers, holidays and starting balances; sees all leave; cancels approved leave; approves managers' requests.
 - **Systems:** email (notifications). Login with @asnet.com.vn email and password, with Google SSO later. The Excel files are replaced; balances are entered by hand once at launch.
 
 ## Constraints
@@ -37,11 +37,15 @@ A simple web tool where staff request leave, managers approve or reject it, and 
 - Slack/Teams notifications (email only).
 - Importing Excel history or past leave records.
 - CSV import of balances: deferred to a later phase. At launch HR enters balances by hand.
-- Leave types beyond annual, sick and unpaid; non-US holiday calendars; Saturday/shift work patterns.
+- Leave types beyond annual, sick and unpaid; non-Vietnamese holiday calendars; Saturday/shift work patterns.
 - **Release phasing:** team calendar and monthly report are deferred to about two weeks after 1 Nov. HR keeps using Excel for the month-end report until then.
 
-## Open questions
-- Notice period for leave longer than a week: 1 week or 2 weeks? Is it a hard block or a warning?
-- Confirm new-joiner pro-rating method (remaining months, rounded to nearest half day).
-- Exact date for phase 2 (calendar and report).
-- Can carried-over days themselves be carried over again, or is the 6-day cap applied only to the current year's unused balance?
+## Decisions (2026-10-28)
+- Leave longer than a week (more than 5 working days): 1 week notice, warning only, never a hard block.
+- New-joiner pro-rating: remaining months (start on day 1-15 counts that month), annual and sick, rounded to the nearest half day.
+- Phase 2 (calendar and report) ships Mon 16 Nov 2026.
+- Carried-over days are not carried again; the 6-day cap applies to the current year's unused days only.
+- Holidays: Vietnamese public holidays (replaces the earlier US calendar).
+- HR is 2 people: the HR owner and one deputy.
+
+See `leave-management-tool/spec.md` for the full decisions log.
