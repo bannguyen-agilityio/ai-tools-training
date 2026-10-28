@@ -26,7 +26,7 @@ balances are wrong, and managers can't see who is off.
 Staff request leave in a web app, managers approve it there, balances and a team
 calendar are always current, and HR exports a monthly report.
 ## Affected users and systems
-~45 employees, 6 managers, HR (1–2); company email (SMTP).
+~250 employees, 16 managers, HR (2: owner and deputy); company email.
 ## Constraints
 Weekends and public holidays don't count. Half days allowed. Sick leave must not be
 visible as "sick" to colleagues. Works on phones. Small budget. Live next month.

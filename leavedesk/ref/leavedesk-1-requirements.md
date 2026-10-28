@@ -10,7 +10,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 
 ## Part A — Client brief
 
-**Client:** Brightpath Software, a 250-person software company (fictional) in Austin, Texas.
+**Client:** Brightpath Software, a 250-person software company (fictional) in Vietnam.
 **Product owner:** Sarah Miller, HR Manager.
 
 **Today's process:** Employees email their manager to ask for leave. The manager replies "OK", and HR updates an Excel file by hand at the end of the month. Emails get lost, balances are often wrong, and nobody knows who is off next week.
@@ -27,10 +27,10 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 
 | Topic | Sarah's answer |
 |---|---|
-| Leave types | Annual 12 days/year, Sick 5 days/year (paid), Unpaid (no limit) |
+| Leave types | Annual 12 days/year, Sick 7 days/year (paid), Unpaid (no limit) |
 | Half days | Yes, morning or afternoon (0.5 day) |
-| What counts | Mon–Fri only; public holidays don't count |
-| Public holidays | HR enters them each year |
+| What counts | Mon–Fri only; Vietnamese public holidays don't count |
+| Public holidays | Vietnamese public holidays, preloaded; HR edits them each year |
 | Approver | The employee's direct manager. Managers' own requests go to HR |
 | Cancelling | Employee can cancel while *Pending*. Once *Approved*, only HR can cancel; days are refunded |
 | Backdating | Sick leave up to 7 days back. Other types must be in the future |
@@ -42,7 +42,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 | Calendar | Month view of who's off in my team; HR sees all teams |
 | Reports | HR needs a monthly export they can open in Excel |
 | Devices | Must work in a phone browser. No native app |
-| Users | ~250 staff, 16 managers, 1 HR people |
+| Users | ~250 staff, 16 managers, 2 HR people (owner and deputy) |
 | Success | No leave requests by email after launch; HR month-end takes under 10 minutes; no balance corrections |
 | Not now | Carry-over of unused days, SSO, Slack, payroll, multi-level approval |
 | Deadline | Live next month |
@@ -64,12 +64,12 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 1. Create `intent/leave-requests/` on a new branch.
 2. Start Claude and run:
    ```
-   I'm the HR manager at a 45-person company. Here's my problem: <paste Sarah's message>.
+   I'm the HR manager at a 250-person company. Here's my problem: <paste Sarah's message>.
    Interview me like a business analyst — scope, users, constraints, what success looks like —
    one question at a time, until the idea is concrete.
    ```
 3. Answer from Part B.
-4. Ask Claude to write `intent/leave-management-tool.md` with these sections: Problem, Proposed outcome, Affected users and systems, Constraints, Success measures, Out of scope, Open questions. Keep it under one page.
+4. Ask Claude to write `intent/leave-management-tool/intent.md` with these sections: Problem, Proposed outcome, Affected users and systems, Constraints, Success measures, Out of scope, Open questions. Keep it under one page.
 5. Correct anything Claude got wrong, then commit, open a PR, and merge. **Merging means the intent is accepted.**
 6. *(Optional)* Save the intent template as a skill: `.claude/skills/intent-template/SKILL.md`.
 
@@ -87,7 +87,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
       Prompt:
       ```
       Do not read or reference any files under @ref/.
-      Use @intent/leave-management-tool.md as the source of truth for this task.
+      Use @intent/leave-management-tool/intent.md as the source of truth for this task.
 
       Before creating `spec.md`, analyze the intent document and suggest a set of reusable skills that will help maintain consistency between the requirements and the specification I will define later.
 
@@ -118,7 +118,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
    - `ux-standard`: mobile, accessibility, form errors, date format, destructive actions
 2. **Run the design session** in Claude Code:
    ```
-   Read intent/leave-management-tool.md and produce a requirements and design spec.
+   Read intent/leave-management-tool/intent.md and produce a requirements and design spec.
    Apply the skills available to you so the spec conforms to our security, privacy and UX standards.
    Number every requirement (R1, R2, …) with Given/When/Then acceptance criteria.
    Include: tech stack, data model, API list, screens, how each intent constraint is met, open questions carried forward, and an "Areas of concern" section — especially where policies contradict each other. Save as intent/leave-management-tool/spec.md.
@@ -243,4 +243,4 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 - [ ] Metrics log filled in, and a comparison note with the solutions for each stage
 
 ## Stretch (v1.1, run through all six stages again)
-Carry-over of up to 5 annual days (expiring March 31) · Google SSO · Slack notification to managers · Pro-rated quota for people who join mid-year
+Carry-over of up to 6 annual days (expiring 31 Dec of the following year) · Google SSO · Slack notification to managers · Pro-rated quota for people who join mid-year

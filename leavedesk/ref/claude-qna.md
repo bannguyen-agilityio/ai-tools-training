@@ -9,15 +9,15 @@ one question at a time, until the idea is concrete.
 
 2. Roughly how many leave requests do you get in a typical month, and how much of your time does the Excel upkeep and monthly reporting take? A rough guess is fine, for example "about 40 requests and two days a month."
 
-    About 26 requests and 2 days a month.
+    About 150 requests and 2 days a month.
 
 3. What types of leave do you need to track, and how is each one's balance worked out? For example, annual leave with a fixed yearly allowance, sick leave, unpaid leave, or others. Please also say whether unused days carry over to the next year and whether the allowance depends on years of service.
 
-    Annual leave: 12 days per year. Sick leave: 5 paid days per year. Unpaid leave: no limit. Unused leave days can be carried over to the following year.
+    Annual leave: 12 days per year. Sick leave: 7 paid days per year. Unpaid leave: no limit. Unused leave days can be carried over to the following year.
 
 4. Is there a cap or expiry on the carried-over days? For example, all unused days carry over forever, only up to X days carry over, or carried-over days must be used by a certain month. Does the same apply to sick leave, or only to annual leave?
 
-    Only annual leave carries over, up to 6 days. Sick leave does not carry over.
+    Only annual leave carries over, up to 6 days. Sick leave does not carry over. (Decided 2026-10-28: carried days are not carried again; the cap applies to the current year's unused days.)
 
 5. Do carried-over days expire, or can they be used any time during the new year? Also, does your leave year run January to December, or does it follow a different cycle?
 
@@ -29,11 +29,11 @@ one question at a time, until the idea is concrete.
 
 7. Can people request half days or partial days, or only full days? Also, are there rules like minimum notice for annual leave, or a manager being allowed to reject a request? If so, does a rejection need a reason?
 
-    Employees can request half-day leave (morning or afternoon). Managers can reject requests but must provide a reason. Minimum notice is 1 day for a single day off and 1–2 weeks for leave longer than one week.
+    Employees can request half-day leave (morning or afternoon). Managers can reject requests but must provide a reason. Minimum notice is 1 day for a single day off and 1–2 weeks for leave longer than one week. (Decided 2026-10-28: 1 week, warning only, for more than 5 working days.)
 
 8. Which days count as working days, and how do you handle public holidays? Is it Monday to Friday only, or do some staff work Saturdays? Who maintains the holiday list: should HR enter the dates each year, or do you want it pre-loaded for your country? Which country is that?
 
-    Working days are Monday–Friday, excluding US public holidays. HR maintains the holiday list annually, preloaded with US holidays.
+    Working days are Monday–Friday, excluding Vietnamese public holidays (revised 2026-10-28; originally US). HR maintains the holiday list annually, preloaded with Vietnamese holidays.
 
 9. Who can see what on the team calendar? Should everyone see who is off, including the leave type, or just "Name – away"? Does it show only approved leave, or pending requests as well? Is it company-wide, or does each person only see their own team?
 
@@ -59,9 +59,9 @@ one question at a time, until the idea is concrete.
 
     Employee can cancel while Pending. Once Approved, only HR can cancel; days are refunded
 
-15. Who sets up and maintains the people and teams in the tool? Does HR add each person with their team and manager, and handle new joiners and leavers? For someone who joins mid-year, do they get the full 12 and 5 days or a pro-rated amount?
+15. Who sets up and maintains the people and teams in the tool? Does HR add each person with their team and manager, and handle new joiners and leavers? For someone who joins mid-year, do they get the full 12 and 7 days or a pro-rated amount?
 
-    HR manages employees, teams, and managers. New joiners receive pro-rated annual and sick leave.
+    HR manages employees, teams, and managers. New joiners receive pro-rated annual and sick leave. HR is 2 people: the HR owner and a deputy (2026-10-28).
 
 16. What are the budget and hosting constraints? Roughly what can you spend, as a one-off and per month? Is there anyone in the company who can look after it technically (hosting, backups, fixing problems) after launch, or will it need to be as hands-off as possible? Is there a hard date next month when it must be live?
 
