@@ -15,9 +15,6 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-APP_ROLE = get_settings().app_db_role
-if not APP_ROLE.isidentifier():
-    raise ValueError("APP_DB_ROLE is not a valid role name")
 TABLES = ("team", "employee", "session", "audit_log")
 UUID_DEFAULT = sa.text("gen_random_uuid()")
 NOW = sa.text("now()")
@@ -27,7 +24,16 @@ def _ts(name: str, **kw) -> sa.Column:  # type: ignore[no-untyped-def]
     return sa.Column(name, sa.DateTime(timezone=True), server_default=NOW, **kw)
 
 
+def _app_role() -> str:
+    # Read lazily: importing this module (e.g. to list heads) must not need app settings.
+    role = get_settings().app_db_role
+    if not role.isidentifier():
+        raise ValueError("APP_DB_ROLE is not a valid role name")
+    return role
+
+
 def upgrade() -> None:
+    app_role = _app_role()
     op.execute("CREATE EXTENSION IF NOT EXISTS citext")
 
     op.create_table(
@@ -109,17 +115,17 @@ def upgrade() -> None:
     # The app role bypasses RLS (there are no policies) but is NOT the table owner,
     # so the grants below are what restrict it. Needs a role allowed to set BYPASSRLS.
     op.execute(
-        f"DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{APP_ROLE}') "
-        f"THEN CREATE ROLE {APP_ROLE} NOLOGIN BYPASSRLS; END IF; END $$"
+        f"DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{app_role}') "
+        f"THEN CREATE ROLE {app_role} NOLOGIN BYPASSRLS; END IF; END $$"
     )
-    op.execute(f"GRANT USAGE ON SCHEMA public TO {APP_ROLE}")
-    op.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON team, employee, session TO {APP_ROLE}")
+    op.execute(f"GRANT USAGE ON SCHEMA public TO {app_role}")
+    op.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON team, employee, session TO {app_role}")
     # Append-only (R30): no UPDATE, DELETE or TRUNCATE.
-    op.execute(f"GRANT SELECT, INSERT ON audit_log TO {APP_ROLE}")
-    op.execute(f"REVOKE UPDATE, DELETE, TRUNCATE ON audit_log FROM {APP_ROLE}")
+    op.execute(f"GRANT SELECT, INSERT ON audit_log TO {app_role}")
+    op.execute(f"REVOKE UPDATE, DELETE, TRUNCATE ON audit_log FROM {app_role}")
 
 
 def downgrade() -> None:
     for table in ("audit_log", "session", "employee", "team"):
         op.execute(f'DROP TABLE IF EXISTS "{table}" CASCADE')
-    op.execute(f"REVOKE USAGE ON SCHEMA public FROM {APP_ROLE}")
+    op.execute(f"REVOKE USAGE ON SCHEMA public FROM {_app_role()}")
