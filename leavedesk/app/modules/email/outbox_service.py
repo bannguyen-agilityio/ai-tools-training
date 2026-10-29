@@ -27,6 +27,7 @@ BATCH = 50
 
 async def drain_due(db: AsyncSession, sender: EmailSender, now: datetime | None = None) -> int:
     """Send due pending mail. Commits per row. Returns the number of rows attempted."""
+    fixed_now = now  # tests pass a clock; in production each row is stamped at its own time
     now = now or datetime.now(UTC)
     attempted = 0
     # One row per transaction: the lock is held only for the row being sent, so two drainers
@@ -44,17 +45,20 @@ async def drain_due(db: AsyncSession, sender: EmailSender, now: datetime | None 
         attempted += 1
         try:
             await sender.send(to=row.to_address, subject=row.subject, body=row.body)
-        except SendError as exc:
+        except Exception as exc:
+            # Any failure counts as an attempt, so one bad row cannot block the queue.
+            stamp = fixed_now or datetime.now(UTC)
             row.attempts += 1
-            row.last_error = str(exc.code) if exc.code is not None else "network"
+            code = exc.code if isinstance(exc, SendError) else None
+            row.last_error = str(code) if code is not None else type(exc).__name__
             if row.attempts >= MAX_ATTEMPTS:
                 row.status = "failed"
                 log.warning("email %s failed after %s attempts", row.id, row.attempts)
             else:
-                row.next_try_at = now + BACKOFF[row.attempts - 1]
+                row.next_try_at = stamp + BACKOFF[row.attempts - 1]
         else:
             row.status = "sent"
-            row.sent_at = now
+            row.sent_at = fixed_now or datetime.now(UTC)
             row.last_error = None
         await db.commit()
     return attempted

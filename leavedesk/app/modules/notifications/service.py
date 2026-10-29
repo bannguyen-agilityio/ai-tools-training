@@ -53,6 +53,9 @@ async def emit(
         if link is None:
             raise ValueError(f"{event} needs a link")
         payload["link"] = link
+        if not occurrence:
+            # Without it a second invite or reset for the same person would be deduplicated away.
+            raise ValueError(f"{event} needs an occurrence (e.g. the token id)")
         key = f"{event}:{recipient.id}:{occurrence}"
 
     privacy.check_payload(payload)
@@ -60,8 +63,14 @@ async def emit(
     if ref is not None:
         render_in["dates"] = privacy.date_range(ref.start_date, ref.end_date)
     out = render(event, render_in)
+    # Names and the rejection reason are free text; only the template wording is checked, so a
+    # reason that mentions "sick" cannot block the decision.
+    probe = render(
+        event,
+        {**render_in, "recipient_name": "-", "employee_name": "-", "rejection_reason": None},
+    )
     privacy.assert_clean(
-        out.subject, out.body, out.notification_title or "", out.notification_body or ""
+        probe.subject, probe.body, probe.notification_title or "", probe.notification_body or ""
     )
 
     mocked = settings.email_backend == "mock"

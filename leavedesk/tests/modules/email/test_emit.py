@@ -77,7 +77,7 @@ async def test_invite_creates_email_but_no_notification(
     login = await make_login()
     async with async_sessionmaker(app_engine, expire_on_commit=False)() as db:
         emp = await _employee(db, login.employee_id)
-        await emit(db, Event.INVITE, emp, link="http://testserver/accept?t=abc")
+        await emit(db, Event.INVITE, emp, link="http://testserver/accept?t=abc", occurrence="t1")
         await db.commit()
     assert await _count(owner_engine, "email_outbox") == 1
     assert await _count(owner_engine, "notification") == 0
