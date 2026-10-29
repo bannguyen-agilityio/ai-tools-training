@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, balance ledger + `compute_balance` + rollover/expire_carry jobs (no balances API yet; used/reserved days arrive with `leave_request_day`, plan 06), frontend shell (R31 primitives in `frontend/src/ui`, served by `app/spa.py`; see `frontend/README.md`). Not built: requests, approvals, holidays, notifications, other jobs, `EmailSender`, feature screens.
+LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, balance ledger + `compute_balance` + rollover/expire_carry jobs (no balances API yet; used/reserved days arrive with `leave_request_day`, plan 06), email outbox + `EmailSender`, notifications API, `drain_outbox` job, frontend shell (R31 primitives in `frontend/src/ui`, served by `app/spa.py`; see `frontend/README.md`). Not built: requests, approvals, holidays, notification bell UI, feature screens.
 
 ## Sources
 
