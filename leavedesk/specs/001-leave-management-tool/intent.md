@@ -24,7 +24,7 @@ A simple web tool where staff request leave, managers approve or reject it, and 
 - Hosting and running cost under $5/month.
 - A developer is available for support; the tool should be low-maintenance.
 - Go-live 1 November 2026, with only four days left when scoped, so release is phased.
-- Modest load: ~250 staff (16 managers, 1 HR), about 150 requests a month.
+- Modest load: ~250 staff (16 managers, 2 HR), about 150 requests a month.
 - New joiners get pro-rated leave (assumed by remaining months, rounded to the nearest half day).
 
 ## Success measures
@@ -48,4 +48,4 @@ A simple web tool where staff request leave, managers approve or reject it, and 
 - Holidays: Vietnamese public holidays (replaces the earlier US calendar).
 - HR is 2 people: the HR owner and one deputy.
 
-See `leave-management-tool/spec.md` for the full decisions log.
+See `specs/001-leave-management-tool/spec.md` for the full decisions log.

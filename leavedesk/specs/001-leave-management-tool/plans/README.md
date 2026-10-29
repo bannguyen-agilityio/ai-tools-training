@@ -10,6 +10,7 @@ Source of truth: `../intent.md` and `../spec.md` (draft 2026-10-28). No code is 
 
 | # | File | R-numbers | Phase | Depends on |
 |---|---|---|---|---|
+| 00 | `R-platform.md` | platform (no R#): environments, deploy pipeline, migrations on deploy, rollback, job workflows | P1 | gate |
 | 01 | `R-029-R-030.md` | API security baseline, audit log, backend skeleton, core tables | P1 | gate |
 | 02 | `R-031.md` | Frontend shell, UX/a11y standard, SPA serving | P1 | 01 (serving only; can run parallel) |
 | 03 | `R-026-R-035.md` | Email outbox + in-app notifications infrastructure | P1 | 01 |
@@ -39,7 +40,7 @@ Plans are grouped into waves. Everything inside a wave can run in parallel (sepa
 | Wave | Plans (parallel) | Needs | Why this order |
 |---|---|---|---|
 | **0** | C-16/Q5 gate (not a plan) | none | Decides hosting, DB and budget; nothing is built before it passes. |
-| **1** | **01** R29-R30 | gate | Scaffold, core tables, CSRF/headers, audit. Every later plan reuses it. |
+| **1** | **00** platform · **01** R29-R30 | gate | 00: staging/production, deploy, rollback, job workflows. 01: scaffold, core tables, CSRF/headers, audit. Every later plan reuses them. |
 | **2** | **02** R31 · **03** R26-R35 · **05** R5-R7-R8 | 01 | Three independent foundations: UI primitives, notification machinery, balance engine. |
 | **3** | **04** R1-R2-R3 | 01, 02, 03 | Login and invite need UI primitives and the email outbox. Unlocks all authenticated features. |
 | **4** | **06** R6-R11 · **07** R9-R23 | 06: 04 · 07: 04, 05 | Working days/holidays/request tables, and employees/teams/pro-rating. |
@@ -52,10 +53,11 @@ Plans are grouped into waves. Everything inside a wave can run in parallel (sepa
 
 ### Dependency chains
 
-- **Critical path (longest chain):** gate → 01 → {02, 03} → 04 → 06 → 09 → 10 → 13 → {15, 18} → 19. Any slip here moves go-live; assign the strongest capacity to these plans first.
+- **Critical path (longest chain):** gate → {00, 01} → {02, 03} → 04 → 06 → 09 → 10 → 13 → {15, 18} → 19. Any slip here moves go-live; assign the strongest capacity to these plans first.
 - **Auth chain:** 01 → 03 + 02 → 04 → (06, 07).
 - **Balance chain:** 01 → 05 → {07 → 08, 09} → 10.
 - **Request chain:** 10 → {11, 12, 13} → {14, 15, 16, 17, 18} → P2 {20, 21}.
+- **Plan 00 conventions:** plan 19's backup and keep-alive workflows, and the job callers in plans 03 and 05, use plan 00's reusable `job.yml`.
 - **Early-start items inside plan 19:** the backup and keep-alive workflows only need plan 01 and can be built in wave 2 on a branch, but the PR merges last (wave 9) because the perf and restore evidence needs the finished system.
 - **Conformance test (plan 03):** each event-producing plan (10, 12, 13, 14, 15, 16) flips its pending marker; the last one to merge removes the final marker.
 
@@ -63,7 +65,7 @@ Plans are grouped into waves. Everything inside a wave can run in parallel (sepa
 
 | After this merges | These can run at the same time |
 |---|---|
-| 01 | 02, 03, 05 |
+| 00 and 01 | 02, 03, 05 |
 | 04 | 06, 07 |
 | 07 and 06 (each with 05) | 08, 09 |
 | 10 | 11, 12, 13 |
@@ -129,3 +131,6 @@ Plans reference these IDs and say which behaviour they implement *only if* the s
 | A-23 | UI language (English vs Vietnamese) is not stated. | R31 | 02 |
 | A-24 | Dashboard shows several carry-over blocks? Only one carry block per year exists by design; confirm. | R10 | 09 |
 | A-25 | Session cookie `Secure` in local HTTP development; session sliding window behaviour on read-only calls. | R2, R29 | 01, 04 |
+| A-26 | Staging database topology: separate Supabase project vs shared project/schemas (free tier may cap project count). | §2, Q13 | 00 |
+| A-27 | Who holds the production `DATABASE_URL` in GitHub secrets for cron jobs; environment protection and reviewers. | §5.6, §2 | 00 |
+| A-28 | Does FastAPI Cloud/GitHub cron support the needed cadence (outbox drain per minute) or must the drain run in-process? Related: A-1 (layout), A-17 (backup target). | §5.6 | 00, 03 |
