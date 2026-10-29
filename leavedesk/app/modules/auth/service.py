@@ -6,6 +6,7 @@ Audit rows carry the email hash only, never the address, password or a token (sp
 import uuid
 from datetime import UTC, datetime, timedelta
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -73,6 +74,9 @@ async def login(
     settings = get_settings()
     now = _now()
     ehash = ratelimit.email_hash(email)
+    # Serialise attempts per email until commit, so parallel guesses cannot all pass the
+    # lockout check before any failure is recorded.
+    await db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:k, 0))"), {"k": ehash})
 
     if await ratelimit.is_blocked(
         db, email=email, ip=ip, ip_limit=settings.login_ip_limit, now=now

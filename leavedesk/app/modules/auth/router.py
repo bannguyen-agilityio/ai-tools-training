@@ -41,6 +41,7 @@ async def login(body: LoginIn, request: Request, response: Response, db: DB) -> 
         current_token=request.cookies.get(SESSION_COOKIE),
     )
     settings = get_settings()
+    response.headers["Cache-Control"] = "no-store"  # the body carries the CSRF token
     response.set_cookie(
         SESSION_COOKIE,
         token,
@@ -95,5 +96,6 @@ async def change_password(
 
 
 @router.get("/me", response_model=MeOut)
-async def me(user: CurrentUser, request: Request, db: DB) -> MeOut:
+async def me(user: CurrentUser, request: Request, response: Response, db: DB) -> MeOut:
+    response.headers["Cache-Control"] = "no-store"
     return await service.profile(db, user, tokens.session_csrf(_session_token(request)))

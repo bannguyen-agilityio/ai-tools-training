@@ -28,7 +28,7 @@ async def _seed(engine: AsyncEngine, status: str = "pending") -> uuid.UUID:
         await conn.execute(
             text(
                 "INSERT INTO email_outbox (id, to_address, template, subject, body, dedupe_key, "
-                "status) VALUES (:i, 'a@asnet.com.vn', 'invite', 's', 'b', :k, :s)"
+                "status) VALUES (:i, 'a@asnet.com.vn', 'request_approved', 's', 'b', :k, :s)"
             ),
             {"i": oid, "k": str(oid), "s": status},
         )
