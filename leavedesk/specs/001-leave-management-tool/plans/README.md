@@ -8,29 +8,30 @@ Source of truth: `../intent.md` and `../spec.md` (draft 2026-10-28). No code is 
 
 ## Plans in dependency order
 
-| # | File | R-numbers | Phase | Depends on |
-|---|---|---|---|---|
-| 01 | `R-029-R-030.md` | API security baseline, audit log, backend skeleton, core tables | P1 | gate |
-| 02 | `R-031.md` | Frontend shell, UX/a11y standard, SPA serving | P1 | 01 (serving only; can run parallel) |
-| 03 | `R-026-R-035.md` | Email outbox + in-app notifications infrastructure | P1 | 01 |
-| 04 | `R-001-R-002-R-003.md` | Login, account protection, invite/reset | P1 | 01, 02, 03 |
-| 05 | `R-005-R-007-R-008.md` | Leave types, ledger, `compute_balance`, rollover/expiry jobs | P1 | 01 |
-| 06 | `R-006-R-011.md` | Working-day calculation, public holidays, request tables | P1 | 01, 02, 04 |
-| 07 | `R-009-R-023.md` | Employees, teams, loop check, pro-rating | P1 | 04, 05 |
-| 08 | `R-024.md` | Starting balances by hand | P1 | 05, 07 |
-| 09 | `R-010.md` | Balance display and sufficiency check | P1 | 05, 06 |
-| 10 | `R-012-R-013-R-017.md` | Create request, validation/overlap, routing | P1 | 06, 07, 09 |
-| 11 | `R-014-R-015.md` | Notice rules, Sick exemption/backdating, HR-entered leave | P1 | 10 |
-| 12 | `R-016.md` | Employee cancels own Pending | P1 | 10 |
-| 13 | `R-018-R-019-R-022.md` | Approve, reject, unauthorised-approver 403 | P1 | 10 |
-| 14 | `R-020.md` | Cover for an absent manager | P1 | 13 |
-| 15 | `R-021.md` | HR cancels Approved | P1 | 12, 13 |
-| 16 | `R-004.md` | Deactivation | P1 | 07, 12 |
-| 17 | `R-036.md` | Deputy HR admin | P1 | 13 |
-| 18 | `R-025.md` | HR "All leave" list | P1 | 10, 13 |
-| 19 | `R-032-R-033-R-034.md` | Performance, backup/restore, retention | P1 | 01 (finalise after 18) |
-| 20 | `R-027.md` | Team calendar | **P2** | 13, 07 |
-| 21 | `R-028.md` | Monthly report | **P2** | 13, 08, 25 data |
+| # | File | R-numbers | Phase | Depends on | Worktree |
+|---|---|---|---|---|---|
+| 00 | `R-platform.md` | platform (no R#): environments, deploy pipeline, migrations on deploy, rollback, job workflows | P1 | gate | `leavedesk-00-platform-r29-r30` |
+| 01 | `R-029-R-030.md` | API security baseline, audit log, backend skeleton, core tables | P1 | gate | `leavedesk-00-platform-r29-r30` |
+| 02 | `R-031.md` | Frontend shell, UX/a11y standard, SPA serving | P1 | 01 (serving only; can run parallel) | `leavedesk-02-r31` |
+| 03 | `R-026-R-035.md` | Email outbox + in-app notifications infrastructure | P1 | 01 | `leavedesk-03-r26-r35` |
+| 04 | `R-001-R-002-R-003.md` | Login, account protection, invite/reset | P1 | 01, 02, 03 | `leavedesk-04-r1-r2-r3` |
+| 05 | `R-005-R-007-R-008.md` | Leave types, ledger, `compute_balance`, rollover/expiry jobs | P1 | 01 | `leavedesk-05-r5-r7-r8` |
+| 06 | `R-006-R-011.md` | Working-day calculation, public holidays, request tables | P1 | 01, 02, 04 | `leavedesk-06-r6-r11` |
+| 07 | `R-009-R-023.md` | Employees, teams, loop check, pro-rating | P1 | 04, 05 | `leavedesk-07-r9-r23` |
+| 08 | `R-024.md` | Starting balances by hand | P1 | 05, 07 | `leavedesk-08-r24` |
+| 09 | `R-010.md` | Balance display and sufficiency check | P1 | 05, 06 | `leavedesk-09-r10` |
+| 10 | `R-012-R-013-R-017.md` | Create request, validation/overlap, routing | P1 | 06, 07, 09 | `leavedesk-10-r12-r13-r17` |
+| 11 | `R-014-R-015.md` | Notice rules, Sick exemption/backdating, HR-entered leave | P1 | 10 | `leavedesk-11-r14-r15` |
+| 12 | `R-016.md` | Employee cancels own Pending | P1 | 10 | `leavedesk-12-r16` |
+| 13 | `R-018-R-019-R-022.md` | Approve, reject, unauthorised-approver 403 | P1 | 10 | `leavedesk-13-r18-r19-r22` |
+| 14 | `R-020.md` | Cover for an absent manager | P1 | 13 | `leavedesk-14-r20` |
+| 15 | `R-021.md` | HR cancels Approved | P1 | 12, 13 | `leavedesk-15-r21` |
+| 16 | `R-004.md` | Deactivation | P1 | 07, 12 | `leavedesk-16-r4` |
+| 17 | `R-036.md` | Deputy HR admin | P1 | 13 | `leavedesk-17-r36` |
+| 18 | `R-025.md` | HR "All leave" list | P1 | 10, 13 | `leavedesk-18-r25` |
+| 19 | `R-032-R-033-R-034.md` | Performance, backup/restore, retention | P1 | 01 (finalise after 18) | `leavedesk-19-r32-r33-r34` |
+| 20 | `R-027.md` | Team calendar | **P2** | 13, 07 | `leavedesk-20-r27` |
+| 21 | `R-028.md` | Monthly report | **P2** | 13, 08, 25 data | `leavedesk-21-r28` |
 
 ## Recommended execution sequence
 
@@ -39,7 +40,7 @@ Plans are grouped into waves. Everything inside a wave can run in parallel (sepa
 | Wave | Plans (parallel) | Needs | Why this order |
 |---|---|---|---|
 | **0** | C-16/Q5 gate (not a plan) | none | Decides hosting, DB and budget; nothing is built before it passes. |
-| **1** | **01** R29-R30 | gate | Scaffold, core tables, CSRF/headers, audit. Every later plan reuses it. |
+| **1** | **00** platform · **01** R29-R30 | gate | 00: staging/production, deploy, rollback, job workflows. 01: scaffold, core tables, CSRF/headers, audit. Every later plan reuses them. |
 | **2** | **02** R31 · **03** R26-R35 · **05** R5-R7-R8 | 01 | Three independent foundations: UI primitives, notification machinery, balance engine. |
 | **3** | **04** R1-R2-R3 | 01, 02, 03 | Login and invite need UI primitives and the email outbox. Unlocks all authenticated features. |
 | **4** | **06** R6-R11 · **07** R9-R23 | 06: 04 · 07: 04, 05 | Working days/holidays/request tables, and employees/teams/pro-rating. |
@@ -52,10 +53,11 @@ Plans are grouped into waves. Everything inside a wave can run in parallel (sepa
 
 ### Dependency chains
 
-- **Critical path (longest chain):** gate → 01 → {02, 03} → 04 → 06 → 09 → 10 → 13 → {15, 18} → 19. Any slip here moves go-live; assign the strongest capacity to these plans first.
+- **Critical path (longest chain):** gate → {00, 01} → {02, 03} → 04 → 06 → 09 → 10 → 13 → {15, 18} → 19. Any slip here moves go-live; assign the strongest capacity to these plans first.
 - **Auth chain:** 01 → 03 + 02 → 04 → (06, 07).
 - **Balance chain:** 01 → 05 → {07 → 08, 09} → 10.
 - **Request chain:** 10 → {11, 12, 13} → {14, 15, 16, 17, 18} → P2 {20, 21}.
+- **Plan 00 conventions:** plan 19's backup and keep-alive workflows, and the job callers in plans 03 and 05, use plan 00's reusable `job.yml`.
 - **Early-start items inside plan 19:** the backup and keep-alive workflows only need plan 01 and can be built in wave 2 on a branch, but the PR merges last (wave 9) because the perf and restore evidence needs the finished system.
 - **Conformance test (plan 03):** each event-producing plan (10, 12, 13, 14, 15, 16) flips its pending marker; the last one to merge removes the final marker.
 
@@ -63,7 +65,7 @@ Plans are grouped into waves. Everything inside a wave can run in parallel (sepa
 
 | After this merges | These can run at the same time |
 |---|---|
-| 01 | 02, 03, 05 |
+| 00 and 01 | 02, 03, 05 |
 | 04 | 06, 07 |
 | 07 and 06 (each with 05) | 08, 09 |
 | 10 | 11, 12, 13 |
@@ -129,3 +131,6 @@ Plans reference these IDs and say which behaviour they implement *only if* the s
 | A-23 | UI language (English vs Vietnamese) is not stated. | R31 | 02 |
 | A-24 | Dashboard shows several carry-over blocks? Only one carry block per year exists by design; confirm. | R10 | 09 |
 | A-25 | Session cookie `Secure` in local HTTP development; session sliding window behaviour on read-only calls. | R2, R29 | 01, 04 |
+| A-26 | Staging database topology: separate Supabase project vs shared project/schemas (free tier may cap project count). | §2, Q13 | 00 |
+| A-27 | Who holds the production `DATABASE_URL` in GitHub secrets for cron jobs; environment protection and reviewers. | §5.6, §2 | 00 |
+| A-28 | Does FastAPI Cloud/GitHub cron support the needed cadence (outbox drain per minute) or must the drain run in-process? Related: A-1 (layout), A-17 (backup target). | §5.6 | 00, 03 |
