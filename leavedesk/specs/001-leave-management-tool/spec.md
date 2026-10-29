@@ -292,6 +292,7 @@ For one employee, leave type and `leave_year`:
 - **Consumption order:** days are taken from the carried block first (while it is unexpired on the leave date), then from entitlement (R7).
 - **Available** = entitlement + carried (unexpired) − used − reserved (R10). Unpaid has no balance and is never blocked.
 - One pure function `compute_balance(entries, days, today)` implements all of this and is the only place the rules live (tests: §10). The balance is therefore correct even if the nightly expiry job lags, because expiry is also computed from `expires_on`.
+- **Unused for rollover (A-7)** = entitlement entries of the year minus the days taken from entitlement (carried days are consumed first and never count), with **Pending reservations counted as taken** and a floor of 0. Carry = `min(6, unused)`, so a carried block can never be carried again (R7). `expiry` entries are a record only: `compute_balance` ignores them and derives expiry from `expires_on`. **[Assumption: a Pending request that is later rejected does not restore days to a rollover already written; HR adds an `adjustment`.]**
 - **Refund** (R21) is just the status change `approved → cancelled` with `is_active = false`; no ledger row is needed, and a second cancel cannot refund again because the guarded update (below) matches no row.
 
 ### 5.5 Key transactions

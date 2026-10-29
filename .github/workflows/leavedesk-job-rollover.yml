@@ -1,0 +1,30 @@
+name: leavedesk-job-rollover
+
+on:
+  schedule:
+    - cron: "5 17 31 12 *" # 00:05 on 1 Jan, Asia/Ho_Chi_Minh (UTC+7)
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Leave year to roll into (default: current year)
+        required: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: leavedesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run python -m app.jobs.rollover ${{ inputs.year }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENVIRONMENT: production
+          APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
+          SET_ROLE_ON_CONNECT: "true"
+          EMAIL_BACKEND: sendgrid
+          COOKIE_SECURE: "true"
+          COMPANY_TZ: Asia/Ho_Chi_Minh
