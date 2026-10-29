@@ -1,0 +1,28 @@
+name: leavedesk-job-purge
+
+# Deletes expired sessions, used or expired one-time tokens and login attempts older than 30 days.
+# Idempotent (spec 5.6, R2, R3).
+on:
+  schedule:
+    - cron: "30 17 * * *" # 00:30 daily, Asia/Ho_Chi_Minh (UTC+7)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: leavedesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run python -m app.jobs.purge
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENVIRONMENT: production
+          APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
+          SET_ROLE_ON_CONNECT: "true"
+          EMAIL_BACKEND: sendgrid
+          COOKIE_SECURE: "true"
+          COMPANY_TZ: Asia/Ho_Chi_Minh

@@ -96,7 +96,10 @@ async def app_engine() -> AsyncIterator[AsyncEngine]:
 async def clean_db(owner_engine: AsyncEngine) -> None:
     async with owner_engine.connect() as conn:
         await conn.execute(
-            text("TRUNCATE email_outbox, notification, audit_log, session, team, employee CASCADE")
+            text(
+                "TRUNCATE email_outbox, notification, audit_log, session, login_attempt, "
+                "one_time_token, user_identity, team, employee CASCADE"
+            )
         )
 
 

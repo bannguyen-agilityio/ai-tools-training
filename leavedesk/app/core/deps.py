@@ -8,6 +8,10 @@ is protected by default and a public one must be added deliberately (R29a).
 PUBLIC_PATHS: frozenset[str] = frozenset(
     {
         "/healthz",
-        # Added by the identity plan: login, invite accept, password reset.
+        # R1-R3: sign-in, invite accept, password reset.
+        "/api/v1/auth/login",
+        "/api/v1/auth/invite/accept",
+        "/api/v1/auth/reset/request",
+        "/api/v1/auth/reset/confirm",
     }
 )

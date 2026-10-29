@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     # Session policy (R2): sliding idle window capped by an absolute maximum.
     session_idle_hours: int = 8
     session_max_hours: int = 24
+    # A-6 [Assumption]: failed sign-ins allowed per IP in 15 minutes. Higher than the per-email
+    # limit so the office NAT is not locked out by a few typos.
+    login_ip_limit: int = 30
+    # Header set by the trusted proxy with the client address (e.g. X-Forwarded-For); the
+    # right-most entry is used. Unset: the socket peer address. Set it only behind a proxy.
+    client_ip_header: str | None = None
 
     @model_validator(mode="after")
     def _no_mock_email_in_production(self) -> Settings:

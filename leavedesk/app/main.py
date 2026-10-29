@@ -15,6 +15,7 @@ from app.core.logging import configure_logging
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.jobs.drain_outbox import run_forever
 from app.modules.audit.router import router as audit_router
+from app.modules.auth.router import router as auth_router
 from app.modules.email.router import router as email_router
 from app.modules.notifications.router import router as notifications_router
 from app.spa import mount_spa
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
             raise ProblemError(503, "Database unavailable") from exc
         return {"status": "ok"}
 
+    app.include_router(auth_router)
     app.include_router(audit_router)
     app.include_router(email_router)
     app.include_router(notifications_router)

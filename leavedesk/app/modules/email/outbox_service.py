@@ -22,6 +22,7 @@ BACKOFF = (
     timedelta(hours=12),
 )
 MAX_ATTEMPTS = 5
+LINK_TEMPLATES = frozenset({"invite", "password_reset"})
 BATCH = 50
 
 
@@ -53,6 +54,7 @@ async def drain_due(db: AsyncSession, sender: EmailSender, now: datetime | None 
             row.last_error = str(code) if code is not None else type(exc).__name__
             if row.attempts >= MAX_ATTEMPTS:
                 row.status = "failed"
+                _drop_link(row)
                 log.warning("email %s failed after %s attempts", row.id, row.attempts)
             else:
                 row.next_try_at = stamp + BACKOFF[row.attempts - 1]
@@ -60,8 +62,17 @@ async def drain_due(db: AsyncSession, sender: EmailSender, now: datetime | None 
             row.status = "sent"
             row.sent_at = fixed_now or datetime.now(UTC)
             row.last_error = None
+            _drop_link(row)
         await db.commit()
     return attempted
+
+
+def _drop_link(row: EmailOutbox) -> None:
+    """The link in an invite or reset mail is a live credential (R3): keep it only while the
+    mail can still be sent, so neither a delivered nor a dead-lettered row holds it."""
+    if row.template in LINK_TEMPLATES:
+        row.body = "[link removed]"
+        row.payload = {"recipient_name": row.payload.get("recipient_name", "")}
 
 
 async def list_failed(db: AsyncSession) -> list[EmailOutbox]:
@@ -77,6 +88,9 @@ async def retry(db: AsyncSession, *, actor_id: uuid.UUID, outbox_id: uuid.UUID) 
         raise ProblemError(404, "Email not found")
     if row.status != "failed":
         raise ProblemError(409, "Only failed emails can be retried")
+    if row.template in LINK_TEMPLATES:
+        # The link was removed when the mail failed; a new invite or reset issues a fresh one.
+        raise ProblemError(409, "Send a new invite or reset instead of retrying this email")
     row.status = "pending"
     row.attempts = 0
     row.next_try_at = datetime.now(UTC)
