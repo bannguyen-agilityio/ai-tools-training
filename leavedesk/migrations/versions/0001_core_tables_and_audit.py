@@ -8,12 +8,16 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql as pg
 
+from app.core.config import get_settings
+
 revision = "0001"
 down_revision = None
 branch_labels = None
 depends_on = None
 
-APP_ROLE = "leavedesk_app"
+APP_ROLE = get_settings().app_db_role
+if not APP_ROLE.isidentifier():
+    raise ValueError("APP_DB_ROLE is not a valid role name")
 TABLES = ("team", "employee", "session", "audit_log")
 UUID_DEFAULT = sa.text("gen_random_uuid()")
 NOW = sa.text("now()")

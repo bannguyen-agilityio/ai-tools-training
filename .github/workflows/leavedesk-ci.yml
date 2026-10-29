@@ -36,7 +36,9 @@ jobs:
       - run: uv run pytest -q
       - name: Migration applies and rolls back
         env:
-          MIGRATION_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/leavedesk_test
+          # Same env file the tests use; DATABASE_URL points at the CI service.
+          ENV_FILE: tests/test.env
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
         run: |
           uv run alembic upgrade head
           uv run alembic downgrade base

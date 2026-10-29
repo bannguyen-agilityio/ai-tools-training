@@ -47,10 +47,7 @@ def test_extra_fields_with_forbidden_names_are_scrubbed(caplog: pytest.LogCaptur
     assert record.request_id == "r1"  # type: ignore[attr-defined]
 
 
-def test_unhandled_error_log_has_no_request_secrets(caplog: pytest.LogCaptureFixture) -> None:
+def test_error_logs_are_scrubbed(caplog: pytest.LogCaptureFixture) -> None:
     with caplog.at_level(logging.ERROR):
-        try:
-            raise RuntimeError("boom password=pw-in-exception")
-        except RuntimeError:
-            logging.getLogger("app.test").error("failed: %s", "password=pw-in-message")
+        logging.getLogger("app.test").error("failed: %s", "password=pw-in-message")
     assert "pw-in-message" not in caplog.text

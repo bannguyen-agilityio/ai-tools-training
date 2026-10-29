@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import FORBIDDEN_KEYS
 from app.modules.audit import repository
@@ -52,8 +52,8 @@ def validate_detail(detail: dict[str, Any]) -> None:
     _check(detail, "")
 
 
-def record(
-    db: Session,
+async def record(
+    db: AsyncSession,
     *,
     actor_id: uuid.UUID | None,
     action: str,
@@ -75,4 +75,4 @@ def record(
         detail=detail,
         ip=ip,
     )
-    return repository.add(db, entry)
+    return await repository.add(db, entry)

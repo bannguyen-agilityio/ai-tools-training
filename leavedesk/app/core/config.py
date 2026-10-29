@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Literal
 
@@ -6,21 +7,32 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    """All deployment configuration comes from environment variables or the .env file.
 
-    environment: Literal["dev", "test", "staging", "production"] = "dev"
-    database_url: str = "postgresql+psycopg://leavedesk@localhost:5432/leavedesk"
-    # Role the app connects as. When set, each connection runs SET ROLE so a
-    # superuser URL (local/CI) still exercises the restricted grants.
-    database_role: str | None = None
-    company_tz: str = "Asia/Ho_Chi_Minh"
-    email_backend: Literal["mock", "sendgrid"] = "sendgrid"
+    There are deliberately no defaults for deployment values: a missing variable fails
+    at startup instead of silently running with a guess. The file read is chosen by
+    ENV_FILE (default ".env"); real environment variables win over the file.
+    """
+
+    model_config = SettingsConfigDict(env_file=os.environ.get("ENV_FILE", ".env"), extra="ignore")
+
+    environment: Literal["dev", "test", "staging", "production"]
+    # Async SQLAlchemy URL, e.g. postgresql+psycopg://user:pass@host:port/db
+    database_url: str
+    # Role the app runs as; migrations grant it table privileges.
+    app_db_role: str
+    # Local/CI with an owner URL: start each connection as app_db_role so the
+    # restricted grants are exercised. Leave false when the URL logs in as that role.
+    set_role_on_connect: bool = False
+    company_tz: str
+    email_backend: Literal["mock", "sendgrid"]
+    # A-25: cookie Secure is on everywhere except plain-HTTP local dev.
+    cookie_secure: bool
+    # Extra origins allowed on state-changing calls (same site is always allowed).
+    allowed_origins: list[str] = []
+    # Session policy (R2): sliding idle window capped by an absolute maximum.
     session_idle_hours: int = 8
     session_max_hours: int = 24
-    # A-25: cookie Secure is on everywhere except plain-HTTP local dev.
-    cookie_secure: bool = True
-    # Extra origins allowed on state-changing calls (same origin is always allowed).
-    allowed_origins: list[str] = []
 
     @model_validator(mode="after")
     def _no_mock_email_in_production(self) -> "Settings":
@@ -31,4 +43,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()  # pyright: ignore[reportCallIssue]  # values come from the environment

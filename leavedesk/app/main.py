@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from sqlalchemy import text
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.csrf import OriginCheckMiddleware
@@ -28,9 +28,9 @@ def create_app() -> FastAPI:
     app.add_middleware(SecurityHeadersMiddleware)
 
     @app.get("/healthz")
-    def healthz(db: Annotated[Session, Depends(get_db)]) -> dict[str, str]:
+    async def healthz(db: Annotated[AsyncSession, Depends(get_db)]) -> dict[str, str]:
         try:
-            db.execute(text("SELECT 1"))
+            await db.execute(text("SELECT 1"))
         except Exception as exc:
             raise ProblemError(503, "Database unavailable") from exc
         return {"status": "ok"}

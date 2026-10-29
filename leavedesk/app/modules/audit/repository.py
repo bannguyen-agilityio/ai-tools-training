@@ -1,14 +1,15 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.audit.models import AuditLog
 
 
-def add(db: Session, entry: AuditLog) -> AuditLog:
+async def add(db: AsyncSession, entry: AuditLog) -> AuditLog:
     db.add(entry)
-    db.flush()
+    await db.flush()
     return entry
 
 
-def list_recent(db: Session, limit: int) -> list[AuditLog]:
-    return list(db.scalars(select(AuditLog).order_by(AuditLog.at.desc()).limit(limit)))
+async def list_recent(db: AsyncSession, limit: int) -> list[AuditLog]:
+    result = await db.scalars(select(AuditLog).order_by(AuditLog.at.desc()).limit(limit))
+    return list(result)

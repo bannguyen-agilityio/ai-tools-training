@@ -1,7 +1,13 @@
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
+from typing import Any
 
-from sqlalchemy import Engine, create_engine, event
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import get_settings
 
@@ -10,38 +16,34 @@ class Base(DeclarativeBase):
     pass
 
 
-def make_engine(url: str | None = None, role: str | None = None) -> Engine:
+def make_engine(
+    url: str | None = None, *, set_role: bool | None = None, **engine_kwargs: Any
+) -> AsyncEngine:
     settings = get_settings()
     # Pooled (pgbouncer) URLs do not support server-side prepared statements.
-    engine = create_engine(
+    connect_args: dict[str, Any] = {"prepare_threshold": None}
+    if settings.set_role_on_connect if set_role is None else set_role:
+        if not settings.app_db_role.isidentifier():
+            raise ValueError("APP_DB_ROLE is not a valid role name")
+        connect_args["options"] = f"-c role={settings.app_db_role}"
+    return create_async_engine(
         url or settings.database_url,
         pool_pre_ping=True,
-        connect_args={"prepare_threshold": None},
+        connect_args=connect_args,
+        **engine_kwargs,
     )
-    role = role if role is not None else settings.database_role
-    if role:
-        if not role.isidentifier():
-            raise ValueError("invalid database role name")
-
-        @event.listens_for(engine, "connect")
-        def _set_role(dbapi_conn, _record):  # type: ignore[no-untyped-def]
-            with dbapi_conn.cursor() as cur:
-                cur.execute(f'SET ROLE "{role}"')
-            dbapi_conn.commit()
-
-    return engine
 
 
-_session_factory: sessionmaker[Session] | None = None
+_session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
-def get_session_factory() -> sessionmaker[Session]:
+def get_session_factory() -> async_sessionmaker[AsyncSession]:
     global _session_factory
     if _session_factory is None:
-        _session_factory = sessionmaker(make_engine(), expire_on_commit=False)
+        _session_factory = async_sessionmaker(make_engine(), expire_on_commit=False)
     return _session_factory
 
 
-def get_db() -> Iterator[Session]:
-    with get_session_factory()() as session:
+async def get_db() -> AsyncIterator[AsyncSession]:
+    async with get_session_factory()() as session:
         yield session
