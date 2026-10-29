@@ -19,6 +19,7 @@ dev = [
     "httpx>=0.27",
     "ruff>=0.8",
     "mypy>=1.11",
+    "pyright>=1.1.380",
     "pgserver>=0.1.4",
 ]
 
@@ -44,3 +45,10 @@ module = "tests.*"
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 warn_unused_ignores = false
+
+[tool.pyright]
+pythonVersion = "3.12"
+include = ["app", "tests"]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "basic"
