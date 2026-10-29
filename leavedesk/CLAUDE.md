@@ -19,7 +19,7 @@ LeaveDesk: internal leave management tool for ~250 staff (16 managers, 2 HR). Re
 
 ## Stack
 
-- Backend: Python 3.12, FastAPI, SQLAlchemy 2, Alembic, vertical modules (router, service, repository, models, schemas, dependencies). Use the `add-endpoint` skill for new endpoints.
+- Backend: Python 3.14, FastAPI, SQLAlchemy 2, Alembic, vertical modules (router, service, repository, models, schemas, dependencies). Use the `add-endpoint` skill for new endpoints.
 - DB: PostgreSQL on Supabase (free tier, Singapore) as hosted Postgres only. Not Supabase Auth or its REST/GraphQL. RLS enabled with **no policies** on every table; a test must prove the anon key reads nothing.
 - Frontend: React 18 + TypeScript + Vite, React Router, TanStack Query, React Hook Form + Zod, mobile-first CSS. Build output served by FastAPI at `/`; API at `/api/v1`, same origin (no CORS).
 - Auth: in-app email + password (Argon2id via `argon2-cffi`, tokens via `secrets`, no custom crypto). Hashed session token in an `HttpOnly; Secure; SameSite=Lax` cookie, `X-CSRF-Token` header + `Origin` check on state-changing calls. `user_identity` table keeps provider separate for future SSO.
