@@ -1,65 +1,74 @@
 # CLAUDE.md
 
-LeaveDesk: internal leave management tool for ~250 staff (16 managers, 2 HR). Replaces Excel + email requests. No application code exists yet; the spec is the source of truth.
+LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity. Not built: requests, approvals, balances, holidays, notifications, jobs, `EmailSender`, frontend.
 
-## Source documents
+## Sources
 
-- `specs/001-leave-management-tool/intent.md`: problem, scope, constraints.
-- `specs/001-leave-management-tool/spec.md`: requirements (R1–R36), data model (§5), API (§6), screens (§7), privacy matrix (§8), concerns (C-1–C-18), decisions log (§13). Read the relevant section before building; cite R#/C-# in commits and PRs.
-- `specs/001-leave-management-tool/mocks/`: UI mocks.
-- **Do not read `ref/`.** It is training material only and contains stale figures. Never open, search or cite files under it; the intent and spec are the only sources.
-- If code and spec disagree, fix the spec in the same change. Anything not in the intent is marked **[Assumption]** in the spec.
+- `specs/001-leave-management-tool/`: `intent.md` (scope, constraints), `spec.md` (R1–R36, data model §5, API §6, screens §7, privacy §8, concerns C-1–C-18, decisions §13), `plans/` (per R-number), `mocks/`. Read the relevant section before building; cite R#/C-# in commits and PRs.
+- `docs/runbooks/` (deploy, secrets); `.env.example` lists every variable.
+- **Do not read `ref/`** (stale training material). Never open, search or cite it.
+- If code and spec disagree, fix the spec in the same change. Non-intent items are marked **[Assumption]**.
+- Known drift: `app/core/errors.py` returns `problem+json`; spec §6.1 requires the error envelope below. Fix the code. Spec §2 says Python 3.12; it is 3.14.
 
 ## Phases
 
-- **P1 (go-live 1 Nov 2026):** auth, requests, approvals, HR admin, balances, holidays, audit, email + in-app notifications, HR "All leave" list.
-- **P2 (Mon 16 Nov 2026):** team calendar (R27) and monthly report (R28).
+- **P1 (1 Nov 2026):** auth, requests, approvals, HR admin, balances, holidays, audit, email + in-app notifications, HR "All leave" list.
+- **P2 (16 Nov 2026):** team calendar (R27), monthly report (R28).
 - Never cut authorization, audit or tests to hit the date.
-- Out of scope: Google SSO (first post-launch item), Slack/Teams, history import, balance CSV import, other leave types, non-Vietnamese holidays, Saturday/shift patterns.
+- Out of scope: Google SSO (first post-launch), Slack/Teams, history/balance CSV import, other leave types, non-Vietnamese holidays, Saturday/shift patterns.
 
-## Stack
+## Stack and commands
 
-- Backend: Python 3.14, FastAPI, SQLAlchemy 2, Alembic, vertical modules (router, service, repository, models, schemas, dependencies). Use the `add-endpoint` skill for new endpoints.
-- DB: PostgreSQL on Supabase (free tier, Singapore) as hosted Postgres only. Not Supabase Auth or its REST/GraphQL. RLS enabled with **no policies** on every table; a test must prove the anon key reads nothing.
-- Frontend: React 18 + TypeScript + Vite, React Router, TanStack Query, React Hook Form + Zod, mobile-first CSS. Build output served by FastAPI at `/`; API at `/api/v1`, same origin (no CORS).
-- Auth: in-app email + password (Argon2id via `argon2-cffi`, tokens via `secrets`, no custom crypto). Hashed session token in an `HttpOnly; Secure; SameSite=Lax` cookie, `X-CSRF-Token` header + `Origin` check on state-changing calls. `user_identity` table keeps provider separate for future SSO.
-- Email: SendGrid behind an `EmailSender` interface; `EMAIL_BACKEND=mock` for dev/tests only (app refuses to start with mock in production). Outbox pattern with retry.
-- Hosting: FastAPI Cloud (one service, `fastapi deploy`), budget ≤ $5/month. Build is gated on the hello-world deploy + cost check (C-16, Q5).
-- Jobs: CLI commands `python -m app.jobs.<name>` run from scheduled CI; all idempotent.
-- Tests/lint: pytest, httpx, ruff, mypy; Vitest, React Testing Library, eslint, `tsc --noEmit`; Playwright against staging.
+- Backend: Python 3.14, FastAPI, async SQLAlchemy 2 (psycopg), Alembic, `uv`. Vertical modules in `app/modules/<name>/` (router, service, repository, models, schemas, dependencies); shared code in `app/core/`. Use the `add-endpoint` skill. Routers use prefix `/api/v1/...` and are included in `create_app()`.
+- DB: Supabase Postgres as hosted Postgres only (no Supabase Auth/REST). RLS on with **no policies** on every table; a test must prove the anon key reads nothing. Migrations run as owner; the app runs as `APP_DB_ROLE` (no UPDATE/DELETE on append-only tables). Alembic keeps a single head.
+- Frontend: React 18, TypeScript, Vite, React Router, TanStack Query, React Hook Form + Zod. Served by FastAPI at `/`, API at `/api/v1`, same origin.
+- Auth: email + password (Argon2id via `argon2-cffi`, `secrets`, no custom crypto). Hashed session token in an `HttpOnly; Secure; SameSite=Lax` cookie; `X-CSRF-Token` + `Origin` check on state-changing calls. `user_identity` keeps provider separate for SSO.
+- Email: SendGrid behind `EmailSender`; `EMAIL_BACKEND=mock` dev/tests only (app refuses it in production). Outbox with retry.
+- Hosting: FastAPI Cloud, ≤ $5/month; build gated on hello-world deploy + cost check (C-16, Q5). Config is env-only (`pydantic-settings`); secrets never committed. `/docs` only when `ENVIRONMENT=dev`.
+- Jobs: idempotent `python -m app.jobs.<name>` from scheduled CI.
 
-## Business rules to get right
+```bash
+uv sync && uv run alembic upgrade head
+uv run fastapi dev
+uv run pytest        # needs TEST_DATABASE_URL (owner Postgres; docs/runbooks/secrets.md §4)
+uv run ruff check . && uv run ruff format --check . && uv run mypy . && uv run pyright
+uv run python scripts/check_single_head.py
+```
 
-- Leave year Jan–Dec in `COMPANY_TZ` (`Asia/Ho_Chi_Minh`). "Today", notice, year boundary and holidays all use it.
-- Annual 12 days/yr; carry-over max 6 of the current year's unused days, expires 31 Dec of the following year, never re-carried, consumed first. Sick 7 paid days, no carry-over, may be entered up to 7 days back (older: HR only). Unpaid: unlimited, no balance.
-- Working days = Mon–Fri minus Vietnamese public holidays (HR-editable). Half days count 0.5. A request spanning two years deducts per year.
+Frontend checks: Vitest, React Testing Library, eslint, `tsc --noEmit`; Playwright against staging. Tests mirror the source tree under `tests/`.
+
+## Business rules
+
+- Leave year Jan–Dec in `COMPANY_TZ` (`Asia/Ho_Chi_Minh`); "today", notice, year boundary and holidays use it.
+- Annual 12 days/yr; carry-over max 6 unused, expires 31 Dec of the next year, never re-carried, consumed first. Sick 7 paid days, no carry-over, entered up to 7 days back (older: HR only). Unpaid: no balance.
+- Working days = Mon–Fri minus Vietnamese public holidays (HR-editable). Half day = 0.5. Requests spanning two years deduct per year.
 - Pending requests reserve days: Available = entitlement + carried − used − reserved.
-- Notice: single-day Annual/Unpaid needs 1 day (hard block). More than 5 working days: 1 week, warning only. Sick exempt.
-- Routing: employee → direct manager; manager → HR; HR → deputy. Nobody approves their own request. Rejection needs a 1–500 char reason. Cover-for-absent-manager only via the "On behalf of" tab, audited, direct manager emailed.
+- Notice: single-day Annual/Unpaid needs 1 day (hard block); >5 working days needs 1 week (warning). Sick exempt.
+- Routing: employee → manager; manager → HR; HR → deputy. Never approve your own. Rejection needs a 1–500 char reason. Cover for an absent manager only via "On behalf of", audited, direct manager emailed.
 - Cancel: employee while Pending; only HR once Approved (refund exactly once).
-- New joiners pro-rated by remaining months (start on day 1–15 counts that month), Annual and Sick, nearest 0.5 day.
+- New joiners pro-rated by remaining months (start day 1–15 counts that month), Annual and Sick, nearest 0.5.
 - Holiday edits never rewrite `working_days`; HR sees impacted requests and adjusts via ledger.
 
 ## Architecture rules
 
-- Balances are **derived**, never stored: one pure function `compute_balance(entries, days, today)` holds all balance rules.
-- `balance_entry` and `audit_log` are append-only (no UPDATE/DELETE for the app role). Corrections are new adjustment entries with a reason.
-- `leave_request_day` stores one row per working half day; a partial unique index on `(employee_id, leave_date, slot) WHERE is_active` prevents overlap under concurrency.
-- Optimistic locking: `approve`/`reject`/`cancel` carry `version`; stale → `409`. Submit locks the employee row (`FOR UPDATE`).
-- Authorization is checked in the service layer on every request; hiding a button is not access control. Every endpoint needs a 401/403 test per role.
-- All request bodies use strict schemas (unknown fields refused); parameterised queries only; errors use the `{ "error": { code, message, details[] } }` envelope (spec §6.1); `error.stack` only when `ENVIRONMENT` is not `production`, never in production.
-- Day quantities are `numeric(4,1)` in 0.5 steps; ids are uuid; timestamps `timestamptz` UTC.
+- Balances are **derived**: one pure `compute_balance(entries, days, today)` holds all balance rules.
+- `balance_entry` and `audit_log` are append-only; corrections are new adjustment entries with a reason.
+- `leave_request_day`: one row per working half day; partial unique index `(employee_id, leave_date, slot) WHERE is_active` prevents overlap.
+- `approve`/`reject`/`cancel` carry `version`; stale → `409`. Submit locks the employee row (`FOR UPDATE`).
+- Authorize in the service layer on every request. Every endpoint needs a 401/403 test per role.
+- Strict request schemas (`StrictModel`, unknown fields refused); parameterised queries only.
+- Errors: `{ "error": { code, message, details[] } }` (spec §6.1); `error.stack` only when `ENVIRONMENT` is not `production`.
+- Quantities `numeric(4,1)` in 0.5 steps; uuid ids; `timestamptz` UTC.
 
-## Privacy rules (non-negotiable)
+## Privacy (non-negotiable)
 
-- Redact on the **server**, not in the UI. Sick leave type is visible only to the owner, the deciding/covering approver while deciding, and HR. Everyone else sees "Off", identical for Pending and Approved.
-- Emails, in-app notifications, audit/app logs and exports never contain the Sick type, notes, rejection reasons (except to the employee), passwords or tokens.
+- Redact on the **server**. Sick type is visible only to the owner, the deciding/covering approver while deciding, and HR; everyone else sees "Off", identical for Pending and Approved.
+- Emails, notifications, audit/app logs and exports never contain Sick type, notes, rejection reasons (except to the employee), passwords or tokens.
 - Report/export: HR-only, audited, formula-escaped (`= + - @ tab`), marked confidential.
 - Managers cannot see their reports' balances.
 
 ## Conventions
 
-- Auth, authorization and balance tests are written first. Run `security-review` on the auth module before go-live.
-- Dates shown unambiguously (e.g. "Mon 2 Nov 2026"). UI must pass R31: 360 px wide, 44 px touch targets, WCAG 2.1 AA, labelled fields, focus on first error, destructive actions confirm with default focus on "Keep".
-- Secrets live in platform environment variables, never committed.
-- Git: branch off `main`; commit messages in conventional style (`docs:`, `feat:`, `refactor:`).
+- Write auth, authorization and balance tests first. Run `security-review` on auth before go-live.
+- Dates unambiguous ("Mon 2 Nov 2026"). UI passes R31: 360 px, 44 px targets, WCAG 2.1 AA, labelled fields, focus on first error, destructive confirms default to "Keep".
+- Git: branch off `main`; conventional commits (`docs:`, `feat:`, `refactor:`).
