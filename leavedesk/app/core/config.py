@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     session_max_hours: int = 24
 
     @model_validator(mode="after")
-    def _no_mock_email_in_production(self) -> "Settings":
+    def _no_mock_email_in_production(self) -> Settings:
         if self.environment == "production" and self.email_backend == "mock":
             raise ValueError("EMAIL_BACKEND=mock is not allowed in production")
         return self

@@ -67,7 +67,12 @@ Copy `.env.example` to `.env`, fill in every required value. Use `ENV_FILE=<path
 
 ## 4. Tests
 
-`tests/test.env` holds the non-secret test settings. The database URL comes from `TEST_DATABASE_URL` (an owner URL, e.g. the CI Postgres service) or, if unset, from a throwaway local Postgres started with `pgserver`.
+`tests/test.env` holds the non-secret test settings. The database URL comes from `TEST_DATABASE_URL` (an owner URL, e.g. the CI Postgres service) and is required. Locally, start a throwaway Postgres:
+
+```
+docker run --rm -d --name leavedesk-pg -e POSTGRES_PASSWORD=test -p 5434:5432 postgres:16
+export TEST_DATABASE_URL=postgresql+psycopg://postgres:test@localhost:5434/postgres
+```
 
 ## 5. First-time database setup (each environment)
 

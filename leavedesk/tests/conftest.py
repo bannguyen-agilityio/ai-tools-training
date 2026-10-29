@@ -2,16 +2,14 @@
 
 Configuration is read like production: from environment variables and an env file
 (tests/test.env, chosen via ENV_FILE). The database URL comes from TEST_DATABASE_URL
-(an owner/superuser URL, e.g. the CI Postgres service) or, when unset, from a throwaway
-local Postgres started with pgserver. Migrations run as the owner; the app under test
+(an owner/superuser URL, e.g. the CI Postgres service or a local Docker Postgres).
+Migrations run as the owner; the app under test
 connects with `-c role=<APP_DB_ROLE>`, so the restricted grants are real.
 """
 
 import asyncio
-import logging
 import os
 import secrets
-import tempfile
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
@@ -21,19 +19,17 @@ from typing import Annotated
 
 import pytest
 
-logging.raiseExceptions = False  # pgserver logs to a closed stream at interpreter exit
-
 os.environ.setdefault("ENV_FILE", str(Path(__file__).parent / "test.env"))
 
 
 def _owner_url() -> str:
     url = os.environ.get("TEST_DATABASE_URL")
-    if url:
-        return url
-    from pgserver import get_server  # type: ignore[attr-defined]
-
-    server = get_server(tempfile.mkdtemp(prefix="leavedesk-pg-"))
-    return server.get_uri().replace("postgresql://", "postgresql+psycopg://", 1)
+    if not url:
+        pytest.exit(
+            "TEST_DATABASE_URL is not set; see docs/runbooks/secrets.md section 4.",
+            returncode=2,
+        )
+    return url
 
 
 OWNER_URL = _owner_url()
