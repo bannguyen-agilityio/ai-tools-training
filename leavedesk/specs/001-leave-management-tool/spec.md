@@ -1,6 +1,6 @@
 # Spec: LeaveDesk, internal leave management tool
 
-Source of truth: `intent/leave-management-tool.md`. Status: **Draft for review**. Date: 2026-10-28. Go-live: 2026-11-01.
+Source of truth: `specs/001-leave-management-tool/intent.md`. Status: **Draft for review**. Date: 2026-10-28. Go-live: 2026-11-01.
 
 ## 0. How this spec was produced
 

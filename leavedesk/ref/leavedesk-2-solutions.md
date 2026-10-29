@@ -181,7 +181,7 @@ Login · Dashboard (balances + my requests) · New Request · Approvals · Team 
 - Balance changes only inside balanceService, in a transaction.
 ## Architecture
 - apps/web (React), apps/api (Express), prisma/, e2e/.
-- intent/ holds intent.md, spec.md, plan-*.md per change. PRs cite R-numbers.
+- specs/NNN-name/ holds intent.md, spec.md and plans/ (00-index.md plus one NN-name.md per change). PRs cite R-numbers.
 ## Verifying your work
 Run lint, typecheck and test before reporting any task complete, and paste the output.
 If a test fails, fix the code, not the test.
@@ -189,7 +189,7 @@ If a test fails, fix the code, not the test.
 - Never log the request body in the API; it contains the leave reason.
 ```
 
-### Reference plan (`plan-R2-R4.md`)
+### Reference plan (`plans/02-auth.md` style; here covering R2 and R4)
 ```markdown
 # Plan: R2 submit request + R4 balance (from intent.md, spec.md)
 ## Files that change

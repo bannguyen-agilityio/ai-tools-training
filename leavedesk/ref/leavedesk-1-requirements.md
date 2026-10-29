@@ -61,7 +61,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 ### Stage 1 — Plan → `intent.md`
 **Hat:** Product owner (Sarah)
 
-1. Create `intent/leave-requests/` on a new branch.
+1. Create `specs/NNN-<name>/` (e.g. `specs/001-leave-management-tool/`) on a new branch.
 2. Start Claude and run:
    ```
    I'm the HR manager at a 250-person company. Here's my problem: <paste Sarah's message>.
@@ -69,7 +69,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
    one question at a time, until the idea is concrete.
    ```
 3. Answer from Part B.
-4. Ask Claude to write `intent/leave-management-tool/intent.md` with these sections: Problem, Proposed outcome, Affected users and systems, Constraints, Success measures, Out of scope, Open questions. Keep it under one page.
+4. Ask Claude to write `specs/001-leave-management-tool/intent.md` with these sections: Problem, Proposed outcome, Affected users and systems, Constraints, Success measures, Out of scope, Open questions. Keep it under one page.
 5. Correct anything Claude got wrong, then commit, open a PR, and merge. **Merging means the intent is accepted.**
 6. *(Optional)* Save the intent template as a skill: `.claude/skills/intent-template/SKILL.md`.
 
@@ -87,7 +87,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
       Prompt:
       ```
       Do not read or reference any files under @ref/.
-      Use @intent/leave-management-tool/intent.md as the source of truth for this task.
+      Use @specs/001-leave-management-tool/intent.md as the source of truth for this task.
 
       Before creating `spec.md`, analyze the intent document and suggest a set of reusable skills that will help maintain consistency between the requirements and the specification I will define later.
 
@@ -118,17 +118,17 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
    - `ux-standard`: mobile, accessibility, form errors, date format, destructive actions
 2. **Run the design session** in Claude Code:
    ```
-   Read intent/leave-management-tool/intent.md and produce a requirements and design spec.
+   Read specs/001-leave-management-tool/intent.md and produce a requirements and design spec.
    Apply the skills available to you so the spec conforms to our security, privacy and UX standards.
    Number every requirement (R1, R2, …) with Given/When/Then acceptance criteria.
-   Include: tech stack, data model, API list, screens, how each intent constraint is met, open questions carried forward, and an "Areas of concern" section — especially where policies contradict each other. Save as intent/leave-management-tool/spec.md.
+   Include: tech stack, data model, API list, screens, how each intent constraint is met, open questions carried forward, and an "Areas of concern" section — especially where policies contradict each other. Save as specs/001-leave-management-tool/spec.md.
    ```
 3. **Review the spec** against the intent:
    - Does it solve the problem?
    - Is every open question answered or carried forward?
    - Is every rule in Part B covered by an acceptance criterion?
 4. **Resolve every area of concern** and write each decision into the spec.
-5. *(Optional)* Have Claude mock up 4 screens (Dashboard, New Request, Approvals, Calendar) and save them in `intent/leave-management-tool/mocks/`.
+5. *(Optional)* Have Claude mock up 4 screens (Dashboard, New Request, Approvals, Calendar) and save them in `specs/001-leave-management-tool/mocks/`.
 6. Commit `spec.md` in a PR and merge it. **Merging means you've decided to build.**
 
 **Deliverable:** 3 skills + `spec.md` merged.
@@ -144,11 +144,11 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
    **Rule:** when Claude makes the same mistake twice, the correction goes into `CLAUDE.md`.
 2. **Plan mode for every change.** Press Shift+Tab until you're in plan mode, then:
    ```
-   Read intent/leave-requests/intent.md and spec.md. Produce an implementation plan for <R-numbers>:
+   Read specs/001-leave-management-tool/intent.md and spec.md. Produce an implementation plan for <R-numbers>:
    files that change, order of work, risks, and the tests that prove each acceptance criterion.
    ```
    Push back at least twice: *What could this break? Which step is riskiest? What alternatives did you reject?*
-   Iterate until **someone who never saw the conversation could implement it**, then commit the plan as `intent/leave-requests/plan-<R-numbers>.md`.
+   Iterate until **someone who never saw the conversation could implement it**, then commit the plan as `specs/001-leave-management-tool/plans/<NN-name>.md (and list it in plans/00-index.md)`.
 3. **Add hooks** in `.claude/settings.json` that **block**:
    - edits to `.env*` and to migrations that were already applied
    - edits to test files while you're in "fix mode"

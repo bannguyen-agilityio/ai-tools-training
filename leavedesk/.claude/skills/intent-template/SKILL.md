@@ -6,7 +6,7 @@ description: Writes a one-page intent file for a new project or feature. Use whe
 When writing an intent file:
 
 1. Gather what is already known from the conversation. If the idea is still vague, interview the user one question at a time (scope, users, constraints, success) before writing.
-2. Save it as `intent/<meaningful-kebab-case-name>.md` in the project root (create the folder if missing). If the file already exists, read it and update it instead of overwriting.
+2. Save it as `specs/<NNN>-<meaningful-kebab-case-name>/intent.md` in the project root, where NNN is the next free three-digit number (create the folder if missing). Specs, plans and mocks for the same intent live in that folder. If the file already exists, read it and update it instead of overwriting.
 3. Use exactly these sections, in this order, and keep the whole file under one page:
 
 # Intent: <Name>, <one-line description>
