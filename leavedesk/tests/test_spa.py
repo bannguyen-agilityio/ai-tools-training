@@ -49,3 +49,12 @@ def test_noop_without_build(tmp_path: Path) -> None:
     app = FastAPI()
     mount_spa(app, tmp_path / "missing")
     assert not [r for r in app.routes if getattr(r, "path", "") == "/{path:path}"]
+
+
+async def test_missing_asset_is_404_and_nul_byte_is_not_a_500(tmp_path: Path) -> None:
+    app = FastAPI()
+    mount_spa(app, _dist(tmp_path))
+    async with _client(app) as c:
+        assert (await c.get("/assets/old-hash.js")).status_code == 404
+        assert (await c.get("/favicon.ico")).status_code == 404
+        assert (await c.get("/%00")).status_code == 404

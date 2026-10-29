@@ -24,7 +24,7 @@ export function SampleForm() {
   const { errors, submitCount } = formState;
   const formRef = useFormFocusFirstError(submitCount, Object.keys(errors).length);
   const summary = (["name", "start"] as const).flatMap((k) =>
-    errors[k]?.message ? [{ fieldId: k, message: errors[k].message }] : [],
+    errors[k]?.message ? [{ fieldName: k, message: errors[k].message }] : [],
   );
 
   return (
@@ -44,7 +44,7 @@ export function SampleForm() {
         control={control}
         name="start"
         render={({ field }) => (
-          <DateField label="First day" value={field.value} onChange={field.onChange} error={errors.start?.message} />
+          <DateField name="start" label="First day" value={field.value} onChange={field.onChange} error={errors.start?.message} />
         )}
       />
       <Button type="submit">Submit request</Button>

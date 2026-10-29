@@ -57,6 +57,7 @@ describe("safeNext", () => {
   it("only allows same-site relative paths", () => {
     expect(safeNext("/requests")).toBe("/requests");
     expect(safeNext("//evil.com")).toBe("/");
+    expect(safeNext("/\\evil.com")).toBe("/");
     expect(safeNext("https://evil.com")).toBe("/");
     expect(safeNext(null)).toBe("/");
   });

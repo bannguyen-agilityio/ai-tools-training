@@ -1,6 +1,6 @@
 export interface SummaryItem {
-  /** DOM id of the invalid control, so the link can focus it. */
-  fieldId?: string;
+  /** `name` of the invalid control; the link focuses it. */
+  fieldName?: string;
   message: string;
 }
 
@@ -15,8 +15,20 @@ export function ErrorSummary({ items }: { items: SummaryItem[] }) {
       </p>
       <ul>
         {items.map((item) => (
-          <li key={`${item.fieldId}-${item.message}`}>
-            {item.fieldId ? <a href={`#${item.fieldId}`}>{item.message}</a> : item.message}
+          <li key={`${item.fieldName}-${item.message}`}>
+            {item.fieldName ? (
+              <a
+                href={`#${item.fieldName}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector<HTMLElement>(`[name="${CSS.escape(item.fieldName ?? "")}"]`)?.focus();
+                }}
+              >
+                {item.message}
+              </a>
+            ) : (
+              item.message
+            )}
           </li>
         ))}
       </ul>

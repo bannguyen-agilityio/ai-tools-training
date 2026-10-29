@@ -17,7 +17,7 @@ export function signInUrl(returnTo: string): string {
 
 /** Only same-site relative paths are honoured as a return target. */
 export function safeNext(next: string | null): string {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  return next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/";
 }
 
 interface Options {

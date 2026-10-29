@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 import { Button } from "./Button";
 
 interface ToastItem {
@@ -14,8 +14,9 @@ export const useToast = () => useContext(ToastContext);
 /** Toasts persist until dismissed, so they are never missed and need no timing exemption. */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
+  const nextId = useRef(0);
   const push = useCallback((kind: ToastItem["kind"], message: string) => {
-    setItems((cur) => [...cur, { id: Date.now() + cur.length, kind, message }]);
+    setItems((cur) => [...cur, { id: nextId.current++, kind, message }]);
   }, []);
   return (
     <ToastContext.Provider value={push}>

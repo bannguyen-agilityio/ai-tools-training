@@ -22,7 +22,14 @@ def mount_spa(app: FastAPI, dist: Path = DIST) -> None:
     async def spa(path: str) -> FileResponse:
         if path == "api" or path.startswith("api/"):
             raise HTTPException(404)
-        candidate = (root / path).resolve()
-        if path and candidate.is_file() and candidate.is_relative_to(root):
+        try:
+            candidate = (root / path).resolve()
+            found = bool(path) and candidate.is_relative_to(root) and candidate.is_file()
+        except ValueError:  # embedded NUL byte
+            raise HTTPException(404) from None
+        if found:
             return FileResponse(candidate)
+        # A missing file (has an extension) is a 404, not the HTML shell.
+        if "." in path.rsplit("/", 1)[-1]:
+            raise HTTPException(404)
         return FileResponse(index)
