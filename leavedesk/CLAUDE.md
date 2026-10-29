@@ -47,7 +47,7 @@ LeaveDesk: internal leave management tool for ~250 staff (16 managers, 2 HR). Re
 - `leave_request_day` stores one row per working half day; a partial unique index on `(employee_id, leave_date, slot) WHERE is_active` prevents overlap under concurrency.
 - Optimistic locking: `approve`/`reject`/`cancel` carry `version`; stale → `409`. Submit locks the employee row (`FOR UPDATE`).
 - Authorization is checked in the service layer on every request; hiding a button is not access control. Every endpoint needs a 401/403 test per role.
-- All request bodies use strict schemas (unknown fields refused); parameterised queries only; errors are RFC 9457 `problem+json` with no stack traces.
+- All request bodies use strict schemas (unknown fields refused); parameterised queries only; errors use the `{ "error": { code, message, details[] } }` envelope (spec §6.1); `error.stack` only when `ENVIRONMENT` is not `production`, never in production.
 - Day quantities are `numeric(4,1)` in 0.5 steps; ids are uuid; timestamps `timestamptz` UTC.
 
 ## Privacy rules (non-negotiable)
