@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeaveDesk: Team calendar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mockbar">MOCKUP · Team calendar (Phase 2, ships Mon 16 Nov 2026) · viewer: Linh Tran, Platform team (not HR)</div>
+<header class="app"><div class="bar">
+  <span class="brand">LeaveDesk</span>
+  <nav class="main" aria-label="Main">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="new-request.html">New request</a>
+    <a href="approvals.html">Approvals <span class="badge" aria-label="3 waiting">3</span></a>
+    <a href="calendar.html" aria-current="page">Calendar</a>
+  </nav>
+  <button class="bell" aria-label="Notifications, 2 unread">🔔 <span class="badge">2</span></button>
+</div></header>
+
+<main>
+  <h1>Team calendar</h1>
+  <div class="actions" style="align-items:center;margin-bottom:8px">
+    <button class="btn secondary" type="button" aria-label="Previous month">‹</button>
+    <strong style="min-width:140px;text-align:center">November 2026</strong>
+    <button class="btn secondary" type="button" aria-label="Next month">›</button>
+    <span class="muted">Team: <strong>Platform</strong></span>
+    <span class="small muted">(HR sees a team picker and real leave types.)</span>
+  </div>
+
+  <div class="legend small" aria-label="Legend">
+    <span><span class="chip approved" style="display:inline-block">Approved</span> solid, green</span>
+    <span><span class="chip pending" style="display:inline-block">Pending</span> dashed outline, labelled “(pending)”</span>
+    <span><span class="chip off" style="display:inline-block">Off</span> sick leave, same look whether pending or approved</span>
+  </div>
+
+  <div class="scroll card" style="padding:8px">
+    <table class="cal" aria-label="November 2026 leave for the Platform team">
+      <thead><tr>
+        <th scope="col">Mon</th><th scope="col">Tue</th><th scope="col">Wed</th><th scope="col">Thu</th><th scope="col">Fri</th><th scope="col">Sat</th><th scope="col">Sun</th>
+      </tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+
+  <p class="muted small" style="margin-top:12px">Phone view: the grid scrolls sideways inside its box; the page itself does not. A list-by-day view is the alternative for 360 px screens.</p>
+</main>
+
+<script>
+  // Mock data for Nov 2026 (Platform team). Sick leave carries no type or status.
+  var leave = [
+    { n: "Linh Tran", from: 16, to: 17, kind: "pending", label: "(pending)" },
+    { n: "An Vo", from: 2, to: 13, kind: "approved" },
+    { n: "Hoa Le", from: 3, to: 3, kind: "off" },
+    { n: "Quang Do", from: 23, to: 23, kind: "approved", label: "(am)" },
+    { n: "Mai Ho", from: 26, to: 27, kind: "off" }
+  ];
+  var body = document.getElementById("body");
+  var days = [];                       // Mon 26 Oct .. Sun 6 Dec
+  for (var i = 0; i < 42; i++) {
+    var d = new Date(Date.UTC(2026, 9, 26 + i));
+    days.push({ date: d.getUTCDate(), month: d.getUTCMonth() });
+  }
+  for (var w = 0; w < 6; w++) {
+    var tr = document.createElement("tr");
+    for (var c = 0; c < 7; c++) {
+      var day = days[w * 7 + c];
+      var td = document.createElement("td");
+      var inMonth = day.month === 10;
+      if (!inMonth) td.className = "other";
+      if (c >= 5) td.className += " we";
+      td.innerHTML = '<span class="d">' + day.date + "</span>";
+      if (inMonth && c < 5) {
+        leave.forEach(function (l) {
+          if (day.date >= l.from && day.date <= l.to) {
+            var text = l.kind === "off" ? l.n + ": Off" : l.n + (l.label ? " " + l.label : "");
+            td.innerHTML += '<span class="chip ' + l.kind + '">' + text + "</span>";
+          }
+        });
+      }
+      tr.appendChild(td);
+    }
+    body.appendChild(tr);
+  }
+</script>
+</body>
+</html>

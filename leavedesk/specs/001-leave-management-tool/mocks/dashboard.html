@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeaveDesk: Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mockbar">MOCKUP · Dashboard (P1) · signed in as Linh Tran, employee in Platform team, manager Minh Pham</div>
+<header class="app"><div class="bar">
+  <span class="brand">LeaveDesk</span>
+  <nav class="main" aria-label="Main">
+    <a href="dashboard.html" aria-current="page">Dashboard</a>
+    <a href="new-request.html">New request</a>
+    <a href="approvals.html">Approvals <span class="badge" aria-label="3 waiting">3</span></a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+  <button class="bell" aria-label="Notifications, 2 unread">🔔 <span class="badge">2</span></button>
+</div></header>
+
+<main>
+  <h1>Hello, Linh</h1>
+  <p class="muted">Today is Wed 28 Oct 2026. Leave year 2026 (1 Jan to 31 Dec).</p>
+  <p><a class="btn" href="new-request.html">Request leave</a></p>
+
+  <section aria-labelledby="bal" class="grid cols-3">
+    <h2 id="bal" style="grid-column:1/-1;margin:0">Your balances</h2>
+
+    <article class="card" aria-labelledby="b-annual">
+      <h3 id="b-annual" style="margin:0">Annual</h3>
+      <div class="big">8.5 <span class="small muted">days available</span></div>
+      <dl class="bal">
+        <dt>Entitlement</dt><dd>12.0</dd>
+        <dt>Carried over</dt><dd>4.0</dd>
+        <dt>Used (approved)</dt><dd>6.5</dd>
+        <dt>Reserved (pending)</dt><dd>1.0</dd>
+      </dl>
+      <p class="alert warn small">⚠ 2.0 carried days expire on Thu 31 Dec 2026. Carried days are used first.</p>
+    </article>
+
+    <article class="card" aria-labelledby="b-sick">
+      <h3 id="b-sick" style="margin:0">Sick (paid)</h3>
+      <div class="big">6.0 <span class="small muted">days available</span></div>
+      <dl class="bal">
+        <dt>Entitlement</dt><dd>7.0</dd>
+        <dt>Carried over</dt><dd>0.0 (no carry-over)</dd>
+        <dt>Used (approved)</dt><dd>1.0</dd>
+        <dt>Reserved (pending)</dt><dd>0.0</dd>
+      </dl>
+    </article>
+
+    <article class="card" aria-labelledby="b-unpaid">
+      <h3 id="b-unpaid" style="margin:0">Unpaid</h3>
+      <div class="big">No limit</div>
+      <p class="muted">Unpaid leave has no balance and is never blocked.</p>
+      <dl class="bal"><dt>Taken in 2026</dt><dd>0.0</dd></dl>
+    </article>
+  </section>
+
+  <section class="grid cols-2" style="margin-top:16px">
+    <div class="card" aria-labelledby="mine">
+      <h2 id="mine">My requests</h2>
+      <ul class="list">
+        <li>
+          <div><strong>Annual · Mon 16 Nov to Tue 17 Nov 2026</strong><br><span class="muted small">2.0 days · submitted Mon 26 Oct</span></div>
+          <div class="actions"><span class="pill pending">Pending</span>
+            <button class="btn danger" type="button">Cancel request</button></div>
+        </li>
+        <li>
+          <div><strong>Annual · Fri 4 Dec 2026 (afternoon)</strong><br><span class="muted small">0.5 day · submitted Fri 23 Oct</span></div>
+          <span class="pill approved">Approved</span>
+        </li>
+        <li>
+          <div><strong>Annual · Mon 7 Sep to Fri 11 Sep 2026</strong><br><span class="muted small">5.0 days · taken</span></div>
+          <span class="pill approved">Approved</span>
+        </li>
+        <li>
+          <div><strong>Annual · Fri 14 Aug 2026</strong><br><span class="muted small">1.0 day · Reason from Minh Pham: “Release freeze that week.”</span></div>
+          <span class="pill rejected">Rejected</span>
+        </li>
+      </ul>
+      <p class="small"><a href="#">View all requests</a></p>
+    </div>
+
+    <div class="card" aria-labelledby="up">
+      <h2 id="up">Upcoming leave</h2>
+      <ul class="list">
+        <li><span>Mon 16 Nov to Tue 17 Nov</span><span class="pill pending">Pending</span></li>
+        <li><span>Fri 4 Dec (afternoon)</span><span class="pill approved">Approved</span></li>
+      </ul>
+      <p class="muted small">Next public holiday: Fri 1 Jan 2027, New Year's Day.</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

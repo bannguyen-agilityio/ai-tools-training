@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeaveDesk: Approvals</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="mockbar">MOCKUP · Approvals (P1) · signed in as Minh Pham, manager</div>
+<header class="app"><div class="bar">
+  <span class="brand">LeaveDesk</span>
+  <nav class="main" aria-label="Main">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="new-request.html">New request</a>
+    <a href="approvals.html" aria-current="page">Approvals <span class="badge" aria-label="3 waiting">3</span></a>
+    <a href="calendar.html">Calendar</a>
+  </nav>
+  <button class="bell" aria-label="Notifications, 2 unread">🔔 <span class="badge">2</span></button>
+</div></header>
+
+<main>
+  <h1>Approvals</h1>
+  <div class="tabs" role="tablist">
+    <a href="#" role="tab" aria-selected="true">My team (3)</a>
+    <a href="#" role="tab" aria-selected="false">On behalf of other managers (2)</a>
+  </div>
+
+  <ul class="list card" style="padding:0 16px">
+    <li style="align-items:flex-start">
+      <div style="flex:1;min-width:240px">
+        <strong>Linh Tran</strong> · Annual<br>
+        Mon 16 Nov to Tue 17 Nov 2026 · <strong>2.0 days</strong><br>
+        <span class="muted small">Submitted Mon 26 Oct · Linh's Annual balance is not shown to you.</span><br>
+        <span class="small">Note: “Family event.”</span>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button">Approve</button>
+        <button class="btn danger" type="button" aria-expanded="false">Reject…</button>
+      </div>
+    </li>
+
+    <li style="align-items:flex-start">
+      <div style="flex:1;min-width:240px">
+        <strong>An Vo</strong> · Annual<br>
+        Mon 2 Nov to Fri 13 Nov 2026 · <strong>10.0 days</strong><br>
+        <span class="alert warn small" style="display:inline-block;margin:4px 0">⚠ Longer than 5 working days and requested 6 days ahead (1 week notice advised). You can still decide.</span><br>
+        <span class="muted small">Submitted Tue 27 Oct</span>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button">Approve</button>
+        <button class="btn danger" type="button">Reject…</button>
+      </div>
+    </li>
+
+    <li style="align-items:flex-start">
+      <div style="flex:1;min-width:240px">
+        <strong>Hoa Le</strong> · Sick<br>
+        Wed 28 Oct 2026 · <strong>1.0 day</strong> · backdated 0 days<br>
+        <span class="muted small">Submitted today. The type is visible to you only while deciding; emails and the team calendar show “Off”.</span>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button">Approve</button>
+        <button class="btn danger" type="button">Reject…</button>
+      </div>
+    </li>
+  </ul>
+
+  <section class="card" style="margin-top:16px" aria-labelledby="rj">
+    <h2 id="rj">Reject request (expanded state)</h2>
+    <p>Rejecting <strong>Linh Tran · Annual · Mon 16 Nov to Tue 17 Nov 2026</strong>. Linh will receive your reason by email.</p>
+    <form novalidate>
+      <div class="field">
+        <label for="reason">Reason (required, up to 500 characters)</label>
+        <textarea id="reason" aria-invalid="true" aria-describedby="reason-e"></textarea>
+        <div class="err-msg" id="reason-e">Enter a reason so Linh knows why this was rejected.</div>
+      </div>
+      <div class="actions">
+        <button class="btn danger" type="submit">Reject request</button>
+        <button class="btn secondary" type="button" autofocus>Keep pending</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" style="margin-top:16px" aria-labelledby="ob">
+    <h2 id="ob">“On behalf of” tab (preview)</h2>
+    <div class="alert warn">You are deciding for other managers' reports. Your name and the direct manager's name are recorded, and the direct manager is emailed.</div>
+    <ul class="list">
+      <li>
+        <div><strong>Quang Do</strong> (reports to <strong>Thao Nguyen</strong>) · Annual<br>
+        Thu 5 Nov to Fri 6 Nov 2026 · 2.0 days</div>
+        <div class="actions"><button class="btn" type="button">Approve on behalf of Thao</button>
+        <button class="btn danger" type="button">Reject…</button></div>
+      </li>
+    </ul>
+  </section>
+
+  <p class="muted small" style="margin-top:16px">Concurrency: if someone else already decided, you see “This request was already decided.” and the list refreshes.</p>
+</main>
+</body>
+</html>
