@@ -9,6 +9,7 @@ REQUIRED = {
     "app_db_role": "r",
     "company_tz": "Asia/Ho_Chi_Minh",
     "email_backend": "mock",
+    "app_base_url": "http://localhost",
     "cookie_secure": False,
 }
 
@@ -39,7 +40,29 @@ def test_values_load_from_env_file(tmp_path: pytest.TempPathFactory, monkeypatch
     env_file.write_text(
         "ENVIRONMENT=staging\nDATABASE_URL=postgresql+psycopg://u@h/d\nAPP_DB_ROLE=app\n"
         "COMPANY_TZ=Asia/Ho_Chi_Minh\nEMAIL_BACKEND=sendgrid\nCOOKIE_SECURE=true\n"
+        "APP_BASE_URL=https://x.test\nSENDGRID_API_KEY=k\nEMAIL_FROM=noreply@asnet.com.vn\n"
     )
     s = Settings(_env_file=str(env_file))  # type: ignore[call-arg]
     assert s.environment == "staging"
     assert s.cookie_secure is True
+
+
+def test_sendgrid_needs_credentials() -> None:
+    with pytest.raises(ValidationError):
+        Settings(**{**REQUIRED, "email_backend": "sendgrid"})  # type: ignore[arg-type]
+    creds = {"sendgrid_api_key": "k", "email_from": "a@b.c"}
+    Settings(**{**REQUIRED, "email_backend": "sendgrid", **creds})  # type: ignore[arg-type]
+
+
+def test_app_refuses_to_start_with_mock_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.core.config import get_settings
+    from app.main import create_app
+
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    get_settings.cache_clear()
+    try:
+        with pytest.raises(ValidationError):
+            create_app()
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()

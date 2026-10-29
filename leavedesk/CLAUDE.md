@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity. Not built: requests, approvals, balances, holidays, notifications, jobs, `EmailSender`, frontend.
+LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, email outbox + `EmailSender`, notifications API, `drain_outbox` job. Not built: requests, approvals, balances, holidays, frontend (incl. bell UI).
 
 ## Sources
 

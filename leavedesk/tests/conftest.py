@@ -95,7 +95,9 @@ async def app_engine() -> AsyncIterator[AsyncEngine]:
 @pytest.fixture(autouse=True)
 async def clean_db(owner_engine: AsyncEngine) -> None:
     async with owner_engine.connect() as conn:
-        await conn.execute(text("TRUNCATE audit_log, session, team, employee CASCADE"))
+        await conn.execute(
+            text("TRUNCATE email_outbox, notification, audit_log, session, team, employee CASCADE")
+        )
 
 
 @pytest.fixture

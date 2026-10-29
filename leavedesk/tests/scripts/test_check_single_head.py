@@ -4,7 +4,14 @@ import sys
 
 from scripts import check_single_head
 
-APP_SETTINGS = ("ENVIRONMENT", "DATABASE_URL", "APP_DB_ROLE", "COMPANY_TZ", "EMAIL_BACKEND")
+APP_SETTINGS = (
+    "ENVIRONMENT",
+    "DATABASE_URL",
+    "APP_DB_ROLE",
+    "COMPANY_TZ",
+    "EMAIL_BACKEND",
+    "APP_BASE_URL",
+)
 
 
 def test_repository_has_a_single_head(capsys) -> None:  # type: ignore[no-untyped-def]
