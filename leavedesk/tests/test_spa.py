@@ -48,7 +48,7 @@ async def test_path_traversal_returns_shell_not_files(tmp_path: Path) -> None:
 def test_noop_without_build(tmp_path: Path) -> None:
     app = FastAPI()
     mount_spa(app, tmp_path / "missing")
-    assert not [r for r in app.routes if getattr(r, "path", "") == "/{path:path}"]
+    assert 404 not in app.exception_handlers
 
 
 async def test_missing_asset_is_404_and_nul_byte_is_not_a_500(tmp_path: Path) -> None:
