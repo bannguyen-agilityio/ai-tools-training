@@ -1,7 +1,9 @@
 name: leavedesk-deploy
 
-# Merge to main -> checks -> staging. Production runs after staging and waits for the
-# required reviewers configured on the "production" GitHub environment.
+# The target environment is inferred from the branch:
+#   push to `staging` -> staging (automatic)
+#   push to `main`    -> production (waits for required reviewers on the "production" environment)
+# Manual runs infer it from the branch they run on; on a tag (rollback) pass `environment`.
 # Per-environment config (Settings > Environments > staging | production):
 #   secrets: FASTAPI_CLOUD_TOKEN, DATABASE_URL (pooled, app role), MIGRATION_DATABASE_URL (owner)
 #   vars:    FASTAPI_CLOUD_APP_ID, APP_URL, APP_DB_ROLE, COMPANY_TZ
@@ -10,12 +12,17 @@ name: leavedesk-deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
     paths: ["leavedesk/**", ".github/workflows/leavedesk-deploy*.yml"]
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Override the environment (required when running on a tag, e.g. a rollback)."
+        type: choice
+        options: ["", staging, production]
+        default: ""
       ref:
-        description: "Ref to deploy (branch, tag or SHA). Use a previous prod-* tag to roll back."
+        description: "Ref to deploy (branch, tag or SHA). Defaults to the ref this run was started on."
         required: false
         default: ""
 
@@ -23,28 +30,43 @@ permissions:
   contents: read
 
 jobs:
+  target:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.pick.outputs.environment }}
+    steps:
+      - id: pick
+        env:
+          OVERRIDE: ${{ inputs.environment }}
+          BRANCH: ${{ github.ref_type == 'branch' && github.ref_name || '' }}
+        run: |
+          if [ -n "$OVERRIDE" ]; then env_name="$OVERRIDE"
+          else
+            case "$BRANCH" in
+              main) env_name=production ;;
+              staging) env_name=staging ;;
+              *) echo "::error::cannot infer an environment from '${BRANCH:-a tag}'; run on main/staging or set the environment input"; exit 1 ;;
+            esac
+          fi
+          echo "environment=$env_name" >> "$GITHUB_OUTPUT"
+          echo "Deploying to $env_name"
+
   checks:
+    needs: target
     uses: ./.github/workflows/leavedesk-ci.yml
 
-  deploy-staging:
-    needs: checks
+  deploy:
+    needs: [target, checks]
     uses: ./.github/workflows/leavedesk-deploy-env.yml
     with:
-      environment: staging
-      ref: ${{ inputs.ref }}
-    secrets: inherit
-
-  deploy-production:
-    needs: deploy-staging
-    uses: ./.github/workflows/leavedesk-deploy-env.yml
-    with:
-      environment: production
+      environment: ${{ needs.target.outputs.environment }}
       ref: ${{ inputs.ref }}
     secrets: inherit
 
   # Tag what reached production so rolling back is "redeploy the previous prod-* tag".
   tag-production:
-    needs: deploy-production
+    needs: [target, deploy]
+    if: needs.target.outputs.environment == 'production'
     runs-on: ubuntu-latest
     permissions:
       contents: write
