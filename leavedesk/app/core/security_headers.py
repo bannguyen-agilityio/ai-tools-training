@@ -8,6 +8,13 @@ CSP = (
     "frame-ancestors 'none'"
 )
 
+# Swagger UI (dev only, see create_app) loads assets from jsDelivr and boots inline.
+DOCS_CSP = (
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+    "img-src 'self' data: https://fastapi.tiangolo.com; frame-ancestors 'none'"
+)
+
 HEADERS = {
     "Content-Security-Policy": CSP,
     "X-Content-Type-Options": "nosniff",
@@ -21,4 +28,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         for name, value in HEADERS.items():
             response.headers[name] = value
+        if request.url.path == "/docs":
+            response.headers["Content-Security-Policy"] = DOCS_CSP
         return response

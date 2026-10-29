@@ -219,7 +219,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given any endpoint other than login, invite and reset, when it is called without a valid session, then it returns 401.
 - Given any input, when it is received, then it is validated against a schema (types, lengths, enum values, dates). Unknown fields are refused. Queries are parameterised.
 - Given a request without a valid session cookie, then it returns 401. Given a state-changing request without a valid CSRF token or with a foreign `Origin`, then it returns 403. The SPA must not render untrusted HTML, and a strict CSP limits script sources.
-- Given any response, then it carries security headers (CSP, `X-Content-Type-Options`, `Referrer-Policy`, HSTS), and errors do not leak stack traces.
+- Given any response, then it carries security headers (CSP, `X-Content-Type-Options`, `Referrer-Policy`, HSTS), and in production errors do not leak stack traces (`error.stack` is allowed only when `ENVIRONMENT` is not `production`, §6.1).
 
 **R30 [P1] Audit log.**
 - Given any create, approve, reject, cancel, balance change, holiday change, employee change, login failure, role change or export, when it happens, then an append-only record is written with actor, action, target, time, and before/after values where relevant.
@@ -322,7 +322,23 @@ Base path `/api/v1`, JSON only, same origin as the SPA.
 
 - **Auth:** `HttpOnly` session cookie; every non-GET call also sends `X-CSRF-Token` (value from `GET /me`) and must pass the `Origin` check (R29). No session → `401`.
 - **Dates and times:** `YYYY-MM-DD` for dates, ISO 8601 UTC for timestamps. Half-day values are `full`, `am` or `pm`. Day quantities are numbers in 0.5 steps.
-- **Errors:** `application/problem+json` (RFC 9457): `{ "type": "https://<host>/errors/<code>", "title": "...", "status": 409, "detail": "...", "code": "<machine code>", "field": "..."? }`. `detail` is the user-facing message and never contains a stack trace, a note or a Sick type. Status codes: `400` malformed, `401` no session, `403` not allowed (including an unrelated manager deciding a request, R22), `404` unknown id, `409` conflict (already decided, overlapping leave, stale `version`), `422` rule failed (no working days, balance too low, past date, reason missing), `429` too many sign-in attempts (R2). Stack traces are never returned.
+- **Errors:** every error response is JSON with one `error` envelope: `{ "error": { "code": "<MACHINE_CODE>", "message": "<user-facing text>", "details": [ { "field": "<field name>", "issue": "<what is wrong>" } ] } }`. `code` is a stable upper-snake machine code (e.g. `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT`); the HTTP status carries the class of error. `message` is the user-facing summary. `details` lists per-field problems and is present for validation failures (`422`, and `400` for unknown fields) and omitted otherwise. `message` and `issue` never contain a stack trace, a note, a rejection reason (except to the employee) or a Sick type. Example (`422`):
+
+  ```json
+  {
+    "error": {
+      "code": "VALIDATION_ERROR",
+      "message": "Request validation failed.",
+      "details": [
+        { "field": "email", "issue": "Invalid email format." }
+      ]
+    }
+  }
+  ```
+
+  **Stack (non-production only):** when `ENVIRONMENT` is not `production` (local, test, staging), an unhandled-error response also carries `error.stack` (string, the formatted traceback) to help debugging. When `ENVIRONMENT=production` the field is never present and the response is the plain envelope; the traceback goes to the server log only. The app defaults to production behaviour when `ENVIRONMENT` is unset or unrecognised. A test must prove `stack` is absent in production for 4xx and 5xx responses.
+
+  Status codes: `400` malformed, `401` no session, `403` not allowed (including an unrelated manager deciding a request, R22), `404` unknown id, `409` conflict (already decided, overlapping leave, stale `version`), `422` rule failed (no working days, balance too low, past date, reason missing), `429` too many sign-in attempts (R2). In production, stack traces are never returned.
 - **Validation:** every body is a strict schema; unknown fields are refused (R29).
 - **Concurrency:** request objects carry `version`; `approve`, `reject` and `cancel` must send it back. A stale version returns `409`.
 - **Creates:** a successful `POST` that creates a resource (requests, employees, teams, holidays, balance entries, HR-entered requests) returns `201 Created` with the new resource in the body and a `Location` header pointing at it, e.g. `Location: /api/v1/requests/{id}`. Actions that change state without creating a resource (approve, reject, cancel, deactivate, login) return `200` with the updated resource, or `204` where there is no body. `POST /auth/reset/request` returns `202`.
