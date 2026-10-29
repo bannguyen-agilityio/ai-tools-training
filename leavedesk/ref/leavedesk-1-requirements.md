@@ -147,11 +147,41 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
    If the repository is empty and has no code to inspect, have Claude read the approved `intent.md` and `spec.md` and generate `CLAUDE.md` from those documents instead.
 2. **Plan mode for every change.** Press Shift+Tab until you're in plan mode, then:
    ```
-   Read specs/001-leave-management-tool/intent.md and spec.md. Produce an implementation plan for <R-numbers>:
-   files that change, order of work, risks, and the tests that prove each acceptance criterion.
+   Read `specs/001-leave-management-tool/intent.md` and `specs/001-leave-management-tool/spec.md`.
+
+   Create implementation plans for `<R-numbers>`.
+
+   Each plan must cover either one R-number or a cohesive group of related R-numbers that can be implemented, tested, reviewed, and delivered in a single pull request.
+
+   For each plan, specify:
+   - Requirements and acceptance criteria covered
+   - Files to create, modify, or delete
+   - Implementation steps and their order
+   - Risks and dependencies
+   - Tests proving each acceptance criterion
+   - Definition of done
+
+   Save plans in `specs/001-leave-management-tool/plans/`, naming each file by its R-number(s), e.g. `R-001.md` or `R-002-R-004.md`.
+
+   Ensure every specified R-number is covered, plans are independently deliverable, and dependencies are explicit. Follow the approved intent and spec. Do not implement code; flag ambiguities instead of making assumptions.
    ```
    Push back at least twice: *What could this break? Which step is riskiest? What alternatives did you reject?*
    Iterate until **someone who never saw the conversation could implement it**, then commit the plan as `specs/001-leave-management-tool/plans/<NN-name>.md (and list it in plans/00-index.md)`.
+
+   **Create Project Execution Sequence and Parallelization Plan**
+   ```
+   Update plans/README.md with an ordered list of implementation plans, showing:
+
+   The recommended execution sequence.
+
+   Tasks that can run in parallel.
+
+   Dependencies between tasks.
+
+   The order required to complete and deliver the project.
+
+   Ensure the sequence respects dependencies and groups parallelizable tasks clearly. Do not modify the individual plan files.
+   ```
 3. **Add hooks** in `.claude/settings.json` that **block**:
    - edits to `.env*` and to migrations that were already applied
    - edits to test files while you're in "fix mode"
