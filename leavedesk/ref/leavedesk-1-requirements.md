@@ -130,7 +130,7 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 4. **Resolve every area of concern** and write each decision into the spec.
 5. *(Optional)* Have Claude mock up 4 screens (Dashboard, New Request, Approvals, Calendar) and save them in `specs/001-leave-management-tool/mocks/`.
 6. Commit `spec.md` in a PR and merge it. **Merging means you've decided to build.**
-
+7. **
 **Deliverable:** 3 skills + `spec.md` merged.
 **Measure:** time between the `intent.md` merge and the `spec.md` merge.
 **Compare:** Solutions §2 (skills) and §3 (requirements, data model, API, concerns). For each difference, note whether it's *better, worse, or just different*. Keep what's better, and write down why.
@@ -142,6 +142,9 @@ The project follows the six stages of the *AI-native SDLC playbook*: **Plan → 
 
 1. **Scaffold** the stack you chose in the spec, then run `/init` in Claude. Cut the result down to a **one-page `CLAUDE.md`** with Commands, Conventions, Architecture, "Verifying your work", and "Things Claude gets wrong". Commit it.
    **Rule:** when Claude makes the same mistake twice, the correction goes into `CLAUDE.md`.
+   If the project is new, first scaffold the technology stack chosen in spec.md. Then run /init in Claude Code to generate an initial CLAUDE.md.
+
+   If the repository is empty and has no code to inspect, have Claude read the approved `intent.md` and `spec.md` and generate `CLAUDE.md` from those documents instead.
 2. **Plan mode for every change.** Press Shift+Tab until you're in plan mode, then:
    ```
    Read specs/001-leave-management-tool/intent.md and spec.md. Produce an implementation plan for <R-numbers>:
