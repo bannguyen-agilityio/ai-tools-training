@@ -1,7 +1,13 @@
 {
   "permissions": {
     "deny": [
-      "Read(./ref/**)"
+      "Read(./ref/**)",
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./.env.local)",
+      "Read(./.env.local.*)",
+      "Read(./**/.env.local)",
+      "Read(./**/.env.local.*)"
     ]
   }
 }
