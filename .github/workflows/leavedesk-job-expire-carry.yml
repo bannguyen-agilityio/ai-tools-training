@@ -1,0 +1,28 @@
+name: leavedesk-job-expire-carry
+
+# The schedule is off until plan 06 (leave_request_day) lets the job count leave taken;
+# before that the job refuses to run. Re-enable by uncommenting the schedule.
+on:
+  # schedule:
+  #   - cron: "10 17 * * *" # 00:10 daily, Asia/Ho_Chi_Minh (UTC+7)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: leavedesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run python -m app.jobs.expire_carry
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENVIRONMENT: production
+          APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
+          SET_ROLE_ON_CONNECT: "true"
+          EMAIL_BACKEND: sendgrid
+          COOKIE_SECURE: "true"
+          COMPANY_TZ: Asia/Ho_Chi_Minh
