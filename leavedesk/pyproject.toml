@@ -55,3 +55,6 @@ include = ["app", "tests"]
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "basic"
+
+[tool.fastapi]
+entrypoint = "app.main:app"

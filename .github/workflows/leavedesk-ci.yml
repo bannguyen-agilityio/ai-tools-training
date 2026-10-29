@@ -5,6 +5,7 @@ on:
     paths: ["leavedesk/**", ".github/workflows/leavedesk-ci.yml"]
   pull_request:
     paths: ["leavedesk/**", ".github/workflows/leavedesk-ci.yml"]
+  workflow_call:
 
 defaults:
   run:
@@ -24,7 +25,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s
           --health-timeout 5s --health-retries 10
     env:
-      # Owner/superuser URL; tests SET ROLE leavedesk_app to exercise the real grants.
+      # Owner/superuser URL; tests connect as APP_DB_ROLE (tests/test.env) to exercise the real grants.
       TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/leavedesk_test
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +34,7 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy app tests
+      - run: uv run python scripts/check_single_head.py
       - run: uv run pytest -q
       - name: Migration applies and rolls back
         env:

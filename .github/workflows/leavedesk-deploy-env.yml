@@ -1,0 +1,74 @@
+name: leavedesk-deploy-env
+
+# Reusable: deploy leavedesk to one FastAPI Cloud environment.
+# Order matters: migrate first (a failed migration fails the deploy before any new code
+# takes traffic), then deploy, then verify /healthz.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      ref:
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: leavedesk
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+    # One deploy per environment at a time; never cancel one that is mid-migration.
+    concurrency:
+      group: leavedesk-deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      # Everything comes from the environment: no env file in CI.
+      ENV_FILE: /dev/null
+      ENVIRONMENT: ${{ inputs.environment }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+      APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
+      COMPANY_TZ: ${{ vars.COMPANY_TZ }}
+      EMAIL_BACKEND: sendgrid
+      COOKIE_SECURE: "true"
+      FASTAPI_CLOUD_TOKEN: ${{ secrets.FASTAPI_CLOUD_TOKEN }}
+      FASTAPI_CLOUD_APP_ID: ${{ vars.FASTAPI_CLOUD_APP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --python 3.12 --no-dev
+      - name: Build frontend (once frontend/ exists)
+        run: |
+          if [ -f ../frontend/package.json ]; then
+            (cd ../frontend && npm ci && npm run build)
+          else
+            echo "no frontend/ yet; deploying the API only"
+          fi
+      - name: Exactly one Alembic head
+        run: uv run python scripts/check_single_head.py
+      - name: Migrate database
+        run: uv run alembic upgrade head
+      - name: Deploy to FastAPI Cloud
+        run: uv run --with "fastapi[standard]" fastapi deploy
+      - name: Verify /healthz
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS "$APP_URL/healthz" | grep -q '"status":"ok"'; then
+              echo "healthy"; exit 0
+            fi
+            echo "attempt $i: not healthy yet"; sleep 10
+          done
+          echo "::error::$APP_URL/healthz did not become healthy"; exit 1

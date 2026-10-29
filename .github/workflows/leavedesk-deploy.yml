@@ -1,0 +1,59 @@
+name: leavedesk-deploy
+
+# Merge to main -> checks -> staging. Production runs after staging and waits for the
+# required reviewers configured on the "production" GitHub environment.
+# Per-environment config (Settings > Environments > staging | production):
+#   secrets: FASTAPI_CLOUD_TOKEN, DATABASE_URL (pooled, app role), MIGRATION_DATABASE_URL (owner)
+#   vars:    FASTAPI_CLOUD_APP_ID, APP_URL, APP_DB_ROLE, COMPANY_TZ
+# Runtime secrets (SendGrid key, session key) live in the FastAPI Cloud app environment.
+# See leavedesk/docs/runbooks/secrets.md for the full inventory (names only).
+
+on:
+  push:
+    branches: [main]
+    paths: ["leavedesk/**", ".github/workflows/leavedesk-deploy*.yml"]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Ref to deploy (branch, tag or SHA). Use a previous prod-* tag to roll back."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/leavedesk-ci.yml
+
+  deploy-staging:
+    needs: checks
+    uses: ./.github/workflows/leavedesk-deploy-env.yml
+    with:
+      environment: staging
+      ref: ${{ inputs.ref }}
+    secrets: inherit
+
+  deploy-production:
+    needs: deploy-staging
+    uses: ./.github/workflows/leavedesk-deploy-env.yml
+    with:
+      environment: production
+      ref: ${{ inputs.ref }}
+    secrets: inherit
+
+  # Tag what reached production so rolling back is "redeploy the previous prod-* tag".
+  tag-production:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - run: |
+          tag="prod-$(date -u +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
+          git tag "$tag"
+          git push origin "$tag"
+          echo "tagged $tag"
