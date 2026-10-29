@@ -66,10 +66,22 @@ async def _reset_schema() -> None:
     await engine.dispose()
 
 
+async def _snapshot_seed() -> None:
+    engine = create_async_engine(OWNER_URL, isolation_level="AUTOCOMMIT", poolclass=NullPool)
+    async with engine.connect() as conn:
+        await conn.execute(text("DROP SCHEMA IF EXISTS test_seed CASCADE"))
+        await conn.execute(text("CREATE SCHEMA test_seed"))
+        await conn.execute(text("CREATE TABLE test_seed.public_holiday AS TABLE public_holiday"))
+    await engine.dispose()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database() -> None:
     asyncio.run(_reset_schema())
     command.upgrade(Config("alembic.ini"), "head")
+    # TRUNCATE employee CASCADE also empties public_holiday (created_by FK); clean_db restores
+    # the migration's seed from this snapshot.
+    asyncio.run(_snapshot_seed())
 
 
 @pytest.fixture
@@ -100,6 +112,9 @@ async def clean_db(owner_engine: AsyncEngine) -> None:
                 "TRUNCATE email_outbox, notification, audit_log, session, login_attempt, "
                 "one_time_token, user_identity, team, employee CASCADE"
             )
+        )
+        await conn.execute(
+            text("INSERT INTO public_holiday SELECT * FROM test_seed.public_holiday")
         )
 
 

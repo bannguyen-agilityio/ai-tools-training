@@ -21,6 +21,8 @@ interface Envelope {
     message?: string;
     details?: { field?: string; message?: string }[];
   };
+  /** RFC 9457 extension member: a stable reason such as "no_working_days". */
+  code?: string;
   detail?: string;
   title?: string;
   errors?: { field?: string; message?: string }[];
@@ -38,5 +40,5 @@ export async function parseProblem(res: Response): Promise<ApiError> {
     // Non-JSON body: fall back to the status text.
   }
   const message = body.error?.message ?? body.detail ?? body.title ?? res.statusText ?? "Request failed";
-  return new ApiError(res.status, message, body.error?.code, toFields(body.error?.details ?? body.errors));
+  return new ApiError(res.status, message, body.error?.code ?? body.code, toFields(body.error?.details ?? body.errors));
 }
