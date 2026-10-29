@@ -85,6 +85,11 @@ def upgrade() -> None:
             name="ck_balance_entry_manual_range",
         ),
         sa.CheckConstraint(
+            "(kind IN ('opening','entitlement','prorata','carry_over') AND days >= 0)"
+            " OR (kind = 'expiry' AND days <= 0) OR kind = 'adjustment'",
+            name="ck_balance_entry_sign",
+        ),
+        sa.CheckConstraint(
             "(kind = 'carry_over') = (expires_on IS NOT NULL)", name="ck_balance_entry_expires_on"
         ),
     )

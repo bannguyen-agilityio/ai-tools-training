@@ -91,7 +91,7 @@ async def test_sick_never_carries(
     emp = (await make_login()).employee_id
     await seed_year(owner_engine, emp, "entitlement", "7", type="sick")
     async with AsyncSession(app_engine) as db:
-        await service.rollover(db, 2027)
+        await service.rollover(db, 2027, used(0))
     assert [r for r in await all_entries(owner_engine) if r["kind"] == "carry_over"] == []
 
 
@@ -132,7 +132,7 @@ async def test_new_joiner_gets_no_full_entitlement(
     async with owner_engine.connect() as conn:
         await conn.execute(text("UPDATE employee SET start_date = '2027-03-01'"))
     async with AsyncSession(app_engine) as db:
-        await service.rollover(db, 2027)
+        await service.rollover(db, 2027, used(0))
     assert await all_entries(owner_engine) == []  # prorata is written on save (R9)
 
 
@@ -143,11 +143,11 @@ async def test_expire_carry_writes_once(
     await seed_year(owner_engine, emp, "entitlement", "12", year=2027)
     await seed_year(owner_engine, emp, "carry_over", "4", year=2027, expires_on=date(2027, 12, 31))
     async with AsyncSession(app_engine) as db:
-        assert await service.expire_carry(db, date(2027, 12, 31)) == 0  # not yet expired
+        assert await service.expire_carry(db, date(2027, 12, 31), used(0)) == 0  # not yet expired
     async with AsyncSession(app_engine) as db:
-        assert await service.expire_carry(db, date(2028, 1, 1)) == 1
+        assert await service.expire_carry(db, date(2028, 1, 1), used(0)) == 1
     async with AsyncSession(app_engine) as db:
-        assert await service.expire_carry(db, date(2028, 1, 2)) == 0
+        assert await service.expire_carry(db, date(2028, 1, 2), used(0)) == 0
     expiry = [r for r in await all_entries(owner_engine) if r["kind"] == "expiry"]
     assert [(r["days"], r["leave_year"]) for r in expiry] == [(D(-4), 2027)]
 
@@ -190,6 +190,8 @@ async def test_app_role_cannot_modify_ledger(
         ("adjustment", "1", "annual"),  # reason required
         ("entitlement", "5", "unpaid"),  # unpaid has no balance
         ("carry_over", "2", "annual"),  # carry_over needs expires_on
+        ("entitlement", "-1", "annual"),  # credits cannot be negative
+        ("expiry", "1", "annual"),  # expiry cannot add days
     ],
 )
 async def test_db_checks_reject(
@@ -208,3 +210,20 @@ async def test_anon_reads_nothing(owner_engine: AsyncEngine) -> None:
         for table in ("balance_entry", "leave_type"):
             assert (await conn.execute(text(f"SELECT count(*) FROM {table}"))).scalar_one() == 0
         await conn.execute(text("RESET ROLE"))
+
+
+async def test_days_for_refuses_until_leave_days_exist(app_engine: AsyncEngine) -> None:
+    async with AsyncSession(app_engine) as db:
+        with pytest.raises(NotImplementedError):
+            await repository.days_for(db, uuid.uuid4(), "annual", 2026)
+
+
+def test_rollover_year_is_never_in_the_future() -> None:
+    from app.jobs.rollover import resolve_year
+
+    assert resolve_year([], 2027) == 2027
+    assert resolve_year(["2026"], 2027) == 2026
+    with pytest.raises(ValueError):
+        resolve_year(["2028"], 2027)
+    with pytest.raises(ValueError):
+        resolve_year(["20x7"], 2027)

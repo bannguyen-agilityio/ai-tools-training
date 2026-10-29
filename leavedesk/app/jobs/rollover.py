@@ -15,8 +15,18 @@ async def run(year: int) -> int:
         return await service.rollover(db, year)
 
 
+def resolve_year(argv: list[str], current_year: int) -> int:
+    """The target year: argv[0] or the current company-timezone year. Never a future year,
+    so a stray run cannot roll balances before the year has ended."""
+    year = int(argv[0]) if argv else current_year
+    if year > current_year:
+        raise ValueError(f"cannot roll over into {year}: it is after {current_year}")
+    return year
+
+
 def main(argv: list[str]) -> None:
-    year = int(argv[0]) if argv else datetime.now(ZoneInfo(get_settings().company_tz)).year
+    now = datetime.now(ZoneInfo(get_settings().company_tz))
+    year = resolve_year(argv, now.year)
     print(f"rollover {year}: wrote {asyncio.run(run(year))} entries")
 
 

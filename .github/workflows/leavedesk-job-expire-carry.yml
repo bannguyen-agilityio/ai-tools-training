@@ -1,8 +1,10 @@
 name: leavedesk-job-expire-carry
 
+# The schedule is off until plan 06 (leave_request_day) lets the job count leave taken;
+# before that the job refuses to run. Re-enable by uncommenting the schedule.
 on:
-  schedule:
-    - cron: "10 17 * * *" # 00:10 daily, Asia/Ho_Chi_Minh (UTC+7)
+  # schedule:
+  #   - cron: "10 17 * * *" # 00:10 daily, Asia/Ho_Chi_Minh (UTC+7)
   workflow_dispatch:
 
 jobs:

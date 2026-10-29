@@ -69,6 +69,9 @@ async def active_employees(db: AsyncSession) -> list[Employee]:
 async def days_for(
     db: AsyncSession, employee_id: uuid.UUID, leave_type_code: str, leave_year: int
 ) -> list[DayUse]:
-    """Approved and pending half days. `leave_request_day` arrives with plan 06 (R12), so
-    until then there is no leave to count and this returns nothing."""
-    return []
+    """Approved and pending half days from `leave_request_day`.
+
+    That table arrives with plan 06 (R12). Until then this refuses to answer: returning no
+    leave would make every employee look like they took none, and the jobs would write wrong
+    rows into the append-only ledger."""
+    raise NotImplementedError("leave_request_day is not built yet (plan 06)")
