@@ -51,6 +51,10 @@ Review before committing, on the working-tree diff (`git diff` plus new files).
 3. Fix every confirmed correctness, security or privacy finding, then rerun step 4 on the affected checks. Do not fix style nits outside this task's scope; list them instead.
 4. Skip nothing silently. Record each finding with its outcome (fixed, not fixed with reason, or false positive) for the PR body and the report. If a finding is serious and cannot be fixed in scope, stop before pushing and ask the user.
 
+## 5b. Record open items in the plan
+
+Before committing, append every concern that stays open to the task's plan file in `specs/<NNN>-*/plans/`, under a `## Open items (after PR #<n>)` heading (create it; update it if it exists). Include: unfixed review findings, checks not run (e2e, full pytest, pyright, staging), deviations from the plan, **[Assumption]** items, and decisions deferred to a later slice (name the slice). One bullet each, with what is wrong and where it should be fixed. Remove items you fixed. Commit the plan change with the code, and link the section from the PR body. If nothing is open, write "None" rather than skipping it.
+
 ## 6. Commit, push, PR
 
 1. `git status` / `git diff`: stage only files for this task by name.
@@ -77,7 +81,7 @@ Keep it short and factual:
 - Reviews: code and security review run (or light pass), findings and outcomes.
 - Commit hash, branch, PR link.
 - Board: Status, assignees, sub-issue progress (n of m).
-- Remaining blockers, assumptions and open questions.
+- Remaining blockers, assumptions and open questions, matching the plan file's "Open items" section (step 5b).
 
 ## Rules
 

@@ -1,0 +1,18 @@
+/* Contrast ratios are against --bg (#fff) unless noted; all pass WCAG 2.1 AA. */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f6f8;
+  --text: #1a2330; /* 15.9:1 */
+  --text-muted: #4a5568; /* 7.5:1 */
+  --border: #6b7280; /* 4.8:1, meets 3:1 for UI components */
+  --primary: #1d4ed8; /* 6.7:1; white on it 6.7:1 */
+  --primary-text: #ffffff;
+  --danger: #b91c1c; /* 6.5:1; white on it 6.5:1 */
+  --success: #166534; /* 7.1:1 */
+  --focus: #1d4ed8;
+  --target: 44px;
+  --gap: 16px;
+  --radius: 6px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+}

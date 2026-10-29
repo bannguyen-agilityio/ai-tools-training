@@ -11,6 +11,7 @@ from app.core.errors import ProblemError, install_error_handlers
 from app.core.logging import configure_logging
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.modules.audit.router import router as audit_router
+from app.spa import mount_spa
 
 
 def create_app() -> FastAPI:
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(audit_router)
+    mount_spa(app)
     return app
 
 

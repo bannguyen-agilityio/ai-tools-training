@@ -16,7 +16,7 @@ async def test_unhandled_exception_is_generic_problem_json(
 
 
 async def test_not_found_is_problem_json(client: httpx.AsyncClient) -> None:
-    r = await client.get("/nope")
+    r = await client.get("/api/v1/nope")
     assert r.status_code == 404
     assert r.headers["content-type"].startswith("application/problem+json")
 
