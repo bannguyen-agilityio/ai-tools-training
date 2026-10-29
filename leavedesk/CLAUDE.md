@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, balance ledger + `compute_balance` + rollover/expire_carry jobs (no balances API yet; used/reserved days arrive with `leave_request_day`, plan 06). Not built: requests, approvals, holidays, notifications, other jobs, `EmailSender`, frontend.
+LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, balance ledger + `compute_balance` + rollover/expire_carry jobs (no balances API yet; used/reserved days arrive with `leave_request_day`, plan 06), frontend shell (R31 primitives in `frontend/src/ui`, served by `app/spa.py`; see `frontend/README.md`). Not built: requests, approvals, holidays, notifications, other jobs, `EmailSender`, feature screens.
 
 ## Sources
 
@@ -71,4 +71,5 @@ Frontend checks: Vitest, React Testing Library, eslint, `tsc --noEmit`; Playwrig
 
 - Write auth, authorization and balance tests first. Run `security-review` on auth before go-live.
 - Dates unambiguous ("Mon 2 Nov 2026"). UI passes R31: 360 px, 44 px targets, WCAG 2.1 AA, labelled fields, focus on first error, destructive confirms default to "Keep".
+- Implementing a task, issue or plan ("implement leavedesk-NN-rNN", "#40"): invoke the `implement-task` skill first, before reading code or writing any. It drives the board, branch, tests, review and PR. Delegate large independent chunks to sub-agents when asked.
 - Git: branch off `main`; conventional commits (`docs:`, `feat:`, `refactor:`).
