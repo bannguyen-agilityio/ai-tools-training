@@ -22,6 +22,7 @@ BACKOFF = (
     timedelta(hours=12),
 )
 MAX_ATTEMPTS = 5
+LINK_TEMPLATES = frozenset({"invite", "password_reset"})
 BATCH = 50
 
 
@@ -60,6 +61,10 @@ async def drain_due(db: AsyncSession, sender: EmailSender, now: datetime | None 
             row.status = "sent"
             row.sent_at = fixed_now or datetime.now(UTC)
             row.last_error = None
+            if row.template in LINK_TEMPLATES:
+                # The link is a live credential (R3): keep it only until delivery.
+                row.body = "[sign-in link removed after delivery]"
+                row.payload = {"recipient_name": row.payload.get("recipient_name", "")}
         await db.commit()
     return attempted
 
