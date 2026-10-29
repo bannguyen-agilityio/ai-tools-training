@@ -8,30 +8,30 @@ Source of truth: `../intent.md` and `../spec.md` (draft 2026-10-28). No code is 
 
 ## Plans in dependency order
 
-| # | File | R-numbers | Phase | Depends on |
-|---|---|---|---|---|
-| 00 | `R-platform.md` | platform (no R#): environments, deploy pipeline, migrations on deploy, rollback, job workflows | P1 | gate |
-| 01 | `R-029-R-030.md` | API security baseline, audit log, backend skeleton, core tables | P1 | gate |
-| 02 | `R-031.md` | Frontend shell, UX/a11y standard, SPA serving | P1 | 01 (serving only; can run parallel) |
-| 03 | `R-026-R-035.md` | Email outbox + in-app notifications infrastructure | P1 | 01 |
-| 04 | `R-001-R-002-R-003.md` | Login, account protection, invite/reset | P1 | 01, 02, 03 |
-| 05 | `R-005-R-007-R-008.md` | Leave types, ledger, `compute_balance`, rollover/expiry jobs | P1 | 01 |
-| 06 | `R-006-R-011.md` | Working-day calculation, public holidays, request tables | P1 | 01, 02, 04 |
-| 07 | `R-009-R-023.md` | Employees, teams, loop check, pro-rating | P1 | 04, 05 |
-| 08 | `R-024.md` | Starting balances by hand | P1 | 05, 07 |
-| 09 | `R-010.md` | Balance display and sufficiency check | P1 | 05, 06 |
-| 10 | `R-012-R-013-R-017.md` | Create request, validation/overlap, routing | P1 | 06, 07, 09 |
-| 11 | `R-014-R-015.md` | Notice rules, Sick exemption/backdating, HR-entered leave | P1 | 10 |
-| 12 | `R-016.md` | Employee cancels own Pending | P1 | 10 |
-| 13 | `R-018-R-019-R-022.md` | Approve, reject, unauthorised-approver 403 | P1 | 10 |
-| 14 | `R-020.md` | Cover for an absent manager | P1 | 13 |
-| 15 | `R-021.md` | HR cancels Approved | P1 | 12, 13 |
-| 16 | `R-004.md` | Deactivation | P1 | 07, 12 |
-| 17 | `R-036.md` | Deputy HR admin | P1 | 13 |
-| 18 | `R-025.md` | HR "All leave" list | P1 | 10, 13 |
-| 19 | `R-032-R-033-R-034.md` | Performance, backup/restore, retention | P1 | 01 (finalise after 18) |
-| 20 | `R-027.md` | Team calendar | **P2** | 13, 07 |
-| 21 | `R-028.md` | Monthly report | **P2** | 13, 08, 25 data |
+| # | File | R-numbers | Phase | Depends on | Worktree |
+|---|---|---|---|---|---|
+| 00 | `R-platform.md` | platform (no R#): environments, deploy pipeline, migrations on deploy, rollback, job workflows | P1 | gate | `leavedesk-00-platform-r29-r30` |
+| 01 | `R-029-R-030.md` | API security baseline, audit log, backend skeleton, core tables | P1 | gate | `leavedesk-00-platform-r29-r30` |
+| 02 | `R-031.md` | Frontend shell, UX/a11y standard, SPA serving | P1 | 01 (serving only; can run parallel) | `leavedesk-02-r31` |
+| 03 | `R-026-R-035.md` | Email outbox + in-app notifications infrastructure | P1 | 01 | `leavedesk-03-r26-r35` |
+| 04 | `R-001-R-002-R-003.md` | Login, account protection, invite/reset | P1 | 01, 02, 03 | `leavedesk-04-r1-r2-r3` |
+| 05 | `R-005-R-007-R-008.md` | Leave types, ledger, `compute_balance`, rollover/expiry jobs | P1 | 01 | `leavedesk-05-r5-r7-r8` |
+| 06 | `R-006-R-011.md` | Working-day calculation, public holidays, request tables | P1 | 01, 02, 04 | `leavedesk-06-r6-r11` |
+| 07 | `R-009-R-023.md` | Employees, teams, loop check, pro-rating | P1 | 04, 05 | `leavedesk-07-r9-r23` |
+| 08 | `R-024.md` | Starting balances by hand | P1 | 05, 07 | `leavedesk-08-r24` |
+| 09 | `R-010.md` | Balance display and sufficiency check | P1 | 05, 06 | `leavedesk-09-r10` |
+| 10 | `R-012-R-013-R-017.md` | Create request, validation/overlap, routing | P1 | 06, 07, 09 | `leavedesk-10-r12-r13-r17` |
+| 11 | `R-014-R-015.md` | Notice rules, Sick exemption/backdating, HR-entered leave | P1 | 10 | `leavedesk-11-r14-r15` |
+| 12 | `R-016.md` | Employee cancels own Pending | P1 | 10 | `leavedesk-12-r16` |
+| 13 | `R-018-R-019-R-022.md` | Approve, reject, unauthorised-approver 403 | P1 | 10 | `leavedesk-13-r18-r19-r22` |
+| 14 | `R-020.md` | Cover for an absent manager | P1 | 13 | `leavedesk-14-r20` |
+| 15 | `R-021.md` | HR cancels Approved | P1 | 12, 13 | `leavedesk-15-r21` |
+| 16 | `R-004.md` | Deactivation | P1 | 07, 12 | `leavedesk-16-r4` |
+| 17 | `R-036.md` | Deputy HR admin | P1 | 13 | `leavedesk-17-r36` |
+| 18 | `R-025.md` | HR "All leave" list | P1 | 10, 13 | `leavedesk-18-r25` |
+| 19 | `R-032-R-033-R-034.md` | Performance, backup/restore, retention | P1 | 01 (finalise after 18) | `leavedesk-19-r32-r33-r34` |
+| 20 | `R-027.md` | Team calendar | **P2** | 13, 07 | `leavedesk-20-r27` |
+| 21 | `R-028.md` | Monthly report | **P2** | 13, 08, 25 data | `leavedesk-21-r28` |
 
 ## Recommended execution sequence
 
