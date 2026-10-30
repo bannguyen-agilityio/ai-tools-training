@@ -20,9 +20,11 @@ from app.modules.auth.router import router as auth_router
 from app.modules.balances.hr_router import router as balances_router
 from app.modules.balances.me_router import router as me_balances_router
 from app.modules.calendar.router import router as calendar_router
+from app.modules.deputy.router import router as deputy_router
 from app.modules.email.router import router as email_router
 from app.modules.employees.router import router as employees_router
 from app.modules.holidays.router import router as holidays_router
+from app.modules.hr_leave.router import router as hr_leave_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.requests.hr_router import router as hr_requests_router
 from app.modules.requests.router import router as requests_router
@@ -71,8 +73,10 @@ def create_app() -> FastAPI:
     app.include_router(me_balances_router)
     app.include_router(calendar_router)
     app.include_router(email_router)
+    app.include_router(deputy_router)
     app.include_router(employees_router)
     app.include_router(holidays_router)
+    app.include_router(hr_leave_router)
     app.include_router(teams_router)
     app.include_router(notifications_router)
     app.include_router(requests_router)
