@@ -40,7 +40,7 @@ export function BalanceList({ rows, onSelect, checkColumn }: Props) {
               <td className="balance-table__check" />
             ) : (
               <td>
-                <Button variant="secondary" aria-label={`Enter balances for ${r.employee_name}`} onClick={() => onSelect?.(r)}>
+                <Button variant="secondary" aria-label={`Enter or correct balances for ${r.employee_name}`} onClick={() => onSelect?.(r)}>
                   Enter or correct
                 </Button>
               </td>
