@@ -1,6 +1,6 @@
 """Validation pipeline shared by preview and submit (R12, R13, R6, R10).
 
-Order: shape -> past date -> working days -> sufficiency -> overlap. Each step returns a
+Order: shape -> type/past date -> working days -> overlap -> sufficiency. Each step returns a
 `ProblemError`; `evaluate` collects them so preview can show every problem, and submit raises
 the first. Notice rules and Sick limits beyond the backdate window belong to plan 11.
 """
@@ -60,11 +60,10 @@ def check_shape(body: RequestIn) -> ProblemError | None:
     return None
 
 
-async def check_past(db: AsyncSession, body: RequestIn, today: date) -> ProblemError | None:
+def check_past(leave_type: LeaveType, body: RequestIn, today: date) -> ProblemError | None:
     """Annual and Unpaid cannot start in the past (R13); Sick may go back its backdate window
     (R15, `leave_type.allow_backdate_days`)."""
-    leave_type = await db.get(LeaveType, body.leave_type)
-    backdate = leave_type.allow_backdate_days if leave_type else 0
+    backdate = leave_type.allow_backdate_days
     if (today - body.start_date).days > backdate:
         message = (
             "Start date is in the past."
@@ -99,7 +98,11 @@ async def evaluate(
     if shape is not None:
         ev.errors.append(shape)
         return ev
-    past = await check_past(db, body, today)
+    leave_type = await db.get(LeaveType, body.leave_type)
+    if leave_type is None:
+        ev.errors.append(_field_error(422, "UNKNOWN_TYPE", "leave_type", "Unknown leave type."))
+        return ev
+    past = check_past(leave_type, body, today)
     if past is not None:
         ev.errors.append(past)
     try:
@@ -111,7 +114,12 @@ async def evaluate(
         return ev
     ev.per_year = days_per_year(ev.rows)
 
-    leave_type = await db.get(LeaveType, body.leave_type)
+    # Overlap first: a duplicate of a Pending request is already reserved, so "not enough leave"
+    # would mislead.
+    overlap = await check_overlap(db, employee, ev.rows)
+    if overlap is not None:
+        ev.errors.append(overlap)
+
     if leave_type is not None and leave_type.is_limited:
         ev.available_before = await available_by_year(
             db, employee, body.leave_type, ev.per_year, today
@@ -122,7 +130,4 @@ async def evaluate(
                 ev.errors.append(insufficient(body.leave_type, year, shortfall))
                 break
 
-    overlap = await check_overlap(db, employee, ev.rows)
-    if overlap is not None:
-        ev.errors.append(overlap)
     return ev

@@ -12,7 +12,7 @@ Status = Literal["pending", "approved", "rejected", "cancelled"]
 
 
 def _blank_to_none(value: str | None) -> str | None:
-    return value or None
+    return (value or "").strip() or None
 
 
 Note = Annotated[str | None, Field(max_length=500), AfterValidator(_blank_to_none)]

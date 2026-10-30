@@ -418,3 +418,37 @@ async def test_preview_reports_overlap_and_cross_year(client, staff) -> None:  #
         await post(client, emp, body("2026-12-30", "2027-01-05", leave_type="unpaid"), PREVIEW)
     ).json()
     assert [y["year"] for y in split["per_year"]] == [2026, 2027]
+
+
+async def test_duplicate_reports_overlap_not_insufficient(client, staff, owner_engine) -> None:  # type: ignore[no-untyped-def]
+    emp, _ = staff
+    await seed_year(owner_engine, emp.employee_id, "entitlement", "1")
+    assert (await post(client, emp, body("2026-06-08"))).status_code == 201
+    dup = await post(client, emp, body("2026-06-08"))
+    assert dup.status_code == 409 and dup.json()["error"]["code"] == "OVERLAP"
+
+
+async def test_whitespace_note_is_dropped(client, staff) -> None:  # type: ignore[no-untyped-def]
+    emp, _ = staff
+    resp = await post(client, emp, body("2026-06-08", note="   "))
+    assert resp.status_code == 201 and resp.json()["note"] is None
+
+
+async def test_cursor_is_stable_when_new_requests_arrive(client, staff) -> None:  # type: ignore[no-untyped-def]
+    emp, _ = staff
+    for d in ("2026-06-08", "2026-06-09", "2026-06-10"):
+        assert (await post(client, emp, body(d))).status_code == 201
+    first = (
+        await client.get("/api/v1/me/requests", params={"limit": 2}, headers=emp.headers)
+    ).json()
+    assert (await post(client, emp, body("2026-06-15"))).status_code == 201
+    rest = (
+        await client.get(
+            "/api/v1/me/requests",
+            params={"limit": 2, "cursor": first["next_cursor"]},
+            headers=emp.headers,
+        )
+    ).json()
+    assert [i["start_date"] for i in rest["items"]] == ["2026-06-08"]
+    bad = await client.get("/api/v1/me/requests", params={"cursor": "zzz"}, headers=emp.headers)
+    assert bad.status_code == 422

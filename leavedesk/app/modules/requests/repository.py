@@ -2,7 +2,7 @@ import uuid
 from collections.abc import Collection
 from datetime import date
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, or_, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.identity.models import Employee
@@ -25,8 +25,8 @@ async def find_overlap(
     """The employee's own Pending/Approved request sharing a (date, slot) with `rows` (R13)."""
     if not rows:
         return None
-    clash = or_(
-        *(and_(LeaveRequestDay.leave_date == d, LeaveRequestDay.slot == s) for d, s, _ in rows)
+    clash = tuple_(LeaveRequestDay.leave_date, LeaveRequestDay.slot).in_(
+        [(d, s) for d, s, _ in rows]
     )
     return await db.scalar(
         select(LeaveRequest)
@@ -57,7 +57,7 @@ async def list_own(
     employee_id: uuid.UUID,
     status: str | None,
     year: int | None,
-    offset: int,
+    after: tuple[date, uuid.UUID] | None,
     limit: int,
 ) -> list[LeaveRequest]:
     q = select(LeaveRequest).where(LeaveRequest.employee_id == employee_id)
@@ -67,7 +67,15 @@ async def list_own(
         q = q.where(
             LeaveRequest.start_date <= date(year, 12, 31), LeaveRequest.end_date >= date(year, 1, 1)
         )
+    if after:
+        start, last_id = after
+        q = q.where(
+            or_(
+                LeaveRequest.start_date < start,
+                and_(LeaveRequest.start_date == start, LeaveRequest.id > last_id),
+            )
+        )
     result = await db.scalars(
-        q.order_by(LeaveRequest.start_date.desc(), LeaveRequest.id).offset(offset).limit(limit)
+        q.order_by(LeaveRequest.start_date.desc(), LeaveRequest.id).limit(limit)
     )
     return list(result)

@@ -25,7 +25,6 @@ from app.modules.requests.schemas import (
     YearBalance,
 )
 
-MAX_OFFSET = 1_000_000
 OVERLAP_RACE = "This overlaps your existing leave."
 
 
@@ -102,7 +101,12 @@ async def create(
     except IntegrityError as exc:
         # The partial unique index is the backstop if the pre-check missed a concurrent insert.
         await db.rollback()
-        raise ProblemError(409, OVERLAP_RACE, code="OVERLAP") from exc
+        raise ProblemError(
+            409,
+            OVERLAP_RACE,
+            code="OVERLAP",
+            details=[{"field": "start_date", "issue": OVERLAP_RACE}],
+        ) from exc
 
     # Detail has ids and quantities only: never the type or the note (R30, §8).
     await audit.record(
@@ -130,16 +134,19 @@ async def get(db: AsyncSession, viewer: Employee, request_id: uuid.UUID) -> Requ
     return redact(viewer, req)
 
 
-def _decode_cursor(cursor: str | None) -> int:
+def _decode_cursor(cursor: str | None) -> tuple[date, uuid.UUID] | None:
+    """Keyset cursor `start_date|id`, so rows created between pages cannot shift a page."""
     if not cursor:
-        return 0
+        return None
     try:
-        offset = int(base64.urlsafe_b64decode(cursor.encode()))
+        start, last_id = base64.urlsafe_b64decode(cursor.encode()).decode().split("|")
+        return date.fromisoformat(start), uuid.UUID(last_id)
     except (ValueError, binascii.Error) as exc:
         raise ProblemError(422, "Invalid cursor") from exc
-    if not 0 <= offset <= MAX_OFFSET:
-        raise ProblemError(422, "Invalid cursor")
-    return offset
+
+
+def _encode_cursor(req: LeaveRequest) -> str:
+    return base64.urlsafe_b64encode(f"{req.start_date.isoformat()}|{req.id}".encode()).decode()
 
 
 async def list_own(
@@ -150,8 +157,8 @@ async def list_own(
     limit: int,
     cursor: str | None,
 ) -> RequestList:
-    offset = _decode_cursor(cursor)
-    rows = await repository.list_own(db, user.id, status, year, offset, limit + 1)
-    more = len(rows) > limit
-    next_cursor = base64.urlsafe_b64encode(str(offset + limit).encode()).decode() if more else None
-    return RequestList(items=[redact(user, r) for r in rows[:limit]], next_cursor=next_cursor)
+    after = _decode_cursor(cursor)
+    rows = await repository.list_own(db, user.id, status, year, after, limit + 1)
+    page = rows[:limit]
+    next_cursor = _encode_cursor(page[-1]) if len(rows) > limit else None
+    return RequestList(items=[redact(user, r) for r in page], next_cursor=next_cursor)
