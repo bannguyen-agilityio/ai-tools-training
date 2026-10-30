@@ -35,6 +35,7 @@ export interface LeaveRequest {
 
 export interface Preview {
   valid: boolean;
+  notice_warning: boolean;
   working_days: number | null;
   per_year: {
     year: number;

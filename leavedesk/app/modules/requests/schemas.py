@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field, StringConstraints
 
 from app.core.schemas import StrictModel
 from app.modules.leave_days.calendar import Part
@@ -33,6 +33,15 @@ class CancelIn(StrictModel):
     """Body of `POST /requests/{id}/cancel` (spec 6.2 #12). HR's `reason` arrives with R21."""
 
     version: Annotated[int, Field(ge=1)]
+
+
+class HrRequestIn(RequestIn):
+    """Body of `POST /hr/requests` (spec 6.2 #17)."""
+
+    employee_id: uuid.UUID
+    entry_reason: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)
+    ]
 
 
 class RequestOut(BaseModel):

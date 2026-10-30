@@ -164,4 +164,21 @@ describe("requests screens", () => {
       expect(onCancel).not.toHaveBeenCalled();
     });
   });
+
+  it("shows the short-notice warning on the detail page", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      json({ ...base, leave_type: "annual", notice_warning: true }),
+    );
+    wrap("/requests/r1");
+    expect(await screen.findByRole("status")).toHaveTextContent(/Short notice/);
+  });
+
+  it("shows no warning when notice is fine", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      json({ ...base, leave_type: "annual" }),
+    );
+    wrap("/requests/r1");
+    await screen.findByText("Leave request");
+    expect(screen.queryByRole("status")).toBeNull();
+  });
 });
