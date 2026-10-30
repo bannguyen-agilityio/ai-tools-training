@@ -12,7 +12,8 @@ name: leavedesk-deploy
 
 on:
   push:
-    branches: [main, staging]
+    # TEMPORARY (PR #72): remove worktree-fix-deploy-frontend before merging.
+    branches: [main, staging, worktree-fix-deploy-frontend]
     paths: ["leavedesk/**", ".github/workflows/leavedesk-deploy*.yml"]
   workflow_dispatch:
     inputs:
@@ -45,6 +46,8 @@ jobs:
             case "$BRANCH" in
               main) env_name=production ;;
               staging) env_name=staging ;;
+              # TEMPORARY (PR #72): test branch deploys to staging.
+              worktree-fix-deploy-frontend) env_name=staging ;;
               *) echo "::error::cannot infer an environment from '${BRANCH:-a tag}'; run on main/staging or set the environment input"; exit 1 ;;
             esac
           fi
