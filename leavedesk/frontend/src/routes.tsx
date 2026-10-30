@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
 import { ApprovalList } from "./features/approvals/ApprovalList";
+import { CalendarPage } from "./features/calendar/CalendarPage";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { MyRequests } from "./features/requests/MyRequests";
 import { NewRequest } from "./features/requests/NewRequest";
@@ -9,7 +10,9 @@ import { RequestDetail } from "./features/requests/RequestDetail";
 import { BalancesPage } from "./features/hr/balances/BalancesPage";
 import { EmployeesPage } from "./features/hr/employees/EmployeesPage";
 import { HolidaysPage } from "./features/hr/holidays/HolidaysPage";
+import { AllLeavePage } from "./features/hr/leave/AllLeavePage";
 import { MonthlyReportPage } from "./features/hr/report/MonthlyReportPage";
+import { SettingsPage } from "./features/hr/settings/SettingsPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
 import { Layout } from "./ui/Layout";
@@ -18,13 +21,16 @@ import type { NavItem } from "./ui/Nav";
 const NAV: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/requests", label: "My requests" },
+  { to: "/calendar", label: "Calendar" },
   { to: "/sample-form", label: "Sample form" },
 ];
 const HR_NAV: NavItem[] = [
+  { to: "/hr/leave", label: "All leave" },
   { to: "/hr/employees", label: "Employees" },
   { to: "/hr/balances", label: "Balances" },
   { to: "/hr/teams", label: "Teams" },
   { to: "/hr/holidays", label: "Holidays" },
+  { to: "/hr/settings", label: "Settings" },
   { to: "/hr/report", label: "Monthly report" },
 ];
 
@@ -44,6 +50,7 @@ export function AppRoutes() {
         <Route path="/requests" element={<MyRequests />} />
         <Route path="/requests/new" element={<NewRequest />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/approvals" element={<ApprovalList />} />
         <Route path="/sample-form" element={<SampleForm />} />
         <Route
@@ -75,6 +82,22 @@ export function AppRoutes() {
           element={
             <RequireHr>
               <TeamsPage />
+            </RequireHr>
+          }
+        />
+        <Route
+          path="/hr/leave"
+          element={
+            <RequireHr>
+              <AllLeavePage />
+            </RequireHr>
+          }
+        />
+        <Route
+          path="/hr/settings"
+          element={
+            <RequireHr>
+              <SettingsPage />
             </RequireHr>
           }
         />

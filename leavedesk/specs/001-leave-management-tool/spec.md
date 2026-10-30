@@ -144,7 +144,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 **R17 [P1] Routing.**
 - Given a request from an employee with a direct manager, when it is created, then it is assigned to that manager and the manager is emailed.
 - Given a request from a manager, when it is created, then it is assigned to HR and HR is emailed.
-- Given a request that has no route, when it is submitted, then it is refused with a clear `422` and nothing is saved: an employee with no active direct manager (`NO_APPROVER`), a manager when no HR approver other than them exists (`NO_APPROVER`), and an HR admin's own request until the deputy route ships (`ROUTE_UNAVAILABLE`, plan 17). **[Assumption: A-10, not in the intent]**
+- Given a request that has no route, when it is submitted, then it is refused with a clear `422` and nothing is saved: an employee with no active direct manager (`NO_APPROVER`), a manager when no HR approver other than them exists (`NO_APPROVER`), and an HR admin's own request when no active deputy is set (`NO_APPROVER`; with a deputy it routes to `queue=deputy`, R36). **[Assumption: A-10, not in the intent]**
 - Given a manager's request, then "HR is emailed" means every active HR approver (HR admin or deputy) except the requester, each emailed and notified once. **[Assumption: A-14]**
 - Given a person's own request, when they try to approve it, then it is refused, whatever their role.
 
@@ -184,6 +184,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 
 **R25 [P1] HR sees all approved leave.**
 - Given HR, when they open "All leave", then they see all Approved leave (and can filter by Pending, date range, employee, team and type), with real leave types.
+- **[Assumption]** `from`/`to` match any request overlapping the range; results are ordered by start date then id, 50 per page (max 200), status defaults to Approved and takes one value at a time. The deputy gets 403.
 
 ### 4.6 Notifications
 
@@ -213,6 +214,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given any viewer who is not HR and not the leave owner, when the entry is Sick leave, then it is shown as "Off", with no type, no note, and no pending/approved distinction that would reveal the type (see C-2).
 - Given the viewer is HR, when the calendar opens, then they can see all teams and the real leave type.
 - Given a request from another team, when the API is called by an employee for another team, then it returns 403.
+- **[Assumption: A-21]** A viewer's team is `employee.team_id` (managers, the deputy and HR have one too); the calendar defaults to it and a different `team_id` is 403 for everyone except HR admins. A person with no team sees an empty calendar. Deactivated staff appear for HR only (R34). Masked Sick entries are built with exactly `employee_id, employee_name, date, slot, label`, and entries are ordered by date, name, slot, so nothing depends on the request. The screen is a day-by-day list (a month grid is not built yet).
 
 ### 4.8 Monthly report (P2)
 
