@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from typing import Any
 
 import httpx
 import pytest
@@ -25,10 +26,11 @@ def body(**over: object) -> dict[str, object]:
     }
 
 
-async def create(client: httpx.AsyncClient, hr: Login, **over: object) -> dict:  # type: ignore[type-arg]
+async def create(client: httpx.AsyncClient, hr: Login, **over: object) -> dict[str, Any]:
     r = await client.post(URL, json=body(**over), headers=hr.mutating_headers)
     assert r.status_code == 201, r.text
-    return r.json()
+    created: dict[str, Any] = r.json()
+    return created
 
 
 # --- 401 / 403 matrix ----------------------------------------------------------------------
@@ -200,7 +202,9 @@ async def test_indirect_loop_and_self_refused(
     client: httpx.AsyncClient, make_login: MakeLogin
 ) -> None:
     hr = await make_login("hr")
-    a, b, c = (await create(client, hr) for _ in range(3))
+    a = await create(client, hr)
+    b = await create(client, hr)
+    c = await create(client, hr)
     h = hr.mutating_headers
     for child, parent in ((a, b), (b, c)):
         r = await client.patch(f"{URL}/{child['id']}", json={"manager_id": parent["id"]}, headers=h)
