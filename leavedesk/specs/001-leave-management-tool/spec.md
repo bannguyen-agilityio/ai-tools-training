@@ -222,6 +222,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given HR selects a month, when they click Export, then a file (Excel or CSV) is produced in under 10 minutes of HR effort, with: days taken per employee per type, remaining balances, and who was off and when.
 - Given any cell starting with `=`, `+`, `-`, `@` or tab, when it is written, then it is prefixed so a spreadsheet cannot run it as a formula.
 - Given a non-HR user calls the export endpoint, then the API returns 403. Every export is audited (who, month, time).
+- **[Assumption: A-20]** The file has three sections (sheets in xlsx): days taken per employee and type (Approved only, one half day = 0.5), remaining balances for Annual (available and carried) and Sick for active employees as of the last day of the month in that leave year (entitlement less Approved days up to then; Pending is not counted), and who was off and when (one row per Approved request with a day in the month, with its full dates and the days that fall in the month). Pending, rejected and cancelled leave and all notes are left out. Row one says CONFIDENTIAL (xlsx also in the document properties and each sheet banner); the audit row holds actor, month, format and row count only. CSV is UTF-8 with a BOM so Excel reads Vietnamese names.
 
 ### 4.9 Non-functional
 

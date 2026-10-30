@@ -26,6 +26,7 @@ from app.modules.employees.router import router as employees_router
 from app.modules.holidays.router import router as holidays_router
 from app.modules.hr_leave.router import router as hr_leave_router
 from app.modules.notifications.router import router as notifications_router
+from app.modules.reports.router import router as reports_router
 from app.modules.requests.hr_router import router as hr_requests_router
 from app.modules.requests.router import router as requests_router
 from app.modules.teams.router import router as teams_router
@@ -79,6 +80,7 @@ def create_app() -> FastAPI:
     app.include_router(hr_leave_router)
     app.include_router(teams_router)
     app.include_router(notifications_router)
+    app.include_router(reports_router)
     app.include_router(requests_router)
     app.include_router(hr_requests_router)
     app.include_router(approvals_router)

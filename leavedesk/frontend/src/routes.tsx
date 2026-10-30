@@ -11,6 +11,7 @@ import { BalancesPage } from "./features/hr/balances/BalancesPage";
 import { EmployeesPage } from "./features/hr/employees/EmployeesPage";
 import { HolidaysPage } from "./features/hr/holidays/HolidaysPage";
 import { AllLeavePage } from "./features/hr/leave/AllLeavePage";
+import { MonthlyReportPage } from "./features/hr/report/MonthlyReportPage";
 import { SettingsPage } from "./features/hr/settings/SettingsPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
@@ -30,6 +31,7 @@ const HR_NAV: NavItem[] = [
   { to: "/hr/teams", label: "Teams" },
   { to: "/hr/holidays", label: "Holidays" },
   { to: "/hr/settings", label: "Settings" },
+  { to: "/hr/report", label: "Monthly report" },
 ];
 
 export function AppRoutes() {
@@ -96,6 +98,14 @@ export function AppRoutes() {
           element={
             <RequireHr>
               <SettingsPage />
+            </RequireHr>
+          }
+        />
+        <Route
+          path="/hr/report"
+          element={
+            <RequireHr>
+              <MonthlyReportPage />
             </RequireHr>
           }
         />
