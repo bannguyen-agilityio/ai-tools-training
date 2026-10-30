@@ -115,7 +115,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 
 **R12 [P1] Create a request.**
 - Given an active employee, when they pick type, start date, end date, and (for single days) Full / Morning / Afternoon, then a Pending request is created with the computed working days and an optional note.
-- Given the start day, when half-day is chosen, then it is only allowed when start = end. A multi-day request can mark the first day as afternoon-only and the last day as morning-only **[Assumption; see Q7]**.
+- Given a single-day request, when a half day is chosen, then start and end carry the same part (`am` or `pm`). Given a multi-day request, then the first day may be `full` or `pm` (afternoon only) and the last day `full` or `am` (morning only); starting on `am` or ending on `pm` is refused (**decided, Q7**; A-22).
 - Given any half day, when days are counted, then it counts as 0.5.
 
 **R13 [P1] Validation and overlap.**
@@ -141,6 +141,8 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 **R17 [P1] Routing.**
 - Given a request from an employee with a direct manager, when it is created, then it is assigned to that manager and the manager is emailed.
 - Given a request from a manager, when it is created, then it is assigned to HR and HR is emailed.
+- Given a request that has no route, when it is submitted, then it is refused with a clear `422` and nothing is saved: an employee with no active direct manager (`NO_APPROVER`), a manager when no HR approver other than them exists (`NO_APPROVER`), and an HR admin's own request until the deputy route ships (`ROUTE_UNAVAILABLE`, plan 17). **[Assumption: A-10, not in the intent]**
+- Given a manager's request, then "HR is emailed" means every active HR approver (HR admin or deputy) except the requester, each emailed and notified once. **[Assumption: A-14]**
 - Given a person's own request, when they try to approve it, then it is refused, whatever their role.
 
 **R18 [P1] Approve.**
