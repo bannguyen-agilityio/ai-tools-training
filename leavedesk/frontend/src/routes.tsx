@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
+import { ApprovalList } from "./features/approvals/ApprovalList";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { MyRequests } from "./features/requests/MyRequests";
 import { NewRequest } from "./features/requests/NewRequest";
@@ -27,7 +28,13 @@ const HR_NAV: NavItem[] = [
 
 export function AppRoutes() {
   const me = useMe();
-  const nav = me.data?.role === "hr" ? [...NAV, ...HR_NAV] : NAV;
+  const role = me.data?.role;
+  const deciders: NavItem[] =
+    role === "manager" || role === "hr" || me.data?.is_hr_deputy
+      ? [{ to: "/approvals", label: "Approvals" }]
+      : [];
+  const base = [...NAV, ...deciders];
+  const nav = role === "hr" ? [...base, ...HR_NAV] : base;
   return (
     <Layout nav={nav}>
       <Routes>
@@ -35,6 +42,7 @@ export function AppRoutes() {
         <Route path="/requests" element={<MyRequests />} />
         <Route path="/requests/new" element={<NewRequest />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
+        <Route path="/approvals" element={<ApprovalList />} />
         <Route path="/sample-form" element={<SampleForm />} />
         <Route
           path="/hr/holidays"
