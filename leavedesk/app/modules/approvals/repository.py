@@ -27,6 +27,23 @@ async def pending_for(db: AsyncSession, actor: Employee) -> list[LeaveRequest]:
     return list(result)
 
 
+async def pending_cover(db: AsyncSession, actor: Employee) -> list[LeaveRequest]:
+    """Other managers' reports' Pending items (scope=cover): never the actor's own reports or own
+    requests."""
+    result = await db.scalars(
+        select(LeaveRequest)
+        .where(
+            LeaveRequest.status == "pending",
+            LeaveRequest.queue == "manager",
+            LeaveRequest.assigned_to.is_not(None),
+            LeaveRequest.assigned_to != actor.id,
+            LeaveRequest.employee_id != actor.id,
+        )
+        .order_by(LeaveRequest.submitted_at, LeaveRequest.id)
+    )
+    return list(result)
+
+
 async def decide(
     db: AsyncSession,
     request_id: uuid.UUID,
@@ -35,6 +52,7 @@ async def decide(
     status: str,
     actor_id: uuid.UUID,
     reason: str | None,
+    on_behalf_of: uuid.UUID | None = None,
 ) -> LeaveRequest | None:
     """Guarded update: only a Pending row at `version` changes. None: someone got there first."""
     now = datetime.now(UTC)
@@ -48,6 +66,7 @@ async def decide(
         .values(
             status=status,
             decided_by=actor_id,
+            decided_on_behalf_of=on_behalf_of,
             decided_at=now,
             decision_reason=reason,
             version=LeaveRequest.version + 1,

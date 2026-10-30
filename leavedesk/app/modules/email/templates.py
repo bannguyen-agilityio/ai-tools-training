@@ -16,6 +16,7 @@ class Event(StrEnum):
     REQUEST_CANCELLED_BY_EMPLOYEE = "request_cancelled_by_employee"
     REQUEST_CANCELLED_BY_HR = "request_cancelled_by_hr"
     REQUEST_APPROVED_ON_BEHALF = "request_approved_on_behalf"
+    REQUEST_REJECTED_ON_BEHALF = "request_rejected_on_behalf"
     INVITE = "invite"
     PASSWORD_RESET = "password_reset"
 
@@ -51,9 +52,12 @@ def _request(event: Event, p: dict[str, Any]) -> Rendered:
         case Event.REQUEST_CANCELLED_BY_HR:
             line = f"HR cancelled the leave for {when}."
             subject = "Leave cancelled by HR"
+        case Event.REQUEST_APPROVED_ON_BEHALF:
+            line = f"{p['actor_name']} approved the leave of {who} for {when} on your behalf."
+            subject = "Leave approved on your behalf"
         case _:
-            line = f"Your leave for {when} was approved on behalf of your manager."
-            subject = "Leave approved on behalf of the manager"
+            line = f"{p['actor_name']} rejected the leave of {who} for {when} on your behalf."
+            subject = "Leave rejected on your behalf"
     body = f"Hello {p['recipient_name']},\n\n{line}"
     if event is Event.REQUEST_REJECTED and p.get("rejection_reason"):
         body += f"\nReason: {p['rejection_reason']}"

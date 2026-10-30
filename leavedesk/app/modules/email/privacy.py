@@ -13,7 +13,15 @@ from typing import Any
 
 # Rejection reasons go to the employee only; see build_payload.
 ALLOWED_PAYLOAD_KEYS = frozenset(
-    {"recipient_name", "employee_name", "start_date", "end_date", "link", "rejection_reason"}
+    {
+        "recipient_name",
+        "employee_name",
+        "start_date",
+        "end_date",
+        "link",
+        "rejection_reason",
+        "actor_name",
+    }
 )
 _SICK = re.compile(r"\bsick\b", re.IGNORECASE)
 

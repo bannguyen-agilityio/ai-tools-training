@@ -13,7 +13,13 @@ function message(error: unknown): string | undefined {
 }
 
 /** Approve or reject one Pending request. A stale version shows the server's 409 message. */
-export function DecisionPanel({ request }: { request: LeaveRequest }) {
+export function DecisionPanel({
+  request,
+  onBehalfOf,
+}: {
+  request: LeaveRequest;
+  onBehalfOf?: string;
+}) {
   const [rejecting, setRejecting] = useState(false);
   const approve = useDecide(request.id, "approve");
   const reject = useDecide(request.id, "reject");
@@ -38,7 +44,11 @@ export function DecisionPanel({ request }: { request: LeaveRequest }) {
           pending={reject.isPending}
           serverError={reasonError}
           onSubmit={(reason) =>
-            reject.mutate({ version: request.version, reason })
+            reject.mutate({
+              version: request.version,
+              reason,
+              on_behalf_of: onBehalfOf,
+            })
           }
           onCancel={() => setRejecting(false)}
         />
@@ -46,7 +56,10 @@ export function DecisionPanel({ request }: { request: LeaveRequest }) {
         <>
           <Button
             disabled={approve.isPending}
-            onClick={() => approve.mutate({ version: request.version })}
+            onClick={() => approve.mutate({
+                version: request.version,
+                on_behalf_of: onBehalfOf,
+              })}
           >
             Approve
           </Button>{" "}

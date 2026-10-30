@@ -187,7 +187,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 ### 4.6 Notifications
 
 **R26 [P1] Email notifications.**
-- Given the events: request created, approved, rejected, cancelled by employee, cancelled by HR, approved on behalf, invite, password reset, when each occurs, then the right recipient gets one email.
+- Given the events: request created, approved, rejected, cancelled by employee, cancelled by HR, approved on behalf, rejected on behalf (both to the direct manager), invite, password reset, when each occurs, then the right recipient gets one email.
 - Given an email is sent, then it contains the date range and a link, but **not** the leave type when the type is Sick, and never the note. Rejection reasons go to the employee only. (hr-privacy; see C-2)
 - Given `EMAIL_BACKEND=mock` (development and tests only), when an event occurs, then the rendered email is stored in `email_outbox` with status `mocked` and nothing is sent.
 - Given SendGrid is down or rejects a message, when an event occurs, then the email stays in the outbox and is retried with back-off. The request is not lost, and HR can see failed sends.
