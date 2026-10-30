@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
 import { ApprovalList } from "./features/approvals/ApprovalList";
+import { CalendarPage } from "./features/calendar/CalendarPage";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { MyRequests } from "./features/requests/MyRequests";
 import { NewRequest } from "./features/requests/NewRequest";
@@ -19,6 +20,7 @@ import type { NavItem } from "./ui/Nav";
 const NAV: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/requests", label: "My requests" },
+  { to: "/calendar", label: "Calendar" },
   { to: "/sample-form", label: "Sample form" },
 ];
 const HR_NAV: NavItem[] = [
@@ -46,6 +48,7 @@ export function AppRoutes() {
         <Route path="/requests" element={<MyRequests />} />
         <Route path="/requests/new" element={<NewRequest />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/approvals" element={<ApprovalList />} />
         <Route path="/sample-form" element={<SampleForm />} />
         <Route

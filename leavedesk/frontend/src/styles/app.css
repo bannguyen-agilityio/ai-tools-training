@@ -240,6 +240,27 @@ a {
   }
 }
 
+.calendar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.calendar-list,
+.calendar-list ul {
+  list-style: none;
+  padding: 0;
+}
+.calendar-item {
+  border-left: 4px solid var(--border);
+  padding: 4px 8px;
+  margin-block: 4px;
+}
+.calendar-item--pending {
+  border-left-style: dashed;
+  font-style: italic;
+
 .filters {
   display: grid;
   gap: 8px 16px;
