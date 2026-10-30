@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from app.modules.balances.me_router import get_today
 from tests.conftest import Login, MakeLogin
 from tests.modules.balances.test_ledger_jobs import seed_year
-from tests.modules.requests.test_requests import body, post, set_manager
+from tests.modules.requests.conftest import set_manager
+from tests.modules.requests.test_requests import body, post
 
 TODAY = date(2026, 6, 1)
 LIST = "/api/v1/approvals"

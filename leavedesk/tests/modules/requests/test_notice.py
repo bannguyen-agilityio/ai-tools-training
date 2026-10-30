@@ -7,12 +7,8 @@ from sqlalchemy import text
 from app.modules.balances.me_router import get_today
 from app.modules.requests.notice import Notice, notice_check
 from tests.modules.balances.test_ledger_jobs import seed_year
-from tests.modules.requests import test_requests as base
-from tests.modules.requests.test_requests import PREVIEW, TODAY, body, post
-
-# Reuse the module fixtures (frozen "today", employee with a manager and balance).
-fixed_today = base.fixed_today
-staff = base.staff
+from tests.modules.requests.conftest import TODAY
+from tests.modules.requests.test_requests import PREVIEW, body, post
 
 HR_CREATE = "/api/v1/hr/requests"
 

@@ -85,3 +85,19 @@ export function useRequest(id: string) {
     queryFn: () => api<LeaveRequest>(`/requests/${id}`),
   });
 }
+
+export function useCancelRequest(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (version: number) =>
+      api<LeaveRequest>(`/requests/${id}/cancel`, {
+        method: "POST",
+        body: { version },
+      }),
+    onSuccess: (updated) => {
+      qc.setQueryData(["request", id], updated);
+      void qc.invalidateQueries({ queryKey: ["my-requests"] });
+      void qc.invalidateQueries({ queryKey: ["my-balances"] });
+    },
+  });
+}
