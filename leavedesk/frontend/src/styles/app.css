@@ -239,3 +239,35 @@ a {
     min-width: 6rem;
   }
 }
+
+.filters {
+  display: grid;
+  gap: 8px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: end;
+}
+@media (max-width: 600px) {
+  .leave-table thead {
+    position: absolute;
+    clip-path: inset(50%);
+  }
+  .leave-table tr {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-block: 8px;
+    padding: 8px;
+  }
+  .leave-table th,
+  .leave-table td {
+    display: block;
+    text-align: left;
+  }
+  .leave-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: bold;
+  }
+}
+.leave-table td {
+  overflow-wrap: anywhere;
+}
