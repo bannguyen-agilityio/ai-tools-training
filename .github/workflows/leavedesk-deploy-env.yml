@@ -82,4 +82,11 @@ jobs:
       - name: Verify the SPA is served at /
         env:
           APP_URL: ${{ vars.APP_URL }}
-        run: curl -fsS "$APP_URL/" | grep -qi '<div id="root"' || { echo "::error::$APP_URL/ did not return the SPA shell"; exit 1; }
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS "$APP_URL/" | grep -qi '<div id="root"'; then
+              echo "SPA served"; exit 0
+            fi
+            echo "attempt $i: SPA shell not served yet"; sleep 10
+          done
+          echo "::error::$APP_URL/ did not return the SPA shell (is frontend/dist in the upload?)"; exit 1
