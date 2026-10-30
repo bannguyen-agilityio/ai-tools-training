@@ -70,7 +70,7 @@ describe("BalancesPage (R24)", () => {
     const user = userEvent.setup();
     const calls = mockApi();
     renderPage();
-    await user.click(await screen.findByRole("button", { name: "Enter balances for Eli Employee" }));
+    await user.click(await screen.findByRole("button", { name: "Enter or correct balances for Eli Employee" }));
     await user.type(screen.getByLabelText("Days"), "41");
     await user.click(screen.getByRole("button", { name: "Review entry" }));
     expect((await screen.findAllByText("Days must be between 0 and 40.")).length).toBeGreaterThan(0);
@@ -81,7 +81,7 @@ describe("BalancesPage (R24)", () => {
     const user = userEvent.setup();
     const calls = mockApi();
     renderPage();
-    await user.click(await screen.findByRole("button", { name: "Enter balances for Eli Employee" }));
+    await user.click(await screen.findByRole("button", { name: "Enter or correct balances for Eli Employee" }));
     await user.type(screen.getByLabelText("Days"), "5");
     await user.click(screen.getByRole("button", { name: "Review entry" }));
     expect(await screen.findByText("Check this entry before saving")).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe("BalancesPage (R24)", () => {
     const user = userEvent.setup();
     mockApi();
     renderPage();
-    await user.click(await screen.findByRole("button", { name: "Enter balances for Eli Employee" }));
+    await user.click(await screen.findByRole("button", { name: "Enter or correct balances for Eli Employee" }));
     await user.selectOptions(screen.getByLabelText("Entry"), "adjustment");
     await user.type(screen.getByLabelText("Days"), "-2");
     await user.click(screen.getByRole("button", { name: "Review entry" }));
