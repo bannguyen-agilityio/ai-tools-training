@@ -21,6 +21,7 @@ from app.modules.employees.schemas import EmployeeCreate, EmployeePatch
 from app.modules.identity.models import Employee
 
 TARGET = "employee"
+MAX_OFFSET = 1_000_000  # keeps a forged cursor inside the database integer range
 DUPLICATE = "An employee with that email already exists."
 
 
@@ -55,7 +56,7 @@ def decode_cursor(cursor: str | None) -> int:
         offset = int(base64.urlsafe_b64decode(cursor.encode()))
     except (ValueError, binascii.Error) as exc:
         raise ProblemError(422, "Invalid cursor") from exc
-    if offset < 0:
+    if not 0 <= offset <= MAX_OFFSET:
         raise ProblemError(422, "Invalid cursor")
     return offset
 
@@ -188,9 +189,10 @@ async def update(
     if employee.id == actor.id and changes.get("role", actor.role) != actor.role:
         # Self-demotion could leave nobody able to reach the HR-only endpoints.
         raise ProblemError(422, "You cannot change your own role.")
-    if "team_id" in changes:
+    # Validate only what changes, so an unchanged (now inactive) manager does not block an edit.
+    if changes.get("team_id", employee.team_id) != employee.team_id:
         await _check_team(db, changes["team_id"])
-    if "manager_id" in changes:
+    if changes.get("manager_id", employee.manager_id) != employee.manager_id:
         await _check_manager(db, changes["manager_id"], employee.id)
     for field, value in changes.items():
         setattr(employee, field, value)

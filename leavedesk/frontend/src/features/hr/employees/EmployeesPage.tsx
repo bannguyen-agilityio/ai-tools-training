@@ -25,7 +25,8 @@ export function EmployeesPage() {
   };
   const fail = (e: unknown) => setServerError(e instanceof ApiError ? e.message : "Could not save the employee.");
 
-  if (mode.kind !== "list" && employees.data) {
+  // Wait for both lists: a select without its options would submit "no team"/"no manager".
+  if (mode.kind !== "list" && employees.data && teams.data) {
     const editing = mode.kind === "edit" ? mode.employee : undefined;
     return (
       <EmployeeForm
@@ -57,7 +58,7 @@ export function EmployeesPage() {
     <section aria-labelledby="employees-title">
       <h1 id="employees-title">Employees</h1>
       <p>
-        <Button onClick={() => setMode({ kind: "add" })} disabled={!employees.data}>
+        <Button onClick={() => setMode({ kind: "add" })} disabled={!employees.data || !teams.data}>
           Add employee
         </Button>
       </p>
@@ -90,7 +91,7 @@ export function EmployeesPage() {
                 <td>{nameOf(e.manager_id)}</td>
                 <td>{formatDate(e.start_date)}</td>
                 <td>
-                  <Button variant="secondary" aria-label={`Edit ${e.name}`} onClick={() => setMode({ kind: "edit", employee: e })}>
+                  <Button variant="secondary" aria-label={`Edit ${e.name}`} disabled={!teams.data} onClick={() => setMode({ kind: "edit", employee: e })}>
                     Edit
                   </Button>{" "}
                   {e.is_active && (

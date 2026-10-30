@@ -62,7 +62,10 @@ export function EmployeeForm({ employee, employees, teams, serverError, busy, on
   const summary = (["name", "email", "start_date"] as const).flatMap((k) =>
     errors[k]?.message ? [{ fieldName: k, message: errors[k].message }] : [],
   );
-  const managers = employees.filter((e) => e.is_active && e.id !== employee?.id);
+  // Keep the current manager listed even when inactive, so saving never silently clears them.
+  const managers = employees.filter(
+    (e) => e.id !== employee?.id && (e.is_active || e.id === employee?.manager_id),
+  );
 
   return (
     <form

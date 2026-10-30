@@ -73,9 +73,10 @@ export function TeamsPage() {
   };
   const fail = (e: unknown) => setServerError(e instanceof ApiError ? e.message : "Could not save the team.");
 
-  if (mode.kind !== "list") {
+  // Wait for the employee list: the manager select needs its options before it can be saved.
+  if (mode.kind !== "list" && employees.data) {
     const editing = mode.kind === "edit" ? mode.team : undefined;
-    const managers = (employees.data ?? []).filter((e) => e.is_active).map((e) => ({ value: e.id, label: e.name }));
+    const managers = employees.data.filter((e) => e.is_active || e.id === editing?.manager_id).map((e) => ({ value: e.id, label: e.name }));
     return (
       <TeamForm
         team={editing}
@@ -97,7 +98,9 @@ export function TeamsPage() {
     <section aria-labelledby="teams-title">
       <h1 id="teams-title">Teams</h1>
       <p>
-        <Button onClick={() => setMode({ kind: "add" })}>Add team</Button>
+        <Button onClick={() => setMode({ kind: "add" })} disabled={!employees.data}>
+          Add team
+        </Button>
       </p>
       {teams.isError && <p role="alert">Could not load teams.</p>}
       {teams.data && teams.data.length === 0 && <p>No teams yet.</p>}
@@ -117,7 +120,7 @@ export function TeamsPage() {
                 <th scope="row">{t.name}</th>
                 <td>{managerName(t.manager_id)}</td>
                 <td>
-                  <Button variant="secondary" aria-label={`Edit ${t.name}`} onClick={() => setMode({ kind: "edit", team: t })}>
+                  <Button variant="secondary" aria-label={`Edit ${t.name}`} disabled={!employees.data} onClick={() => setMode({ kind: "edit", team: t })}>
                     Edit
                   </Button>
                 </td>
