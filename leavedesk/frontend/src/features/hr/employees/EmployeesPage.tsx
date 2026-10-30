@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ApiError } from "../../../api/problem";
 import { formatDate } from "../../../lib/dates";
 import { Button } from "../../../ui/Button";
+import { ConfirmDialog } from "../../../ui/ConfirmDialog";
 import { useToast } from "../../../ui/Toast";
 import { useTeams } from "../teams/api";
 import { useEmployeeMutations, useEmployees, type Employee } from "./api";
@@ -14,9 +15,10 @@ const ROLE_LABEL = { employee: "Employee", manager: "Manager", hr: "HR" } as con
 export function EmployeesPage() {
   const [mode, setMode] = useState<Mode>({ kind: "list" });
   const [serverError, setServerError] = useState<string>();
+  const [leaving, setLeaving] = useState<Employee>();
   const employees = useEmployees();
   const teams = useTeams();
-  const { create, update, invite } = useEmployeeMutations();
+  const { create, update, invite, deactivate } = useEmployeeMutations();
   const toast = useToast();
 
   const back = () => {
@@ -108,6 +110,11 @@ export function EmployeesPage() {
                     >
                       Re-send invite
                     </Button>
+                  )}{" "}
+                  {e.is_active && e.role !== "hr" && !e.is_hr_deputy && (
+                    <Button variant="danger" aria-label={`Deactivate ${e.name}`} onClick={() => setLeaving(e)}>
+                      Deactivate
+                    </Button>
                   )}
                 </td>
               </tr>
@@ -115,6 +122,22 @@ export function EmployeesPage() {
           </tbody>
         </table>
       )}
+      <ConfirmDialog
+        open={leaving !== undefined}
+        title="Deactivate this employee?"
+        consequence={`${leaving?.name} will be signed out and cannot sign in again. Their Pending requests are cancelled and their manager is told. Their history is kept.`}
+        confirmLabel="Deactivate"
+        onConfirm={() => {
+          const target = leaving;
+          setLeaving(undefined);
+          if (!target) return;
+          deactivate.mutate(target.id, {
+            onSuccess: () => toast("success", `${target.name} was deactivated.`),
+            onError: (err) => toast("error", err instanceof ApiError ? err.message : "Could not deactivate."),
+          });
+        }}
+        onKeep={() => setLeaving(undefined)}
+      />
     </section>
   );
 }

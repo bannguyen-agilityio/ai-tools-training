@@ -59,20 +59,22 @@ async def list_leave(
         ).decode()
     return HrLeaveList(
         items=[
-            HrLeaveOut(
-                id=r.id,
-                employee_id=r.employee_id,
-                employee_name=e.name,
-                team_id=e.team_id,
-                leave_type=r.leave_type_code,
-                start_date=r.start_date,
-                start_part=r.start_part,
-                end_date=r.end_date,
-                end_part=r.end_part,
-                working_days=float(r.working_days),
-                note=r.note,
-                status=r.status,
-                version=r.version,
+            HrLeaveOut.model_validate(
+                {
+                    "id": r.id,
+                    "employee_id": r.employee_id,
+                    "employee_name": e.name,
+                    "team_id": e.team_id,
+                    "leave_type": r.leave_type_code,
+                    "start_date": r.start_date,
+                    "start_part": r.start_part,
+                    "end_date": r.end_date,
+                    "end_part": r.end_part,
+                    "working_days": float(r.working_days),
+                    "note": r.note,
+                    "status": r.status,
+                    "version": r.version,
+                }
             )
             for r, e in shown
         ],

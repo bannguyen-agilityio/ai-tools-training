@@ -73,6 +73,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 
 **R4 [P1] Deactivation.**
 - Given HR deactivates an employee, when that person next makes a request, then it is refused and their sessions are deleted. Their history stays. Their Pending requests are cancelled and the manager is told.
+- **[Assumption]** (A-11) Deactivating an HR admin, the deputy or yourself is refused (422) until HR rules are decided. Pending requests assigned *to* a deactivated manager are not rerouted. Approved future leave of the deactivated employee keeps its reservation. Pending requests are cancelled with the fixed reason "Account deactivated" (`cancelled_by` is the HR actor); the manager (or HR approvers) get `request_cancelled_on_deactivation`, with no type or note.
 
 ### 4.2 Leave types, balances and calendar of working days
 
