@@ -2,6 +2,9 @@ import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
 import { Dashboard } from "./features/dashboard/Dashboard";
+import { MyRequests } from "./features/requests/MyRequests";
+import { NewRequest } from "./features/requests/NewRequest";
+import { RequestDetail } from "./features/requests/RequestDetail";
 import { BalancesPage } from "./features/hr/balances/BalancesPage";
 import { EmployeesPage } from "./features/hr/employees/EmployeesPage";
 import { HolidaysPage } from "./features/hr/holidays/HolidaysPage";
@@ -12,6 +15,7 @@ import type { NavItem } from "./ui/Nav";
 
 const NAV: NavItem[] = [
   { to: "/", label: "Home" },
+  { to: "/requests", label: "My requests" },
   { to: "/sample-form", label: "Sample form" },
 ];
 const HR_NAV: NavItem[] = [
@@ -28,6 +32,9 @@ export function AppRoutes() {
     <Layout nav={nav}>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/requests" element={<MyRequests />} />
+        <Route path="/requests/new" element={<NewRequest />} />
+        <Route path="/requests/:id" element={<RequestDetail />} />
         <Route path="/sample-form" element={<SampleForm />} />
         <Route
           path="/hr/holidays"

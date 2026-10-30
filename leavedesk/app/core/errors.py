@@ -35,11 +35,18 @@ STATUS_CODES = {
 class ProblemError(Exception):
     """Raise to return the error envelope. `detail` is the user-facing message."""
 
-    def __init__(self, status: int, detail: str | None = None, code: str | None = None) -> None:
+    def __init__(
+        self,
+        status: int,
+        detail: str | None = None,
+        code: str | None = None,
+        details: list[dict[str, str]] | None = None,
+    ) -> None:
         super().__init__(detail or HTTPStatus(status).phrase)
         self.status = status
         self.detail = detail
         self.code = code  # stable UPPER_SNAKE reason, e.g. "NO_WORKING_DAYS"
+        self.details = details  # [{"field", "issue"}], when the failure belongs to a field
 
 
 def error_response(
@@ -63,7 +70,7 @@ def error_response(
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(ProblemError)
     async def _problem(_: Request, exc: ProblemError) -> JSONResponse:
-        return error_response(exc.status, exc.detail, exc.code)
+        return error_response(exc.status, exc.detail, exc.code, exc.details)
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(_: Request, exc: StarletteHTTPException) -> JSONResponse:

@@ -7,9 +7,8 @@ one to merge deletes the set.
 
 from app.modules.email.templates import Event
 
-WIRED = {Event.INVITE, Event.PASSWORD_RESET}  # wired by plan 04 (identity)
+WIRED = {Event.INVITE, Event.PASSWORD_RESET, Event.REQUEST_CREATED}  # plans 04, 10
 PENDING_WIRING = {
-    Event.REQUEST_CREATED,  # plan 10
     Event.REQUEST_APPROVED,  # plan 13
     Event.REQUEST_REJECTED,  # plan 13
     Event.REQUEST_CANCELLED_BY_EMPLOYEE,  # plan 12
