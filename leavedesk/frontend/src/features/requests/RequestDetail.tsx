@@ -22,6 +22,11 @@ export function RequestDetail() {
   return (
     <section aria-labelledby="request-title">
       <h1 id="request-title">Leave request</h1>
+      {data.notice_warning && (
+        <p role="status">
+          Short notice: this long request starts within a week.
+        </p>
+      )}
       <dl>
         <dt>Dates</dt>
         <dd>{rangeText(data)}</dd>

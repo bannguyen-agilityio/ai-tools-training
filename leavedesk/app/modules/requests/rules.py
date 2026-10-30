@@ -2,7 +2,7 @@
 
 Order: shape -> type/past date -> working days -> overlap -> sufficiency. Each step returns a
 `ProblemError`; `evaluate` collects them so preview can show every problem, and submit raises
-the first. Notice rules and Sick limits beyond the backdate window belong to plan 11.
+the first. Notice (R14) and the Sick backdate window (R15) are plan 11.
 """
 
 from dataclasses import dataclass, field
@@ -19,6 +19,7 @@ from app.modules.identity.models import Employee
 from app.modules.leave_days.calendar import HalfDay, days_per_year
 from app.modules.leave_days.service import working_half_days
 from app.modules.requests import repository
+from app.modules.requests.notice import Notice, notice_check
 from app.modules.requests.schemas import RequestIn
 
 
@@ -28,6 +29,7 @@ class Evaluation:
     per_year: dict[int, Decimal] = field(default_factory=dict)
     available_before: dict[int, Decimal] | None = None  # None: type has no balance
     errors: list[ProblemError] = field(default_factory=list)
+    notice_warning: bool = False
 
     @property
     def working_days(self) -> Decimal | None:
@@ -91,8 +93,10 @@ async def check_overlap(
 
 
 async def evaluate(
-    db: AsyncSession, employee: Employee, body: RequestIn, today: date
+    db: AsyncSession, employee: Employee, body: RequestIn, today: date, *, hr_entry: bool = False
 ) -> Evaluation:
+    """`hr_entry`: HR enters leave on someone's behalf (R15, A-12): no notice rule, and no
+    past-date rule for Sick; overlap and balance still apply."""
     ev = Evaluation()
     shape = check_shape(body)
     if shape is not None:
@@ -102,7 +106,9 @@ async def evaluate(
     if leave_type is None:
         ev.errors.append(_field_error(422, "UNKNOWN_TYPE", "leave_type", "Unknown leave type."))
         return ev
-    past = check_past(leave_type, body, today)
+    # HR may enter older Sick (R15); every other type keeps the past-date rule (A-12).
+    skip_past = hr_entry and leave_type.allow_backdate_days > 0
+    past = None if skip_past else check_past(leave_type, body, today)
     if past is not None:
         ev.errors.append(past)
     try:
@@ -113,6 +119,25 @@ async def evaluate(
         ev.errors.append(exc)
         return ev
     ev.per_year = days_per_year(ev.rows)
+
+    if not hr_entry and past is None:
+        notice = notice_check(
+            exempt=leave_type.notice_exempt,
+            start=body.start_date,
+            end=body.end_date,
+            working_days=ev.working_days or Decimal(0),
+            today=today,
+        )
+        if notice is Notice.BLOCK:
+            ev.errors.append(
+                _field_error(
+                    422,
+                    "NOTICE_TOO_SHORT",
+                    "start_date",
+                    "A single day of this leave needs at least 1 day's notice.",
+                )
+            )
+        ev.notice_warning = notice is Notice.WARNING
 
     # Overlap first: a duplicate of a Pending request is already reserved, so "not enough leave"
     # would mislead.

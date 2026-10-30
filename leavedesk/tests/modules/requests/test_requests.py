@@ -198,7 +198,8 @@ async def test_past_start(client, staff) -> None:  # type: ignore[no-untyped-def
     for leave_type in ("annual", "unpaid"):
         r = await post(client, staff[0], body("2026-05-29", leave_type=leave_type))
         assert r.status_code == 422 and r.json()["error"]["details"][0]["field"] == "start_date"
-    assert (await post(client, staff[0], body("2026-06-01"))).status_code == 201  # today is fine
+    # Today is not "in the past"; a single day today is the notice rule (R14), so use two days.
+    assert (await post(client, staff[0], body("2026-06-01", "2026-06-02"))).status_code == 201
 
 
 # --- R17 -----------------------------------------------------------------------------------

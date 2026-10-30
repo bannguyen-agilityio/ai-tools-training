@@ -17,6 +17,7 @@ from app.modules.requests import repository, rules
 from app.modules.requests.redaction import can_view, redact
 from app.modules.requests.routing import Route, route_for
 from app.modules.requests.schemas import (
+    HrRequestIn,
     PreviewOut,
     RequestIn,
     RequestList,
@@ -34,10 +35,10 @@ def _issue(err: ProblemError) -> RuleIssue:
 
 
 async def _evaluate(
-    db: AsyncSession, user: Employee, body: RequestIn, today: date
+    db: AsyncSession, user: Employee, body: RequestIn, today: date, *, hr_entry: bool = False
 ) -> tuple[rules.Evaluation, Route | None]:
     """Rules plus routing. Routing is only worth checking once the request itself is valid."""
-    ev = await rules.evaluate(db, user, body, today)
+    ev = await rules.evaluate(db, user, body, today, hr_entry=hr_entry)
     route: Route | None = None
     try:
         route = await route_for(db, user)
@@ -52,6 +53,7 @@ async def preview(db: AsyncSession, user: Employee, body: RequestIn, today: date
     before = ev.available_before
     return PreviewOut(
         valid=not ev.errors,
+        notice_warning=ev.notice_warning,
         working_days=float(ev.working_days) if ev.working_days is not None else None,
         per_year=[
             YearBalance(
@@ -69,9 +71,36 @@ async def preview(db: AsyncSession, user: Employee, body: RequestIn, today: date
 async def create(
     db: AsyncSession, user: Employee, body: RequestIn, today: date, ip: str | None = None
 ) -> LeaveRequest:
-    """Submit (R12, R13, R17; spec 5.5): lock the employee, run the rules, insert, audit, emit."""
+    """Submit (R12, R13, R14, R17; spec 5.5): lock the employee, run the rules, insert, audit,
+    emit."""
+    return await _submit(db, user, body, today, ip)
+
+
+async def create_for(
+    db: AsyncSession, hr: Employee, body: HrRequestIn, today: date, ip: str | None = None
+) -> LeaveRequest:
+    """HR enters leave for an employee (R15, endpoint 17; A-12). Created `pending` for the normal
+    route; never for HR's own leave, which would let HR pick their own approver."""
+    if body.employee_id == hr.id:
+        raise ProblemError(403, "Not allowed")
+    target = await db.get(Employee, body.employee_id)
+    if target is None or not target.is_active:
+        raise ProblemError(404, "Employee not found")
+    return await _submit(db, target, body, today, ip, entered_by=hr, reason=body.entry_reason)
+
+
+async def _submit(
+    db: AsyncSession,
+    user: Employee,
+    body: RequestIn,
+    today: date,
+    ip: str | None,
+    *,
+    entered_by: Employee | None = None,
+    reason: str | None = None,
+) -> LeaveRequest:
     await repository.lock_employee(db, user.id)
-    ev, route = await _evaluate(db, user, body, today)
+    ev, route = await _evaluate(db, user, body, today, hr_entry=entered_by is not None)
     if ev.errors:
         raise ev.errors[0]
     assert route is not None  # a routing failure is in ev.errors
@@ -92,7 +121,9 @@ async def create(
         queue=route.queue,
         assigned_to=route.assigned_to.id if route.assigned_to else None,
         submitted_at=datetime.now(UTC),
-        notice_warning=False,
+        notice_warning=ev.notice_warning,
+        entered_by=entered_by.id if entered_by else None,
+        entry_reason=reason,
         version=1,
     )
     repository.add(db, req, ev.rows)
@@ -109,13 +140,19 @@ async def create(
         ) from exc
 
     # Detail has ids and quantities only: never the type or the note (R30, §8).
+    # HR entry is audited under HR as actor; the reason text stays on the request only.
     await audit.record(
         db,
-        actor_id=user.id,
-        action="request.create",
+        actor_id=entered_by.id if entered_by else user.id,
+        action="request.hr_create" if entered_by else "request.create",
         target_type="leave_request",
         target_id=str(req.id),
-        detail={"request_id": str(req.id), "status": "pending", "days": float(working_days)},
+        detail={
+            "request_id": str(req.id),
+            "employee_id": str(user.id),
+            "status": "pending",
+            "days": float(working_days),
+        },
         ip=ip,
     )
     ref = RequestRef(req.id, user.id, user.name, req.start_date, req.end_date)

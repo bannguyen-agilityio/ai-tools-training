@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field, StringConstraints
 
 from app.core.schemas import StrictModel
 from app.modules.leave_days.calendar import Part
@@ -27,6 +27,15 @@ class RequestIn(StrictModel):
     end_date: date
     end_part: Part = "full"
     note: Note = None
+
+
+class HrRequestIn(RequestIn):
+    """Body of `POST /hr/requests` (spec 6.2 #17)."""
+
+    employee_id: uuid.UUID
+    entry_reason: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)
+    ]
 
 
 class RequestOut(BaseModel):
