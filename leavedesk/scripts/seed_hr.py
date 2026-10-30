@@ -9,7 +9,8 @@ idempotent: an existing employee with that email is left untouched. Run as the o
 import getpass
 import os
 import sys
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import psycopg
 
@@ -17,13 +18,14 @@ from app.modules.auth.passwords import hash_password
 
 
 def main(email: str, name: str) -> None:
+    email = email.strip().lower()
     if not email.endswith("@asnet.com.vn"):
         sys.exit("Email must end with @asnet.com.vn (R1).")
     password = os.environ.get("SEED_HR_PASSWORD") or getpass.getpass("Password (min 12): ")
     if len(password) < 12:
         sys.exit("Password must be at least 12 characters (R2).")
     url = os.environ["MIGRATION_DATABASE_URL"].replace("postgresql+psycopg://", "postgresql://")
-    year = date.today().year
+    year = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).year  # COMPANY_TZ
     with psycopg.connect(url) as c:
         if c.execute("SELECT 1 FROM employee WHERE lower(email) = lower(%s)", (email,)).fetchone():
             sys.exit(f"{email} already exists; nothing changed.")
@@ -40,10 +42,16 @@ def main(email: str, name: str) -> None:
         )
         for typ, days in (("annual", 12), ("sick", 7)):
             c.execute(
-                "INSERT INTO balance_entry (employee_id, leave_type_code, leave_year, kind, days)"
-                " VALUES (%s,%s,%s,'entitlement',%s)",
-                (row[0], typ, year, days),
+                "INSERT INTO balance_entry (employee_id, leave_type_code, leave_year, kind, days,"
+                " idempotency_key) VALUES (%s,%s,%s,'entitlement',%s,%s)"
+                " ON CONFLICT (idempotency_key) DO NOTHING",
+                (row[0], typ, year, days, f"entitlement:{year}:{row[0]}:{typ}"),
             )
+        c.execute(
+            "INSERT INTO audit_log (action, target_type, target_id, detail)"
+            " VALUES ('employee.seed_hr', 'employee', %s, '{}'::jsonb)",
+            (str(row[0]),),
+        )
     print(f"created HR admin {email}")
 
 

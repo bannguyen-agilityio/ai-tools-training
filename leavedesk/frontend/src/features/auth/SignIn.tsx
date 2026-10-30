@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { api, safeNext, setCsrfToken } from "../../api/client";
+import { api, safeNext, setCsrfToken, signInPath } from "../../api/client";
 import { Button } from "../../ui/Button";
 import { ErrorSummary } from "../../ui/ErrorSummary";
 import { TextField } from "../../ui/TextField";
@@ -44,8 +44,9 @@ export function SignIn() {
     try {
       const me = await api<Me>("/auth/login", { method: "POST", body: values, noRedirect: true });
       setCsrfToken(me.csrf_token);
-      await queryClient.invalidateQueries({ queryKey: ["me"] });
-      navigate(safeNext(params.get("next")), { replace: true });
+      queryClient.clear(); // nothing a previous user loaded may show to this one
+      const next = safeNext(params.get("next"));
+      navigate(next.startsWith(signInPath) ? "/" : next, { replace: true });
     } catch (e) {
       const status = (e as { status?: number }).status;
       setFormError(
