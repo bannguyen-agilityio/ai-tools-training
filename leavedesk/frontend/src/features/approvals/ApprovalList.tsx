@@ -51,6 +51,12 @@ export function ApprovalList() {
                 </p>
               )}
               <dl>
+                {r.employee_name && (
+                  <>
+                    <dt>Requested by</dt>
+                    <dd>{r.employee_name}</dd>
+                  </>
+                )}
                 <dt>Type</dt>
                 <dd>{typeLabel(r)}</dd>
                 <dt>Working days</dt>

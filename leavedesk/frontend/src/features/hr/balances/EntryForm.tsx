@@ -13,6 +13,7 @@ const schema = z
   .object({
     leave_type_code: z.enum(["annual", "sick"]),
     kind: z.enum(["opening", "carry_over", "adjustment"]),
+    leave_year: z.string(),
     days: z.string().trim().min(1, "Enter the number of days."),
     expires_on: z.string(),
     reason: z.string().trim().max(500, "Use 500 characters or fewer."),
@@ -26,6 +27,9 @@ const schema = z
       const range = v.kind === "adjustment" ? "-40 and 40" : "0 and 40";
       ctx.addIssue({ code: "custom", path: ["days"], message: `Days must be between ${range}.` });
     }
+    if (v.kind === "carry_over" && Number.isFinite(days) && days > 6) {
+      ctx.addIssue({ code: "custom", path: ["days"], message: "Carried days are at most 6." });
+    }
     if (v.kind === "carry_over" && !v.expires_on) {
       ctx.addIssue({ code: "custom", path: ["expires_on"], message: "Enter the expiry date, for example Thu 31 Dec 2026." });
     }
@@ -35,6 +39,8 @@ const schema = z
   });
 type Values = z.infer<typeof schema>;
 
+const THIS_YEAR = new Date().getFullYear();
+const YEARS = [THIS_YEAR - 1, THIS_YEAR, THIS_YEAR + 1].map((y) => ({ value: String(y), label: String(y) }));
 const TYPES = [
   { value: "annual", label: "Annual" },
   { value: "sick", label: "Sick" },
@@ -57,7 +63,7 @@ interface Props {
 export function EntryForm({ employeeName, serverError, busy, onSubmit, onCancel }: Props) {
   const { register, control, handleSubmit, formState } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { leave_type_code: "annual", kind: "opening", days: "", expires_on: "", reason: "" },
+    defaultValues: { leave_year: String(THIS_YEAR), leave_type_code: "annual", kind: "opening", days: "", expires_on: "", reason: "" },
     shouldFocusError: false,
   });
   const { errors, submitCount } = formState;
@@ -77,6 +83,7 @@ export function EntryForm({ employeeName, serverError, busy, onSubmit, onCancel 
           leave_type_code: v.leave_type_code,
           kind: v.kind,
           days: Number(v.days),
+          leave_year: Number(v.leave_year),
           ...(v.kind === "carry_over" ? { expires_on: v.expires_on } : {}),
           ...(v.kind === "adjustment" ? { reason: v.reason } : {}),
         }),
@@ -85,6 +92,7 @@ export function EntryForm({ employeeName, serverError, busy, onSubmit, onCancel 
       <h2>Balance entry for {employeeName}</h2>
       <ErrorSummary items={summary} />
       {serverError && <p role="alert">{serverError}</p>}
+      <Select label="Leave year" options={YEARS} {...register("leave_year")} />
       <Select label="Leave type" options={TYPES} {...register("leave_type_code")} />
       <Select label="Entry" options={KINDS} {...register("kind")} />
       <TextField

@@ -21,18 +21,22 @@ export function DecisionPanel({
   onBehalfOf?: string;
 }) {
   const [rejecting, setRejecting] = useState(false);
-  const approve = useDecide(request.id, "approve");
-  const reject = useDecide(request.id, "reject");
-  const failure = message(approve.error ?? reject.error);
+  // One mutation, so a later outcome always replaces an earlier error.
+  const decide = useDecide(request.id);
+  const failure = message(decide.error);
   const reasonError =
-    reject.error instanceof ApiError && reject.error.status === 422
-      ? reject.error.message
+    decide.error instanceof ApiError &&
+    decide.error.status === 422 &&
+    decide.variables?.action === "reject"
+      ? decide.error.message
       : undefined;
 
-  if (approve.isSuccess || reject.isSuccess) {
+  if (decide.isSuccess) {
     return (
       <p role="status">
-        {approve.isSuccess ? "Request approved." : "Request rejected."}
+        {decide.variables.action === "approve"
+          ? "Request approved."
+          : "Request rejected."}
       </p>
     );
   }
@@ -41,10 +45,11 @@ export function DecisionPanel({
       {failure && !reasonError && <p role="alert">{failure}</p>}
       {rejecting ? (
         <RejectForm
-          pending={reject.isPending}
+          pending={decide.isPending}
           serverError={reasonError}
           onSubmit={(reason) =>
-            reject.mutate({
+            decide.mutate({
+              action: "reject",
               version: request.version,
               reason,
               on_behalf_of: onBehalfOf,
@@ -55,11 +60,14 @@ export function DecisionPanel({
       ) : (
         <>
           <Button
-            disabled={approve.isPending}
-            onClick={() => approve.mutate({
+            disabled={decide.isPending}
+            onClick={() =>
+              decide.mutate({
+                action: "approve",
                 version: request.version,
                 on_behalf_of: onBehalfOf,
-              })}
+              })
+            }
           >
             Approve
           </Button>{" "}

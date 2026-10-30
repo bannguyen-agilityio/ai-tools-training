@@ -20,11 +20,19 @@ async def pending_for(db: AsyncSession, actor: Employee) -> list[LeaveRequest]:
         .where(
             LeaveRequest.status == "pending",
             LeaveRequest.employee_id != actor.id,
+            or_(LeaveRequest.entered_by.is_(None), LeaveRequest.entered_by != actor.id),
             or_(*queues),
         )
         .order_by(LeaveRequest.submitted_at, LeaveRequest.id)
     )
     return list(result)
+
+
+async def names(db: AsyncSession, ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+    if not ids:
+        return {}
+    rows = await db.execute(select(Employee.id, Employee.name).where(Employee.id.in_(ids)))
+    return {i: n for i, n in rows}
 
 
 async def pending_cover(db: AsyncSession, actor: Employee) -> list[LeaveRequest]:
@@ -38,6 +46,7 @@ async def pending_cover(db: AsyncSession, actor: Employee) -> list[LeaveRequest]
             LeaveRequest.assigned_to.is_not(None),
             LeaveRequest.assigned_to != actor.id,
             LeaveRequest.employee_id != actor.id,
+            or_(LeaveRequest.entered_by.is_(None), LeaveRequest.entered_by != actor.id),
         )
         .order_by(LeaveRequest.submitted_at, LeaveRequest.id)
     )

@@ -21,9 +21,13 @@ export function HrCancelDialog({
   const [error, setError] = useState<string>();
   const ref = useRef<HTMLTextAreaElement>(null);
   const keepRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
     if (open) keepRef.current?.focus();
+    else if (wasOpen.current) triggerRef.current?.focus(); // back to where "Keep" was chosen from
+    wasOpen.current = open;
   }, [open]);
 
   function submit(e: FormEvent) {
@@ -44,7 +48,7 @@ export function HrCancelDialog({
 
   if (!open) {
     return (
-      <Button variant="danger" onClick={() => setOpen(true)}>
+      <Button variant="danger" ref={triggerRef} onClick={() => setOpen(true)}>
         Cancel leave (HR)
       </Button>
     );

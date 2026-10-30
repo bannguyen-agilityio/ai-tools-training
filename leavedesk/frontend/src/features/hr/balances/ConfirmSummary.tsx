@@ -43,6 +43,11 @@ export function ConfirmSummary({ summary, busy, serverError, onSave, onBack }: P
         <dt>Available after saving</dt>
         <dd>{summary.resulting_available}</dd>
       </dl>
+      {Number(summary.resulting_available) < 0 && (
+        <p role="alert">
+          Warning: this leaves {summary.employee_name} with a negative balance.
+        </p>
+      )}
       <p>Saved entries cannot be edited or deleted. A mistake is fixed with a new correction.</p>
       {serverError && <p role="alert">{serverError}</p>}
       <Button variant="secondary" onClick={onBack}>

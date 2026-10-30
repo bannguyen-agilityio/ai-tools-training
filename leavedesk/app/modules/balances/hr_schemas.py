@@ -9,6 +9,7 @@ from app.core.schemas import StrictModel
 
 MAX_DAYS = Decimal(40)
 HALF = Decimal("0.5")
+CARRY_CAP = Decimal(6)  # R7: the same cap as the 1 Jan rollover
 
 
 class EntryIn(StrictModel):
@@ -39,6 +40,8 @@ class EntryIn(StrictModel):
                 raise ValueError("only Annual leave carries over")
             if self.expires_on is None:
                 raise ValueError("expires_on is required for carry-over")
+            if self.days > CARRY_CAP:
+                raise ValueError("carry-over is at most 6 days")
         elif self.expires_on is not None:
             raise ValueError("expires_on applies to carry-over only")
         if self.kind != "adjustment" and (self.reason or self.corrects_entry_id):

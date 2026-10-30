@@ -80,6 +80,17 @@ describe("ConfirmDialog (R31e)", () => {
     await userEvent.tab();
     expect(screen.getByRole("button", { name: "Keep" })).toHaveFocus();
   });
+  it("makes the page behind inert and restores it on close", () => {
+    const page = document.createElement("div");
+    document.body.appendChild(page);
+    const { unmount } = render(
+      <ConfirmDialog open title="T" consequence="C" confirmLabel="Yes" onKeep={vi.fn()} onConfirm={vi.fn()} />,
+    );
+    expect(page.inert).toBe(true);
+    unmount();
+    expect(page.inert).toBe(false);
+    page.remove();
+  });
   it("has no axe violations", async () => {
     setup();
     expect(await axe(document.body)).toHaveNoViolations();
@@ -106,6 +117,23 @@ describe("DateField (R31c)", () => {
     expect(screen.getByRole("status")).toHaveTextContent("2026-11-03");
     await user.tab();
     expect(input).toHaveValue("Tue 3 Nov 2026");
+  });
+  it("follows an external change of the value", async () => {
+    function Reset() {
+      const [iso, setIso] = useState("2026-11-02");
+      return (
+        <>
+          <DateField label="Day" value={iso} onChange={setIso} />
+          <button type="button" onClick={() => setIso("2026-12-01")}>
+            Load
+          </button>
+        </>
+      );
+    }
+    const user = userEvent.setup();
+    render(<Reset />);
+    await user.click(screen.getByRole("button", { name: "Load" }));
+    expect(screen.getByLabelText("Day")).toHaveValue("Tue 1 Dec 2026");
   });
   it("explains an unreadable date", async () => {
     const user = userEvent.setup();

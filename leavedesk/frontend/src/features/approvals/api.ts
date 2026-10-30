@@ -13,6 +13,7 @@ export function useApprovals(scope: ApprovalScope = "assigned") {
 }
 
 export interface Decision {
+  action: "approve" | "reject";
   version: number;
   /** Present for a rejection only (1–500 characters, R19). */
   reason?: string;
@@ -20,10 +21,10 @@ export interface Decision {
   on_behalf_of?: string;
 }
 
-export function useDecide(id: string, action: "approve" | "reject") {
+export function useDecide(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Decision) =>
+    mutationFn: ({ action, ...body }: Decision) =>
       api<LeaveRequest>(`/approvals/${id}/${action}`, {
         method: "POST",
         body,

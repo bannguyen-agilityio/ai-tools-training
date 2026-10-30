@@ -44,6 +44,7 @@ export interface EntryInput {
   leave_type_code: LeaveType;
   kind: EntryKind;
   days: number;
+  leave_year?: number;
   expires_on?: string;
   reason?: string;
 }

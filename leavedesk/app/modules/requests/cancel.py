@@ -31,6 +31,39 @@ async def approvers(db: AsyncSession, req: LeaveRequest, owner: Employee) -> lis
     return await hr_approvers(db, owner)
 
 
+async def _cancel_guarded(
+    db: AsyncSession, request_id: uuid.UUID, version: int, expected: str, **values: object
+) -> None:
+    """The one guarded UPDATE: only a row at `version` and `expected` status is cancelled, and its
+    day rows go inactive (the refund). Anyone who lost the race gets 409."""
+    won = await db.scalar(
+        update(LeaveRequest)
+        .where(
+            LeaveRequest.id == request_id,
+            LeaveRequest.version == version,
+            LeaveRequest.status == expected,
+        )
+        .values(
+            status="cancelled",
+            version=LeaveRequest.version + 1,
+            cancelled_at=func.now(),
+            updated_at=func.now(),
+            **values,
+        )
+        .returning(LeaveRequest.id)
+        .execution_options(synchronize_session=False)
+    )
+    if won is None:
+        await db.rollback()
+        raise ProblemError(409, STALE, code="STALE_VERSION")
+    await db.execute(
+        update(LeaveRequestDay)
+        .where(LeaveRequestDay.request_id == request_id)
+        .values(is_active=False)
+        .execution_options(synchronize_session=False)
+    )
+
+
 async def cancel_own(
     db: AsyncSession,
     user: Employee,
@@ -46,32 +79,7 @@ async def cancel_own(
     if req.status != "pending":
         raise ProblemError(403, "Only a Pending request can be cancelled.", code="NOT_PENDING")
 
-    won = await db.scalar(
-        update(LeaveRequest)
-        .where(
-            LeaveRequest.id == request_id,
-            LeaveRequest.version == version,
-            LeaveRequest.status == "pending",
-        )
-        .values(
-            status="cancelled",
-            version=LeaveRequest.version + 1,
-            cancelled_by=user.id,
-            cancelled_at=func.now(),
-            updated_at=func.now(),
-        )
-        .returning(LeaveRequest.id)
-        .execution_options(synchronize_session=False)
-    )
-    if won is None:
-        await db.rollback()
-        raise ProblemError(409, STALE, code="STALE_VERSION")
-    await db.execute(
-        update(LeaveRequestDay)
-        .where(LeaveRequestDay.request_id == request_id)
-        .values(is_active=False)
-        .execution_options(synchronize_session=False)
-    )
+    await _cancel_guarded(db, req.id, version, "pending", cancelled_by=user.id)
     await db.refresh(req)
 
     # Ids and quantities only: never the type or the note (R30, §8).
@@ -122,33 +130,7 @@ async def cancel_by_hr(
     reason: str,
     ip: str | None,
 ) -> LeaveRequest:
-    won = await db.scalar(
-        update(LeaveRequest)
-        .where(
-            LeaveRequest.id == req.id,
-            LeaveRequest.version == version,
-            LeaveRequest.status == "approved",
-        )
-        .values(
-            status="cancelled",
-            version=LeaveRequest.version + 1,
-            cancelled_by=hr.id,
-            cancel_reason=reason,
-            cancelled_at=func.now(),
-            updated_at=func.now(),
-        )
-        .returning(LeaveRequest.id)
-        .execution_options(synchronize_session=False)
-    )
-    if won is None:
-        await db.rollback()
-        raise ProblemError(409, STALE, code="STALE_VERSION")
-    await db.execute(
-        update(LeaveRequestDay)
-        .where(LeaveRequestDay.request_id == req.id)
-        .values(is_active=False)
-        .execution_options(synchronize_session=False)
-    )
+    await _cancel_guarded(db, req.id, version, "approved", cancelled_by=hr.id, cancel_reason=reason)
     await db.refresh(req)
     owner = await db.get(Employee, req.employee_id)
     assert owner is not None

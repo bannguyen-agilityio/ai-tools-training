@@ -19,17 +19,28 @@ from app.modules.requests.schemas import RequestOut
 ALREADY_DECIDED = "This request was already decided."
 
 
+async def _named(db: AsyncSession, actor: Employee, rows: list[LeaveRequest]) -> ApprovalList:
+    """Redacted rows plus the requester's name, so an approver can tell requests apart."""
+    names = await repository.names(db, {r.employee_id for r in rows})
+    return ApprovalList(
+        items=[
+            redact(actor, r).model_copy(update={"employee_name": names.get(r.employee_id)})
+            for r in rows
+        ]
+    )
+
+
 async def list_assigned(db: AsyncSession, actor: Employee) -> ApprovalList:
-    rows = await repository.pending_for(db, actor)
-    return ApprovalList(items=[redact(actor, r) for r in rows])
+    if actor.role not in ("manager", "hr") and not actor.is_hr_deputy:
+        raise ProblemError(403, "Not allowed")
+    return await _named(db, actor, await repository.pending_for(db, actor))
 
 
 async def list_cover(db: AsyncSession, actor: Employee) -> ApprovalList:
     """The "On behalf of" tab (R20): managers only; the default list never includes these."""
     if actor.role != "manager":
         raise ProblemError(403, "Not allowed")
-    rows = await repository.pending_cover(db, actor)
-    return ApprovalList(items=[redact(actor, r) for r in rows])
+    return await _named(db, actor, await repository.pending_cover(db, actor))
 
 
 async def _authorise(

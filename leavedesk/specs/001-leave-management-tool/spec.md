@@ -129,7 +129,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given a request longer than one week (more than 5 working days, C-3), when it starts less than the notice period away, then a **warning** is shown to the employee and to the approver, and the request can still be submitted (**decided, Q1: 1 week, warning only**).
 - Given a request of 2–5 working days, when submitted, then no notice rule applies, because the intent does not define one (**see C-3**).
 - Notice is measured in calendar days from the submission time, in the company time zone (**see C-12**).
-- **[Assumption, A-9]** "Less than 1 day" is the literal calendar-day difference between the start date and today (company time zone): starting today is blocked, starting tomorrow is allowed. A single half-day counts as a single day. "Less than the notice period" is fewer than 7 calendar days. Sick is exempt from both rules. Confirm with the product owner before launch.
+- **[Decided, A-9, product owner 30 Oct 2026]** "Less than 1 day" is the literal calendar-day difference between the start date and today (company time zone): starting today is blocked, starting tomorrow is allowed. A single half-day counts as a single day. "Less than the notice period" is fewer than 7 calendar days. Sick is exempt from both rules. Confirm with the product owner before launch.
 
 **R15 [P1] Sick leave is exempt from notice.** **[Assumption; see C-4]**
 - Given a Sick request that starts today or in the past, when submitted, then the notice rule is not applied. The employee may enter Sick leave up to 7 days in the past. For older dates only HR can enter it on the employee's behalf, with a reason, and it is audited (**decided, Q8**).
@@ -146,7 +146,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given a request from a manager, when it is created, then it is assigned to HR and HR is emailed.
 - Given a request that has no route, when it is submitted, then it is refused with a clear `422` and nothing is saved: an employee with no active direct manager (`NO_APPROVER`), a manager when no HR approver other than them exists (`NO_APPROVER`), and an HR admin's own request when no active deputy is set (`NO_APPROVER`; with a deputy it routes to `queue=deputy`, R36). **[Assumption: A-10, not in the intent]**
 - Given a manager's request, then "HR is emailed" means every active HR approver (HR admin or deputy) except the requester, each emailed and notified once. **[Assumption: A-14]**
-- Given a person's own request, when they try to approve it, then it is refused, whatever their role.
+- Given a person's own request, when they try to approve it, then it is refused, whatever their role. The same applies to a request they entered for someone else (HR entry, R15): separation of duties.
 
 **R18 [P1] Approve.**
 - Given a Pending request assigned to a manager, when the direct manager approves, then status becomes Approved, days move from reserved to used, and the employee is emailed.
@@ -180,7 +180,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given HR, when they enter an employee's opening Annual days, carried days with their expiry date, and Sick days, then the entries are saved as ledger entries with the entering user and time.
 - Given an entered value outside 0–40 days, when saved, then it is refused. Before saving, HR sees a confirmation summary (**the safeguard for "no balance corrections", see C-9**).
 - Given an entry already saved, when HR changes it, then the original stays in the ledger and a new adjustment entry is added with a required reason. Entries are never overwritten.
-- **[Assumption] (A-18, pending product owner):** an `adjustment` is signed and bounded −40..40 in 0.5 steps; opening Sick may be entered (0–40); manual `carry_over` is Annual only and its `expires_on` must fall in the entry's leave year; every manual `days` is a multiple of 0.5. The confirmation step is enforced in the UI only: the API offers a preview (#25) but does not require a token before #26.
+- **[Assumption] (A-18, pending product owner):** an `adjustment` is signed and bounded −40..40 in 0.5 steps; opening Sick may be entered (0–40); manual `carry_over` is Annual only, at most 6 days, and together with any rollover carry for the year at most 6 (`409` otherwise), and its `expires_on` must fall in the entry's leave year; every manual `days` is a multiple of 0.5. The confirmation step is enforced in the UI only: the API offers a preview (#25) but does not require a token before #26.
 
 **R25 [P1] HR sees all approved leave.**
 - Given HR, when they open "All leave", then they see all Approved leave (and can filter by Pending, date range, employee, team and type), with real leave types.
@@ -375,7 +375,7 @@ Base path `/api/v1`, JSON only, same origin as the SPA.
 | 10 | `POST /requests` | Any | Create; returns `201` with `Location`. Body `{leave_type, start_date, start_part, end_date, end_part, note?}`. Returns the request with `status: pending`, routed per R17 | R12–R15, R17 |
 | 11 | `GET /me/requests?status=&year=`, `GET /requests/{id}` | Own list; detail for owner, assigned or covering approver, HR | My requests and one request, redacted per §8. HR lists everyone's leave through endpoint 16 | R16 |
 | 12 | `POST /requests/{id}/cancel` | Owner (Pending only), HR (Approved or Pending) | Body `{version, reason?}`; `reason` required when HR cancels (R21). Owner on a non-Pending request → `403` | R16, R21 |
-| 13 | `GET /approvals?scope=assigned\|cover` | Manager, HR approver | `assigned`: Pending items for me (managers: my reports; HR approvers: the HR queue; deputy: also HR's own requests). `cover`: Pending items of other managers' reports, for the "On behalf of" tab | R17, R20 |
+| 13 | `GET /approvals?scope=assigned\|cover` | Manager, HR approver | `assigned`: Pending items for me (managers: my reports; HR approvers: the HR queue; deputy: also HR's own requests). `cover`: Pending items of other managers' reports, for the "On behalf of" tab. Each item carries `employee_name` for the deciding approver. A plain employee gets `403` | R17, R20 |
 | 14 | `POST /approvals/{id}/approve` | Assigned approver, covering manager, HR approver | Body `{version, on_behalf_of?}`. A cover decision records `decided_on_behalf_of` and emails the direct manager. Own request → `403` | R18, R20, R22, R36 |
 | 15 | `POST /approvals/{id}/reject` | Same as 14 | Body `{version, reason}`; `reason` 1–500 non-blank characters | R19, R20 |
 | 16 | `GET /hr/leave?status=&from=&to=&employee_id=&team_id=&type=` | HR | All leave, real types | R25 |

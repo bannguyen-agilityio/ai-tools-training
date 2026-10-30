@@ -66,6 +66,7 @@ class RequestOut(BaseModel):
     notice_warning: bool
     version: int
     label: str | None = None  # "Off" while the Sick type is masked
+    employee_name: str | None = None  # approvals lists only, for the deciding approver (R18)
 
 
 class RequestList(BaseModel):
