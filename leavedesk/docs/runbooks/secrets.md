@@ -20,7 +20,7 @@ Settings > Environments. Create `staging` and `production`, each with its own va
 | Name | Value |
 |---|---|
 | `FASTAPI_CLOUD_TOKEN` | FastAPI Cloud API token used by `fastapi deploy` |
-| `SENDGRID_API_KEY` | SendGrid key, read by the `drain_outbox` job (each environment) |
+| `SENDGRID_API_KEY` | SendGrid key; the migration step needs it too because settings validate it |
 | `DATABASE_URL` | App database URL: `postgresql+psycopg://<app_role>:<password>@<pooled-host>:<port>/<db>` |
 | `MIGRATION_DATABASE_URL` | Owner/admin URL of the same database, used only by `alembic upgrade head` |
 
@@ -32,7 +32,7 @@ Settings > Environments. Create `staging` and `production`, each with its own va
 | `APP_URL` | Base URL of that app, no trailing slash (used for the `/healthz` check) |
 | `APP_DB_ROLE` | Role the app runs as, e.g. `leavedesk_app` |
 | `COMPANY_TZ` | `Asia/Ho_Chi_Minh` |
-| `EMAIL_FROM` | Verified SendGrid sender, read by the `drain_outbox` job |
+| `EMAIL_FROM` | Verified SendGrid sender; also needed by the migration step |
 
 Scheduled jobs (`leavedesk-job-*`; schedules are disabled for now, manual runs only) run once per environment (staging and production; manual runs follow the branch) and read `DATABASE_URL`, `APP_DB_ROLE`, `COMPANY_TZ`, `APP_URL` (as `APP_BASE_URL`) and, for `drain_outbox`, the two email values above.
 

@@ -39,6 +39,8 @@ jobs:
       APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
       COMPANY_TZ: ${{ vars.COMPANY_TZ }}
       APP_BASE_URL: ${{ vars.APP_URL }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      EMAIL_FROM: ${{ vars.EMAIL_FROM }}
       EMAIL_BACKEND: sendgrid
       COOKIE_SECURE: "true"
       FASTAPI_CLOUD_TOKEN: ${{ secrets.FASTAPI_CLOUD_TOKEN }}
