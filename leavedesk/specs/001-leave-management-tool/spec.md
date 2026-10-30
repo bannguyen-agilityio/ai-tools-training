@@ -212,6 +212,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given any viewer who is not HR and not the leave owner, when the entry is Sick leave, then it is shown as "Off", with no type, no note, and no pending/approved distinction that would reveal the type (see C-2).
 - Given the viewer is HR, when the calendar opens, then they can see all teams and the real leave type.
 - Given a request from another team, when the API is called by an employee for another team, then it returns 403.
+- **[Assumption: A-21]** A viewer's team is `employee.team_id` (managers, the deputy and HR have one too); the calendar defaults to it and a different `team_id` is 403 for everyone except HR admins. A person with no team sees an empty calendar. Deactivated staff appear for HR only (R34). Masked Sick entries are built with exactly `employee_id, employee_name, date, slot, label`, and entries are ordered by date, name, slot, so nothing depends on the request. The screen is a day-by-day list (a month grid is not built yet).
 
 ### 4.8 Monthly report (P2)
 
