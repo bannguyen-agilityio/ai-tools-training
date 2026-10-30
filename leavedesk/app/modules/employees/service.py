@@ -189,6 +189,10 @@ async def update(
     if employee.id == actor.id and changes.get("role", actor.role) != actor.role:
         # Self-demotion could leave nobody able to reach the HR-only endpoints.
         raise ProblemError(422, "You cannot change your own role.")
+    if changes.get("role") == "hr" and employee.is_hr_deputy:
+        raise ProblemError(
+            422, "Remove them as deputy (HR Settings) before making them an HR admin."
+        )
     # Validate only what changes, so an unchanged (now inactive) manager does not block an edit.
     if changes.get("team_id", employee.team_id) != employee.team_id:
         await _check_team(db, changes["team_id"])

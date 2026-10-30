@@ -24,8 +24,8 @@ STALE = "This request was already decided or changed. Reload it."
 
 
 async def approvers(db: AsyncSession, req: LeaveRequest, owner: Employee) -> list[Employee]:
-    """Who was asked to decide: the assigned manager, or every HR approver (A-14)."""
-    if req.queue == "manager" and req.assigned_to is not None:
+    """Who was asked to decide: the assigned manager or deputy, or every HR approver (A-14)."""
+    if req.queue in ("manager", "deputy") and req.assigned_to is not None:
         manager = await db.get(Employee, req.assigned_to)
         return [manager] if manager is not None and manager.is_active else []
     return await hr_approvers(db, owner)
@@ -164,7 +164,7 @@ async def cancel_by_hr(
         ip=ip,
     )
     ref = RequestRef(req.id, owner.id, owner.name, req.start_date, req.end_date)
-    recipients = [owner, *(a for a in await _approvers(db, req, owner) if a.id != hr.id)]
+    recipients = [owner, *(a for a in await approvers(db, req, owner) if a.id != hr.id)]
     for recipient in recipients:
         await emit(db, Event.REQUEST_CANCELLED_BY_HR, recipient, ref=ref)
     await db.commit()
