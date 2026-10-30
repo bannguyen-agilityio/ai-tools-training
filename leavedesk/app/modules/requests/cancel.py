@@ -164,7 +164,7 @@ async def cancel_by_hr(
         ip=ip,
     )
     ref = RequestRef(req.id, owner.id, owner.name, req.start_date, req.end_date)
-    recipients = [owner, *(a for a in await _approvers(db, req, owner) if a.id != hr.id)]
+    recipients = [owner, *(a for a in await approvers(db, req, owner) if a.id != hr.id)]
     for recipient in recipients:
         await emit(db, Event.REQUEST_CANCELLED_BY_HR, recipient, ref=ref)
     await db.commit()
