@@ -22,7 +22,7 @@ from app.modules.requests.routing import hr_approvers
 STALE = "This request was already decided or changed. Reload it."
 
 
-async def _approvers(db: AsyncSession, req: LeaveRequest, owner: Employee) -> list[Employee]:
+async def approvers(db: AsyncSession, req: LeaveRequest, owner: Employee) -> list[Employee]:
     """Who was asked to decide: the assigned manager, or every HR approver (A-14)."""
     if req.queue == "manager" and req.assigned_to is not None:
         manager = await db.get(Employee, req.assigned_to)
@@ -84,7 +84,7 @@ async def cancel_own(
         ip=ip,
     )
     ref = RequestRef(req.id, user.id, user.name, req.start_date, req.end_date)
-    for recipient in await _approvers(db, req, user):
+    for recipient in await approvers(db, req, user):
         await emit(db, Event.REQUEST_CANCELLED_BY_EMPLOYEE, recipient, ref=ref)
     await db.commit()
     return req
