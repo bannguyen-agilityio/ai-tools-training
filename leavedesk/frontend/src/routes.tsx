@@ -1,7 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
+import { EmployeesPage } from "./features/hr/employees/EmployeesPage";
 import { HolidaysPage } from "./features/hr/holidays/HolidaysPage";
+import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
 import { Layout } from "./ui/Layout";
 import type { NavItem } from "./ui/Nav";
@@ -10,7 +12,11 @@ const NAV: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/sample-form", label: "Sample form" },
 ];
-const HR_NAV: NavItem[] = [{ to: "/hr/holidays", label: "Holidays" }];
+const HR_NAV: NavItem[] = [
+  { to: "/hr/employees", label: "Employees" },
+  { to: "/hr/teams", label: "Teams" },
+  { to: "/hr/holidays", label: "Holidays" },
+];
 
 export function AppRoutes() {
   const me = useMe();
@@ -25,6 +31,22 @@ export function AppRoutes() {
           element={
             <RequireHr>
               <HolidaysPage />
+            </RequireHr>
+          }
+        />
+        <Route
+          path="/hr/employees"
+          element={
+            <RequireHr>
+              <EmployeesPage />
+            </RequireHr>
+          }
+        />
+        <Route
+          path="/hr/teams"
+          element={
+            <RequireHr>
+              <TeamsPage />
             </RequireHr>
           }
         />
