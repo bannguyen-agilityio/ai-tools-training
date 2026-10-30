@@ -1,4 +1,6 @@
 import uuid
+from collections import defaultdict
+from collections.abc import Iterable
 from datetime import date
 from decimal import Decimal
 
@@ -9,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.balances.compute import DayUse
 from app.modules.balances.models import BalanceEntry
 from app.modules.identity.models import Employee
+from app.modules.leave_days.models import LeaveRequest, LeaveRequestDay
 
 
 async def add_entry(
@@ -66,12 +69,45 @@ async def active_employees(db: AsyncSession) -> list[Employee]:
     return list(result.scalars())
 
 
+def _day_uses(rows: Iterable[tuple[date, str]]) -> list[DayUse]:
+    return [
+        DayUse(leave_date=d, status="approved" if status == "approved" else "pending")
+        for d, status in rows
+    ]
+
+
+def _active_days(leave_type_code: str, leave_year: int):  # type: ignore[no-untyped-def]
+    return (
+        select(LeaveRequestDay.employee_id, LeaveRequestDay.leave_date, LeaveRequest.status)
+        .join(LeaveRequest, LeaveRequest.id == LeaveRequestDay.request_id)
+        .where(
+            LeaveRequestDay.leave_year == leave_year,
+            LeaveRequestDay.is_active,
+            LeaveRequest.leave_type_code == leave_type_code,
+            LeaveRequest.status.in_(("pending", "approved")),
+        )
+    )
+
+
 async def days_for(
     db: AsyncSession, employee_id: uuid.UUID, leave_type_code: str, leave_year: int
 ) -> list[DayUse]:
-    """Approved and pending half days from `leave_request_day`.
+    """Approved and pending half days from `leave_request_day` (spec 5.4).
 
-    That table arrives with plan 06 (R12). Until then this refuses to answer: returning no
-    leave would make every employee look like they took none, and the jobs would write wrong
-    rows into the append-only ledger."""
-    raise NotImplementedError("leave_request_day is not built yet (plan 06)")
+    Only active rows of pending or approved requests count, one `DayUse` per half day."""
+    result = await db.execute(
+        _active_days(leave_type_code, leave_year).where(LeaveRequestDay.employee_id == employee_id)
+    )
+    return _day_uses((d, status) for _, d, status in result.all())
+
+
+async def days_by_employee(
+    db: AsyncSession, leave_type_code: str, leave_year: int
+) -> dict[uuid.UUID, list[DayUse]]:
+    """`days_for` for every employee in one query (the jobs walk all active employees)."""
+    grouped: dict[uuid.UUID, list[tuple[date, str]]] = defaultdict(list)
+    for employee_id, d, status in (
+        await db.execute(_active_days(leave_type_code, leave_year))
+    ).all():
+        grouped[employee_id].append((d, status))
+    return {employee_id: _day_uses(rows) for employee_id, rows in grouped.items()}

@@ -16,16 +16,21 @@ afterEach(() => {
 describe("parseProblem", () => {
   it("reads the spec error envelope", async () => {
     const err = await parseProblem(
-      respond(422, { error: { code: "invalid", message: "Fix it", details: [{ field: "a", message: "bad" }] } }),
+      respond(422, { error: { code: "VALIDATION_ERROR", message: "Fix it", details: [{ field: "a", issue: "bad" }] } }),
     );
     expect(err).toBeInstanceOf(ApiError);
-    expect(err.code).toBe("invalid");
+    expect(err.code).toBe("VALIDATION_ERROR");
     expect(err.fields).toEqual([{ field: "a", message: "bad" }]);
   });
-  it("reads problem+json", async () => {
-    const err = await parseProblem(respond(403, { title: "Forbidden", detail: "No" }, "application/problem+json"));
+  it("reads the message and code of a 403", async () => {
+    const err = await parseProblem(respond(403, { error: { code: "FORBIDDEN", message: "No" } }));
     expect(err.message).toBe("No");
     expect(err.status).toBe(403);
+    expect(err.code).toBe("FORBIDDEN");
+  });
+  it("falls back to the status text for a non-JSON body", async () => {
+    const err = await parseProblem(new Response("<html>", { status: 502, statusText: "Bad Gateway" }));
+    expect(err.message).toBe("Bad Gateway");
   });
 });
 

@@ -264,7 +264,7 @@ PostgreSQL (Supabase), managed with Alembic. Conventions:
 | `balance_entry` | employee_id, leave_type_code, leave_year, kind (`opening`/`entitlement`/`prorata`/`carry_over`/`expiry`/`adjustment`), days (signed), expires_on (only `carry_over`), reason, source (`manual`/`system`), idempotency_key (unique, nullable), corrects_entry_id → balance_entry, created_by | Append-only ledger (R24). `reason` is required for `adjustment` (`CHECK`). Manual `opening` and `carry_over` entries must be 0–40. `entitlement` rows (12 annual, 7 sick) and rollover `carry_over`/`expiry` rows are written by the system with an `idempotency_key` such as `rollover:2027:<employee_id>`, so a job that runs twice cannot double-credit. No entries exist for `unpaid`. |
 | `leave_request` | employee_id, leave_type_code, start_date, start_part (`full`/`pm`/`am`), end_date, end_part, working_days (snapshot), note, status (`pending`/`approved`/`rejected`/`cancelled`), queue (`manager`/`hr`/`deputy`), assigned_to → employee, submitted_at, notice_warning (bool), entered_by → employee, entry_reason, decided_by, decided_on_behalf_of → employee, decided_at, decision_reason, cancelled_by, cancelled_at, cancel_reason, version | See 5.2 for the checks. `note` is optional, max 500 characters, and is never copied into email, notification, audit or log text. `queue = 'manager'` → `assigned_to` is the direct manager. `queue = 'hr'` (a manager's request) → `assigned_to` is null and any HR approver other than the requester may decide. `queue = 'deputy'` (an HR admin's own request) → `assigned_to` is the deputy (R36). `entered_by`/`entry_reason` are set when HR enters leave for someone (R15). `version` is for optimistic locking (R18). |
 | `leave_request_day` | request_id → leave_request, employee_id, leave_date, slot (`am`/`pm`), leave_year, is_active | Primary key `(request_id, leave_date, slot)`. One row per **working half day** (a full day is two rows, `am` and `pm`; weekends and holidays are never stored). `is_active` is true while the parent is `pending` or `approved` and is set false in the same transaction on reject or cancel. **Partial unique index `(employee_id, leave_date, slot) WHERE is_active`** makes overlap (R13) impossible even under concurrent submits, while a morning and an afternoon half day on one date do not clash. `leave_year` lets a request that spans two years deduct per year (R6). |
-| `public_holiday` | holiday_date (unique), name, source (`seed`/`manual`), created_by | Edits never rewrite `working_days` or `leave_request_day` (C-8). Affected requests are found by query (R11). |
+| `public_holiday` | holiday_date (unique), name, source (`seed`/`manual`), created_by | Edits never rewrite `working_days` or `leave_request_day` (C-8). Affected requests are found by query (R11): Pending or Approved requests whose date range covers the date, counted for weekday dates only (a weekend holiday changes nothing). The range, not the day rows, is used so deleting a holiday also finds requests that skipped it. A move counts the old and the new date. Seeded by migration 0005 from Appendix A. |
 | `audit_log` | actor_id, acting_for_id (cover manager or deputy: the person the actor stood in for), action, target_type, target_id, detail (`jsonb`), ip, at | Append-only (R30). `detail` holds ids and before/after values of non-sensitive fields only: never notes, rejection reasons, tokens, or the type of Sick leave in free text. Kept 7 years (R34). |
 | `email_outbox` | recipient_employee_id, to_address, template, payload (`jsonb`), subject and body (rendered at emit time, privacy-checked; **[Assumption]** invite/reset bodies hold a one-time link), dedupe_key (unique), status (`pending`/`sent`/`failed`/`mocked`), attempts, next_try_at, sent_at, last_error | Written in the same transaction as the event (outbox pattern), so a request is never lost if SendGrid is down (R26). `payload` is privacy-filtered (no Sick type, no note). `last_error` holds the provider status code only. Back-off 1 min, 5 min, 30 min, 2 h, 12 h; after 5 attempts → `failed`, visible to HR. **[Assumption]** The 5th failure ends retries, so the 12 h step is unused (confirm 5 attempts vs 5 retries). `notification` also has a unique `dedupe_key`; rows are never deleted by the app role. |
 | `notification` | employee_id, kind, title, body, link, request_id, read_at | Privacy-filtered like email (R35). Own rows only. |
@@ -590,21 +590,22 @@ Decided on 2026-10-28 (product owner). Concerns still need a written decision un
 | HR count | HR is 2 people (owner and deputy); intent updated | Product owner | 2026-10-28 |
 | C-16 | Gated on the Q5 hello-world deploy and cost check before building | Product owner | 2026-10-28 |
 
-## Appendix A. Draft Vietnamese public holiday seed (UNVERIFIED)
+## Appendix A. Vietnamese public holiday seed (press-reported, decree text not yet checked)
 
-Draft for R11. The developer verifies every date against the government's official decree by 30 Oct 2026 and corrects it in the Holidays screen; 2027 lunar dates are added when the decree is published. Lunar holidays and compensatory days are announced by decree, usually late in the preceding year, so 2027 lunar dates are approximate.
+Seeded by migration `0005` exactly as listed, one row per weekday. Compiled on 30 Oct 2026 from press reports of the Ministry of Home Affairs notices (including notice 11483/TB-BNV of 9 Oct 2026 for Tet and National Day 2027) and the National Assembly resolution making 24 Nov Vietnam Culture Day a paid holiday. The decree and notice texts themselves could not be opened from the build environment, so the developer still confirms each date against them (A-19, go-live gate) and corrects it in the Holidays screen. The public-sector days (2 Jan 2026, 31 Aug 2026, 3 Sep 2027, the Tet block) are included on the Q6 assumption that the company follows the government schedule; Q6 should confirm that for private-sector employers.
 
 | Date | Holiday | Status |
 |---|---|---|
-| 2026-01-01 | New Year's Day | Fixed |
-| 2026-02-16 to 2026-02-20 | Tet (Lunar New Year, 17 Feb 2026), weekdays only | Verify extra days and make-up working Saturday |
-| 2026-04-27 | Hung Kings' Commemoration (lunar 10/3 falls on Sun 26 Apr), compensatory Monday | Verify |
-| 2026-04-30 | Reunification Day | Fixed |
-| 2026-05-01 | International Labour Day | Fixed |
-| 2026-09-01 and 2026-09-02 | National Day | Verify which adjacent day is granted |
+| 2026-01-01, 2026-01-02 | New Year's Day and the extra day | Press-reported (make-up Sat 10 Jan 2026 is not modelled: Saturday shifts are out of scope) |
+| 2026-02-16 to 2026-02-20 | Tet (17 Feb 2026); holiday 14 to 22 Feb, weekdays only | Press-reported |
+| 2026-04-27 | Hung Kings' Commemoration (lunar 10/3 is Sun 26 Apr), compensatory Monday | Verify |
+| 2026-04-30, 2026-05-01 | Reunification Day, International Labour Day | Fixed |
+| 2026-08-31, 2026-09-01, 2026-09-02 | National Day block (29 Aug to 2 Sep; make-up Sat 22 Aug not modelled) | Press-reported |
+| 2026-11-24 | Vietnam Culture Day | Press-reported (sources disagree on whether the day was shifted to Mon 23 Nov; none confirmed) |
 | 2027-01-01 | New Year's Day | Fixed |
-| 2027-02-08 to 2027-02-12 (approx.) | Tet (Lunar New Year, Sat 6 Feb 2027) | To be set by decree |
-| 2027-04-16 | Hung Kings' Commemoration (approx.) | To be set by decree |
+| 2027-02-04, 2027-02-05, 2027-02-08 to 2027-02-10 | Tet (6 Feb 2027); public-sector holiday Thu 4 to Wed 10 Feb | Press-reported |
+| 2027-04-16 | Hung Kings' Commemoration | Verify |
 | 2027-04-30 | Reunification Day | Fixed |
-| 2027-05-03 | Labour Day compensatory Monday (1 May falls on Sat) | Verify |
-| 2027-09-02 | National Day (+ adjacent day) | To be set by decree |
+| 2027-05-03 | Labour Day compensatory Monday (1 May is a Saturday) | Verify |
+| 2027-09-02, 2027-09-03 | National Day and the extra day | Press-reported (private employers may grant 1 Sep or 3 Sep) |
+| 2027-11-24 | Vietnam Culture Day | Press-reported |

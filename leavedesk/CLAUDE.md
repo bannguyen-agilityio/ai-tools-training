@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, balance ledger + `compute_balance` + rollover/expire_carry jobs (no balances API yet; used/reserved days arrive with `leave_request_day`, plan 06), email outbox + `EmailSender`, notifications API, `drain_outbox` job, frontend shell (R31 primitives in `frontend/src/ui`, served by `app/spa.py`; see `frontend/README.md`). Not built: requests, approvals, holidays, notification bell UI, feature screens.
+LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Excel + email. The spec is the source of truth. Built so far: backend core, audit, identity, balance ledger + `compute_balance` + rollover/expire_carry jobs (no balances API yet), email outbox + `EmailSender`, notifications API, `drain_outbox` job, frontend shell (R31 primitives in `frontend/src/ui`, served by `app/spa.py`; see `frontend/README.md`), public holidays (seeded, HR CRUD, impact count), working-day expansion (`leave_days/calendar.py`) and the `leave_request`/`leave_request_day` tables (no request endpoints yet; `days_for` reads them), HR Holidays screen. Not built: request endpoints, approvals, notification bell UI, other feature screens.
 
 ## Sources
 
@@ -8,7 +8,7 @@ LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Exc
 - `docs/runbooks/` (deploy, secrets); `.env.example` lists every variable.
 - **Do not read `ref/`** (stale training material). Never open, search or cite it.
 - If code and spec disagree, fix the spec in the same change. Non-intent items are marked **[Assumption]**.
-- Known drift: `app/core/errors.py` returns `problem+json`; spec §6.1 requires the error envelope below. Fix the code. Spec §2 says Python 3.12; it is 3.14.
+- Known drift: spec §2 says Python 3.12; it is 3.14.
 
 ## Phases
 

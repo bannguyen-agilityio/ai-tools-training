@@ -7,6 +7,7 @@ npm ci
 npm run dev        # Vite on :5173, proxies /api to :8000
 npm run lint && npm run typecheck && npm test && npm run build
 npm run e2e        # Playwright + axe at 360x640; E2E_BASE_URL defaults to http://localhost:8000
+                   # PLAYWRIGHT_CHROMIUM_PATH=/path/to/chromium uses a preinstalled browser
 ```
 
 ## Primitives (`src/ui`)

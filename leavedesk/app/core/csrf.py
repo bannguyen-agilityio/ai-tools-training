@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from app.core.config import get_settings
-from app.core.errors import problem
+from app.core.errors import error_response
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 CSRF_HEADER = "X-CSRF-Token"
@@ -40,5 +40,5 @@ class OriginCheckMiddleware(BaseHTTPMiddleware):
                 # terminated by the platform proxy, so request.url may say http.
                 same_site = urlsplit(origin).netloc == request.headers.get("host")
                 if not same_site and origin.rstrip("/") not in get_settings().allowed_origins:
-                    return problem(403, "Cross-origin request refused")
+                    return error_response(403, "Cross-origin request refused")
         return await call_next(request)

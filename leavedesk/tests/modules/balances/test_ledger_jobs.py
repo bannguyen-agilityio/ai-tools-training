@@ -212,12 +212,6 @@ async def test_anon_reads_nothing(owner_engine: AsyncEngine) -> None:
         await conn.execute(text("RESET ROLE"))
 
 
-async def test_days_for_refuses_until_leave_days_exist(app_engine: AsyncEngine) -> None:
-    async with AsyncSession(app_engine) as db:
-        with pytest.raises(NotImplementedError):
-            await repository.days_for(db, uuid.uuid4(), "annual", 2026)
-
-
 def test_rollover_year_is_never_in_the_future() -> None:
     from app.jobs.rollover import resolve_year
 
