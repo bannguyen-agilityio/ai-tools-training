@@ -23,6 +23,7 @@ ALLOWED_DETAIL_KEYS = frozenset(
         "fields",
         "count",
         "format",
+        "month",
         "reason_code",
     }
 )
