@@ -28,6 +28,7 @@ const item = {
   notice_warning: false,
   version: 4,
   label: null,
+  employee_name: "An Nguyen",
 };
 
 function mount() {
@@ -44,6 +45,12 @@ function mount() {
 afterEach(() => vi.restoreAllMocks());
 
 describe("approvals", () => {
+  it("shows who is asking", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () => json({ items: [item] }));
+    mount();
+    expect(await screen.findByText("An Nguyen")).toBeInTheDocument();
+  });
+
   it("shows the note and type while deciding, and approves with the version", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDate, parseDate } from "../lib/dates";
 import { Field } from "./Field";
 
@@ -29,6 +29,11 @@ function show(iso: string): string {
 export function DateField({ label, value, onChange, error, hint, name }: DateFieldProps) {
   const [text, setText] = useState(show(value));
   const [typed, setTyped] = useState(false);
+  // Follow external changes (form reset, loaded defaults) without fighting what is being typed.
+  useEffect(() => {
+    setText((current) => (parseDate(current) === (value || null) ? current : show(value)));
+    if (!value) setTyped(false);
+  }, [value]);
   const unparsable = typed && text.trim() !== "" && parseDate(text) === null;
   const shownError = error ?? (unparsable ? `Not a date. ${FORMAT_HINT}.` : undefined);
 

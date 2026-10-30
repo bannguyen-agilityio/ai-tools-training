@@ -294,3 +294,35 @@ async def test_hr_list_has_all_active_employees(
         b for b in items[str(emp.employee_id)]["balances"] if b["leave_type_code"] == "annual"
     )
     assert float(annual["available"]) == 6
+
+
+async def test_manual_carry_over_is_capped_at_six_with_rollover(
+    client: httpx.AsyncClient, make_login: MakeLogin, owner_engine: AsyncEngine
+) -> None:
+    hr, emp, other = await make_login("hr"), await make_login(), await make_login()
+    over = await post(
+        client, hr, emp.employee_id, kind="carry_over", days=6.5, expires_on=f"{YEAR}-12-31"
+    )
+    assert over.status_code == 422
+    six = await post(
+        client, hr, emp.employee_id, kind="carry_over", days=6, expires_on=f"{YEAR}-12-31"
+    )
+    assert six.status_code == 201
+    # A rollover carry already in the ledger counts toward the same cap.
+    async with owner_engine.connect() as conn:
+        await conn.execute(
+            text(
+                "INSERT INTO balance_entry (employee_id, leave_type_code, leave_year, kind, days,"
+                " expires_on, source) VALUES (:e, 'annual', :y, 'carry_over', 4, :x, 'system')"
+            ),
+            {"e": other.employee_id, "y": YEAR, "x": date(YEAR, 12, 31)},
+        )
+        await conn.commit()
+    stacked = await post(
+        client, hr, other.employee_id, kind="carry_over", days=3, expires_on=f"{YEAR}-12-31"
+    )
+    assert stacked.status_code == 409
+    fits = await post(
+        client, hr, other.employee_id, kind="carry_over", days=2, expires_on=f"{YEAR}-12-31"
+    )
+    assert fits.status_code == 201

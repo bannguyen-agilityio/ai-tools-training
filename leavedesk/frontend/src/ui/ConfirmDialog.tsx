@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "./Button";
 
 interface ConfirmDialogProps {
@@ -24,6 +25,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const keepRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const bodyId = useId();
 
@@ -31,7 +33,16 @@ export function ConfirmDialog({
     if (!open) return;
     const opener = document.activeElement as HTMLElement | null;
     keepRef.current?.focus();
-    return () => opener?.focus();
+    // Everything behind the dialog is inert, so focus and screen readers cannot leave it (R31e).
+    const behind = [...document.body.children].filter(
+      (el): el is HTMLElement =>
+        el instanceof HTMLElement && el !== backdropRef.current && !el.inert,
+    );
+    behind.forEach((el) => (el.inert = true));
+    return () => {
+      behind.forEach((el) => (el.inert = false));
+      opener?.focus();
+    };
   }, [open]);
 
   if (!open) return null;
@@ -55,8 +66,8 @@ export function ConfirmDialog({
     }
   }
 
-  return (
-    <div className="dialog-backdrop">
+  return createPortal(
+    <div className="dialog-backdrop" ref={backdropRef}>
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- focus trap + Escape for the modal */}
       <div
         ref={dialogRef}
@@ -78,6 +89,7 @@ export function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

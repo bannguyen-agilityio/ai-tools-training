@@ -89,7 +89,12 @@ describe("BalancesPage (R24)", () => {
     await user.click(screen.getByRole("button", { name: "Save entry" }));
     expect(await screen.findByText("Starting balances")).toBeInTheDocument();
     const saved = calls.find((c) => c.method === "POST" && c.url.endsWith("/balance-entries"));
-    expect(JSON.parse(saved?.body ?? "{}")).toEqual({ leave_type_code: "annual", kind: "opening", days: 5 });
+    expect(JSON.parse(saved?.body ?? "{}")).toEqual({
+      leave_type_code: "annual",
+      kind: "opening",
+      days: 5,
+      leave_year: new Date().getFullYear(),
+    });
   });
 
   it("requires a reason for an adjustment", async () => {

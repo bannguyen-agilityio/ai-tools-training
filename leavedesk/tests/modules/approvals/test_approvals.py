@@ -226,7 +226,7 @@ async def test_list_assigned_scoped_and_redacted(
     rid = await submit(client, emp, leave_type="sick", note="flu")
     other = await make_login("manager")
     assert (await client.get(LIST, headers=other.headers)).json()["items"] == []
-    assert (await client.get(LIST, headers=emp.headers)).json()["items"] == []
+    assert (await client.get(LIST, headers=emp.headers)).status_code == 403
     items = (await client.get(LIST, headers=mgr.headers)).json()["items"]
     assert [i["id"] for i in items] == [rid]
     assert items[0]["leave_type"] == "sick" and items[0]["note"] == "flu"  # while deciding
@@ -251,3 +251,37 @@ async def test_hr_queue_for_hr_not_other_managers(
     assert (await client.get(LIST, headers=other.headers)).json()["items"] == []
     assert (await decide(client, other, rid)).status_code == 403
     assert (await decide(client, hr, rid, "reject", reason="no")).status_code == 200
+
+
+# --- Plan open items -------------------------------------------------------------------------
+
+
+async def test_plain_employee_list_is_403(client: httpx.AsyncClient, staff) -> None:  # type: ignore[no-untyped-def]
+    emp, _ = staff
+    assert (await client.get(LIST, headers=emp.headers)).status_code == 403
+
+
+async def test_cards_carry_requester_name(client: httpx.AsyncClient, staff) -> None:  # type: ignore[no-untyped-def]
+    emp, mgr = staff
+    await submit(client, emp)
+    items = (await client.get(LIST, headers=mgr.headers)).json()["items"]
+    assert [i["employee_name"] for i in items] == ["Test"]
+
+
+async def test_hr_who_entered_a_request_cannot_decide_it(
+    client: httpx.AsyncClient, make_login: MakeLogin, owner_engine: AsyncEngine
+) -> None:
+    hr, other_hr, mgr = await make_login("hr"), await make_login("hr"), await make_login("manager")
+    await seed_year(owner_engine, mgr.employee_id, "entitlement", "12")
+    made = await client.post(
+        "/api/v1/hr/requests",
+        json={**body("2026-06-08"), "employee_id": str(mgr.employee_id), "entry_reason": "phone"},
+        headers=hr.mutating_headers,
+    )
+    assert made.status_code == 201, made.text
+    rid = made.json()["id"]
+    assert (await decide(client, hr, rid)).status_code == 403
+    assert rid not in [
+        i["id"] for i in (await client.get(LIST, headers=hr.headers)).json()["items"]
+    ]
+    assert (await decide(client, other_hr, rid)).status_code == 200

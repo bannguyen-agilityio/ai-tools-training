@@ -31,6 +31,8 @@ export interface LeaveRequest {
   notice_warning: boolean;
   version: number;
   label: string | null;
+  /** Approvals lists only: who is asking, for the deciding approver. */
+  employee_name?: string | null;
 }
 
 export interface Preview {

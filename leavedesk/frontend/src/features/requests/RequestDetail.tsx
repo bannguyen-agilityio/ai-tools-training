@@ -5,6 +5,7 @@ import { useMe } from "../../auth/useMe";
 import { Button } from "../../ui/Button";
 import { ConfirmDialog } from "../../ui/ConfirmDialog";
 import { useToast } from "../../ui/Toast";
+import { DecisionPanel } from "../approvals/DecisionPanel";
 import { useCancelRequest, useRequest } from "./api";
 import { HrCancelDialog } from "./HrCancelDialog";
 import { daysText, rangeText, statusText, typeLabel } from "./format";
@@ -33,6 +34,14 @@ export function RequestDetail() {
   const canCancel = data.status === "pending" && me?.id === data.employee_id;
   // R21: HR cancels Approved leave with a reason. The deputy cannot (server 403).
   const canHrCancel = data.status === "approved" && me?.role === "hr";
+  // R18: an approver can decide from here too. The server decides who may (403 otherwise).
+  const canDecide =
+    data.status === "pending" &&
+    !!me &&
+    me.id !== data.employee_id &&
+    (data.assigned_to === me.id ||
+      (data.queue === "hr" && (me.role === "hr" || me.is_hr_deputy)) ||
+      (data.queue === "deputy" && me.is_hr_deputy));
   const { version } = data;
   function confirmCancel() {
     setConfirming(false);
@@ -70,6 +79,7 @@ export function RequestDetail() {
           </>
         )}
       </dl>
+      {canDecide && <DecisionPanel request={data} />}
       {cancel.error && <p role="alert">{cancel.error.message}</p>}
       {canCancel && (
         <Button

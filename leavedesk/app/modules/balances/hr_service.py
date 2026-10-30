@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime
+from decimal import Decimal
 from zoneinfo import ZoneInfo
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,7 @@ from app.modules.audit import service as audit
 from app.modules.balances import repository
 from app.modules.balances.compute import Balance, compute_balance
 from app.modules.balances.hr_schemas import (
+    CARRY_CAP,
     BalanceList,
     BalanceOut,
     BalanceRow,
@@ -106,6 +108,11 @@ async def _check_not_duplicate(db: AsyncSession, entry: BalanceEntry) -> None:
         raise ProblemError(
             409, "That entry already exists for this employee. Add a correction instead."
         )
+    if entry.kind == "carry_over" and (
+        sum((r.days for r in rows if r.kind == "carry_over"), Decimal(0)) + entry.days > CARRY_CAP
+    ):
+        # Manual plus rollover carry must not stack past the cap (R7).
+        raise ProblemError(409, "Carry-over for this year would exceed 6 days.")
 
 
 async def preview(
