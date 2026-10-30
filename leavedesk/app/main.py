@@ -17,6 +17,7 @@ from app.jobs.drain_outbox import run_forever
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.router import router as auth_router
 from app.modules.balances.hr_router import router as balances_router
+from app.modules.balances.me_router import router as me_balances_router
 from app.modules.email.router import router as email_router
 from app.modules.employees.router import router as employees_router
 from app.modules.holidays.router import router as holidays_router
@@ -63,6 +64,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(audit_router)
     app.include_router(balances_router)
+    app.include_router(me_balances_router)
     app.include_router(email_router)
     app.include_router(employees_router)
     app.include_router(holidays_router)

@@ -19,7 +19,7 @@ from app.modules.balances.hr_schemas import (
     Summary,
 )
 from app.modules.balances.models import BalanceEntry
-from app.modules.balances.service import _entries
+from app.modules.balances.service import entries_of
 from app.modules.identity.models import Employee
 
 TYPES = ("annual", "sick")
@@ -51,7 +51,7 @@ async def _balance(
 ) -> Balance:
     rows = [*await repository.entries_for(db, employee_id, code, year), *extra]
     days = await repository.days_for(db, employee_id, code, year)
-    return compute_balance(_entries(rows), days, _today())
+    return compute_balance(entries_of(rows), days, _today())
 
 
 async def _employee(db: AsyncSession, employee_id: uuid.UUID) -> Employee:
@@ -190,7 +190,7 @@ async def all_balances(db: AsyncSession, actor: Employee, year: int | None) -> B
                 _out(
                     c,
                     compute_balance(
-                        _entries(entries.get((e.id, c), [])), days[c].get(e.id, []), today
+                        entries_of(entries.get((e.id, c), [])), days[c].get(e.id, []), today
                     ),
                 )
                 for c in TYPES
