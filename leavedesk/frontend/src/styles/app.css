@@ -208,3 +208,34 @@ a {
 .toast--error {
   border-color: var(--danger);
 }
+
+.balance-table__email {
+  font-weight: normal;
+  font-size: 0.875rem;
+}
+.balance-table__check {
+  min-width: 4rem;
+}
+.print-only {
+  display: none;
+}
+@media print {
+  .no-print,
+  header,
+  nav,
+  .skip-link,
+  .toasts {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  .balance-table th,
+  .balance-table td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+  }
+  .balance-table__check {
+    min-width: 6rem;
+  }
+}

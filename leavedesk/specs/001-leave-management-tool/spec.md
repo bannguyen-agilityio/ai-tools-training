@@ -175,6 +175,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given HR, when they enter an employee's opening Annual days, carried days with their expiry date, and Sick days, then the entries are saved as ledger entries with the entering user and time.
 - Given an entered value outside 0–40 days, when saved, then it is refused. Before saving, HR sees a confirmation summary (**the safeguard for "no balance corrections", see C-9**).
 - Given an entry already saved, when HR changes it, then the original stays in the ledger and a new adjustment entry is added with a required reason. Entries are never overwritten.
+- **[Assumption] (A-18, pending product owner):** an `adjustment` is signed and bounded −40..40 in 0.5 steps; opening Sick may be entered (0–40); manual `carry_over` is Annual only and its `expires_on` must fall in the entry's leave year; every manual `days` is a multiple of 0.5. The confirmation step is enforced in the UI only: the API offers a preview (#25) but does not require a token before #26.
 
 **R25 [P1] HR sees all approved leave.**
 - Given HR, when they open "All leave", then they see all Approved leave (and can filter by Pending, date range, employee, team and type), with real leave types.

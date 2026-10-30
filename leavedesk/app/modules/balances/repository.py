@@ -111,3 +111,43 @@ async def days_by_employee(
     ).all():
         grouped[employee_id].append((d, status))
     return {employee_id: _day_uses(rows) for employee_id, rows in grouped.items()}
+
+
+async def add_manual(db: AsyncSession, entry: BalanceEntry) -> BalanceEntry:
+    db.add(entry)
+    await db.flush()
+    await db.refresh(entry)
+    return entry
+
+
+async def ledger_for(
+    db: AsyncSession, employee_id: uuid.UUID, leave_year: int
+) -> list[BalanceEntry]:
+    """Every entry of the year, newest first."""
+    result = await db.execute(
+        select(BalanceEntry)
+        .where(BalanceEntry.employee_id == employee_id, BalanceEntry.leave_year == leave_year)
+        .order_by(BalanceEntry.created_at.desc(), BalanceEntry.id)
+    )
+    return list(result.scalars())
+
+
+async def entries_by_employee(
+    db: AsyncSession, leave_year: int
+) -> dict[tuple[uuid.UUID, str], list[BalanceEntry]]:
+    grouped: dict[tuple[uuid.UUID, str], list[BalanceEntry]] = defaultdict(list)
+    result = await db.execute(select(BalanceEntry).where(BalanceEntry.leave_year == leave_year))
+    for row in result.scalars():
+        grouped[(row.employee_id, row.leave_type_code)].append(row)
+    return grouped
+
+
+async def employees_by_name(db: AsyncSession) -> list[Employee]:
+    result = await db.execute(
+        select(Employee).where(Employee.is_active).order_by(Employee.name, Employee.id)
+    )
+    return list(result.scalars())
+
+
+async def get_employee(db: AsyncSession, employee_id: uuid.UUID) -> Employee | None:
+    return await db.get(Employee, employee_id)
