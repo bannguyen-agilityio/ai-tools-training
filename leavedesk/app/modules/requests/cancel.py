@@ -23,8 +23,8 @@ STALE = "This request was already decided or changed. Reload it."
 
 
 async def _approvers(db: AsyncSession, req: LeaveRequest, owner: Employee) -> list[Employee]:
-    """Who was asked to decide: the assigned manager, or every HR approver (A-14)."""
-    if req.queue == "manager" and req.assigned_to is not None:
+    """Who was asked to decide: the assigned manager or deputy, or every HR approver (A-14)."""
+    if req.queue in ("manager", "deputy") and req.assigned_to is not None:
         manager = await db.get(Employee, req.assigned_to)
         return [manager] if manager is not None and manager.is_active else []
     return await hr_approvers(db, owner)

@@ -143,7 +143,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 **R17 [P1] Routing.**
 - Given a request from an employee with a direct manager, when it is created, then it is assigned to that manager and the manager is emailed.
 - Given a request from a manager, when it is created, then it is assigned to HR and HR is emailed.
-- Given a request that has no route, when it is submitted, then it is refused with a clear `422` and nothing is saved: an employee with no active direct manager (`NO_APPROVER`), a manager when no HR approver other than them exists (`NO_APPROVER`), and an HR admin's own request until the deputy route ships (`ROUTE_UNAVAILABLE`, plan 17). **[Assumption: A-10, not in the intent]**
+- Given a request that has no route, when it is submitted, then it is refused with a clear `422` and nothing is saved: an employee with no active direct manager (`NO_APPROVER`), a manager when no HR approver other than them exists (`NO_APPROVER`), and an HR admin's own request when no active deputy is set (`NO_APPROVER`; with a deputy it routes to `queue=deputy`, R36). **[Assumption: A-10, not in the intent]**
 - Given a manager's request, then "HR is emailed" means every active HR approver (HR admin or deputy) except the requester, each emailed and notified once. **[Assumption: A-14]**
 - Given a person's own request, when they try to approve it, then it is refused, whatever their role.
 

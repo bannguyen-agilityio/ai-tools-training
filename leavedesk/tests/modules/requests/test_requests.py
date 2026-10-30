@@ -219,7 +219,9 @@ async def test_unroutable_requests_refused(client, make_login) -> None:  # type:
     assert r.status_code == 422 and r.json()["error"]["code"] == "NO_APPROVER"
     hr = await make_login("hr")
     r = await post(client, hr, body("2026-06-08", leave_type="unpaid"))
-    assert r.status_code == 422 and r.json()["error"]["code"] == "ROUTE_UNAVAILABLE"
+    assert (
+        r.status_code == 422 and r.json()["error"]["code"] == "NO_APPROVER"
+    )  # no deputy set (R36)
 
 
 async def test_manager_with_no_hr_approver_refused(client, make_login) -> None:  # type: ignore[no-untyped-def]

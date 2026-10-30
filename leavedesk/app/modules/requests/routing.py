@@ -11,7 +11,7 @@ from app.modules.identity.models import Employee
 
 @dataclass(frozen=True)
 class Route:
-    queue: str  # 'manager' | 'hr'
+    queue: str  # 'manager' | 'hr' | 'deputy'
     assigned_to: Employee | None
     recipients: list[Employee]  # who is emailed and notified
 
@@ -31,14 +31,18 @@ async def hr_approvers(db: AsyncSession, excluding: Employee) -> list[Employee]:
 
 
 async def route_for(db: AsyncSession, employee: Employee) -> Route:
-    """Employee -> direct manager; manager -> HR queue. Unspecified cases are refused (A-10)."""
+    """Employee -> direct manager; manager -> HR queue; HR admin -> deputy (R36).
+
+    Cases with no approver are refused (A-10).
+    """
     if employee.role == "hr":
-        # An HR admin's own request goes to the deputy (R36, plan 17); not built yet.
-        raise ProblemError(
-            422,
-            "Requests from HR admins cannot be submitted yet.",
-            code="ROUTE_UNAVAILABLE",
-        )
+        # An HR admin cannot decide their own leave (R36): it goes to the deputy.
+        deputy = await db.scalar(select(Employee).where(Employee.is_hr_deputy, Employee.is_active))
+        if deputy is None:
+            raise ProblemError(
+                422, "No deputy HR admin is set to approve your leave.", code="NO_APPROVER"
+            )
+        return Route("deputy", deputy, [deputy])
     if employee.role == "manager":
         approvers = await hr_approvers(db, employee)
         if not approvers:
