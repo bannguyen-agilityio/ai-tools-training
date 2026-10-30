@@ -74,8 +74,10 @@ async def _decide(
     on_behalf_of: uuid.UUID | None,
 ) -> RequestOut:
     req = await _authorise(db, actor, request_id, action, ip, on_behalf_of)
-    # Deciding "for yourself" is a normal decision, not cover.
-    cover = req.assigned_to if on_behalf_of not in (None, actor.id) else None
+    # Cover only when the manager-queue cover branch of can_decide authorised it: an assigned
+    # manager or an HR approver never records (or emails) a stand-in relationship.
+    is_cover = req.queue == "manager" and req.assigned_to != actor.id
+    cover = req.assigned_to if is_cover else None
     owner = await db.get(Employee, req.employee_id)
     assert owner is not None  # FK
     decided = await repository.decide(

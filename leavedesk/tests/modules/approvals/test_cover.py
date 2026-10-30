@@ -133,3 +133,21 @@ async def test_cover_authz(
     mismatch = await decide(client, cover, rid, on_behalf_of=str(wrong.employee_id))
     assert mismatch.status_code == 403
     assert await status_of(client, mgr, rid) == "pending"
+
+
+async def test_stray_on_behalf_of_is_not_recorded(
+    client: httpx.AsyncClient,
+    staff,
+    make_login: MakeLogin,
+    owner_engine: AsyncEngine,  # type: ignore[no-untyped-def]
+) -> None:
+    emp, mgr = staff
+    other = await make_login("manager")
+    rid = await submit(client, emp)
+    # The assigned manager is not refused for a wrong hint, and no cover is recorded.
+    r = await decide(client, mgr, rid, on_behalf_of=str(other.employee_id))
+    assert r.status_code == 200
+    q = "SELECT decided_on_behalf_of FROM leave_request WHERE id = :i"
+    assert await scalar(owner_engine, q, i=rid) is None
+    cover_mail = "SELECT count(*) FROM email_outbox WHERE template LIKE '%on_behalf'"
+    assert await scalar(owner_engine, cover_mail) == 0

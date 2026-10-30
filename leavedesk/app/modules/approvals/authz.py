@@ -14,9 +14,11 @@ def can_decide(actor: Employee, req: LeaveRequest, on_behalf_of: uuid.UUID | Non
     if actor.id == req.employee_id:
         return False
     if req.queue == "manager":
-        if on_behalf_of is not None and on_behalf_of != actor.id:
-            return actor.role == "manager" and req.assigned_to == on_behalf_of
-        return req.assigned_to == actor.id
+        if req.assigned_to == actor.id:
+            return True
+        return (
+            actor.role == "manager" and on_behalf_of is not None and req.assigned_to == on_behalf_of
+        )
     if req.queue == "hr":
         return actor.role == "hr" or actor.is_hr_deputy
     return actor.is_hr_deputy
