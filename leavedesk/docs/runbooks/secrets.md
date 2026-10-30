@@ -20,6 +20,7 @@ Settings > Environments. Create `staging` and `production`, each with its own va
 | Name | Value |
 |---|---|
 | `FASTAPI_CLOUD_TOKEN` | FastAPI Cloud API token used by `fastapi deploy` |
+| `SENDGRID_API_KEY` | SendGrid key, read by the `drain_outbox` job (each environment) |
 | `DATABASE_URL` | App database URL: `postgresql+psycopg://<app_role>:<password>@<pooled-host>:<port>/<db>` |
 | `MIGRATION_DATABASE_URL` | Owner/admin URL of the same database, used only by `alembic upgrade head` |
 
@@ -31,6 +32,9 @@ Settings > Environments. Create `staging` and `production`, each with its own va
 | `APP_URL` | Base URL of that app, no trailing slash (used for the `/healthz` check) |
 | `APP_DB_ROLE` | Role the app runs as, e.g. `leavedesk_app` |
 | `COMPANY_TZ` | `Asia/Ho_Chi_Minh` |
+| `EMAIL_FROM` | Verified SendGrid sender, read by the `drain_outbox` job |
+
+Scheduled jobs (`leavedesk-job-*`; schedules are disabled for now, manual runs only) run once per environment (staging and production; manual runs follow the branch) and read `DATABASE_URL`, `APP_DB_ROLE`, `COMPANY_TZ`, `APP_URL` (as `APP_BASE_URL`) and, for `drain_outbox`, the two email values above.
 
 ### Protection rules
 
@@ -40,7 +44,7 @@ Settings > Environments. Create `staging` and `production`, each with its own va
 
 ### Set by the workflow (do not configure)
 
-`ENVIRONMENT` (from the environment name), `EMAIL_BACKEND=sendgrid`, `COOKIE_SECURE=true`, `ENV_FILE=/dev/null`. `leavedesk-ci` needs nothing: its throwaway Postgres credentials are in the workflow file.
+`ENVIRONMENT` (from the environment name), `APP_BASE_URL` (from `APP_URL`), `EMAIL_BACKEND=sendgrid`, `COOKIE_SECURE=true`, `ENV_FILE=/dev/null`. `leavedesk-ci` needs nothing: its throwaway Postgres credentials are in the workflow file.
 
 ## 2. FastAPI Cloud app environment
 
@@ -54,12 +58,17 @@ Set in the dashboard or CLI for each app (staging and production). These are wha
 | `COMPANY_TZ` | yes | `Asia/Ho_Chi_Minh` |
 | `EMAIL_BACKEND` | yes | `sendgrid`. The app refuses `mock` when `ENVIRONMENT=production` |
 | `COOKIE_SECURE` | yes | `true` (set `false` only for plain-HTTP local dev, A-25) |
+| `APP_BASE_URL` | yes | Origin used for email links, no trailing slash (same as `APP_URL`) |
+| `SENDGRID_API_KEY` | yes | SendGrid key (required with `EMAIL_BACKEND=sendgrid`) |
+| `EMAIL_FROM` | yes | Verified sender address |
+| `LOGIN_IP_LIMIT` | no | Failed sign-ins per IP in 15 min, default `30` (A-6) |
+| `CLIENT_IP_HEADER` | no | Header the trusted proxy sets with the client IP (right-most entry used); leave unset if no proxy |
 | `SET_ROLE_ON_CONNECT` | no | Leave unset (default `false`). Only for local/CI with an owner URL |
 | `ALLOWED_ORIGINS` | no | JSON list of extra allowed origins, e.g. `["https://x.example"]`. Not needed for same-origin |
 | `SESSION_IDLE_HOURS` | no | Default `8` (R2) |
 | `SESSION_MAX_HOURS` | no | Default `24` (R2) |
 
-Not read by the code yet; they arrive with later plans and their variable names are not fixed: the SendGrid API key (plan 03) and the session signing key (plan 04). Add them to this table when those plans land.
+Sessions use a random token stored hashed, so there is no signing key.
 
 ## 3. Local development
 
