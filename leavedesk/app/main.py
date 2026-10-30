@@ -22,6 +22,7 @@ from app.modules.email.router import router as email_router
 from app.modules.employees.router import router as employees_router
 from app.modules.holidays.router import router as holidays_router
 from app.modules.notifications.router import router as notifications_router
+from app.modules.requests.hr_router import router as hr_requests_router
 from app.modules.requests.router import router as requests_router
 from app.modules.teams.router import router as teams_router
 from app.spa import mount_spa
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
     app.include_router(teams_router)
     app.include_router(notifications_router)
     app.include_router(requests_router)
+    app.include_router(hr_requests_router)
     mount_spa(app)  # last: it serves the catch-all for client routes
     return app
 

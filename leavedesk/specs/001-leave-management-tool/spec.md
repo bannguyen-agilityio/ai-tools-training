@@ -128,9 +128,11 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given a request longer than one week (more than 5 working days, C-3), when it starts less than the notice period away, then a **warning** is shown to the employee and to the approver, and the request can still be submitted (**decided, Q1: 1 week, warning only**).
 - Given a request of 2–5 working days, when submitted, then no notice rule applies, because the intent does not define one (**see C-3**).
 - Notice is measured in calendar days from the submission time, in the company time zone (**see C-12**).
+- **[Assumption, A-9]** "Less than 1 day" is the literal calendar-day difference between the start date and today (company time zone): starting today is blocked, starting tomorrow is allowed. A single half-day counts as a single day. "Less than the notice period" is fewer than 7 calendar days. Sick is exempt from both rules. Confirm with the product owner before launch.
 
 **R15 [P1] Sick leave is exempt from notice.** **[Assumption; see C-4]**
 - Given a Sick request that starts today or in the past, when submitted, then the notice rule is not applied. The employee may enter Sick leave up to 7 days in the past. For older dates only HR can enter it on the employee's behalf, with a reason, and it is audited (**decided, Q8**).
+- **[Assumption, A-12]** HR entry (`POST /hr/requests`) skips the notice rule (and the past-date rule for Sick only), still applies overlap and balance, routes the request normally, never lets HR enter leave for themselves, and does not separately notify the employee. The reason is stored on the request and kept out of audit detail and emails.
 
 **R16 [P1] Cancel own Pending request.**
 - Given the employee's own Pending request, when they cancel it (after a confirmation step), then its status becomes Cancelled, reserved days are released, and the approver is notified.

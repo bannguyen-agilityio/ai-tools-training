@@ -184,6 +184,12 @@ export function NewRequest() {
             ),
           )}
         </p>
+        {preview.data?.notice_warning && (
+          <p role="status">
+            Warning: a long request is best given a week's notice. You can still
+            submit it, and your approver will see this note.
+          </p>
+        )}
         <Button type="submit" disabled={create.isPending}>
           Submit request
         </Button>
