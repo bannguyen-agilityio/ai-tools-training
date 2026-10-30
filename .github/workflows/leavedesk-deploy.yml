@@ -5,8 +5,8 @@ name: leavedesk-deploy
 #   push to `main`    -> production (waits for required reviewers on the "production" environment)
 # Manual runs infer it from the branch they run on; on a tag (rollback) pass `environment`.
 # Per-environment config (Settings > Environments > staging | production):
-#   secrets: FASTAPI_CLOUD_TOKEN, DATABASE_URL (pooled, app role), MIGRATION_DATABASE_URL (owner)
-#   vars:    FASTAPI_CLOUD_APP_ID, APP_URL, APP_DB_ROLE, COMPANY_TZ
+#   secrets: FASTAPI_CLOUD_TOKEN, DATABASE_URL (pooled, app role), MIGRATION_DATABASE_URL (owner), SENDGRID_API_KEY
+#   vars:    FASTAPI_CLOUD_APP_ID, APP_URL, APP_DB_ROLE, COMPANY_TZ, EMAIL_FROM
 # APP_BASE_URL is set from the APP_URL var. Runtime settings and secrets (SENDGRID_API_KEY, EMAIL_FROM, ...) live in the FastAPI Cloud app environment.
 # See leavedesk/docs/runbooks/secrets.md for the full inventory (names only).
 
