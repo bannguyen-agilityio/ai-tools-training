@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from tests.conftest import Login, MakeLogin
 from tests.modules.requests.test_cancel_own import make, reserved
-from tests.modules.requests.test_requests import body, outbox, post
+from tests.modules.requests.test_requests import outbox, post
 
 REASON = "Office closed for the audit"
 
