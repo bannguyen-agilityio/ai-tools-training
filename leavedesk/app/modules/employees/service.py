@@ -185,6 +185,9 @@ async def update(
     employee = await _get(db, employee_id)
     before = _snapshot(employee)
     changes = body.model_dump(exclude_unset=True)
+    if employee.id == actor.id and changes.get("role", actor.role) != actor.role:
+        # Self-demotion could leave nobody able to reach the HR-only endpoints.
+        raise ProblemError(422, "You cannot change your own role.")
     if "team_id" in changes:
         await _check_team(db, changes["team_id"])
     if "manager_id" in changes:
@@ -192,7 +195,11 @@ async def update(
     for field, value in changes.items():
         setattr(employee, field, value)
     employee.updated_at = func.now()
-    await db.flush()
+    try:
+        await db.flush()
+    except IntegrityError as exc:  # e.g. the team was deleted concurrently
+        await db.rollback()
+        raise ProblemError(409, "The employee could not be updated; reload and retry.") from exc
     after = _snapshot(employee)
     await audit.record(
         db,

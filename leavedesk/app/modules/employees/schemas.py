@@ -2,12 +2,16 @@ import uuid
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 from app.core.schemas import StrictModel
 
 Name = Annotated[str, Field(min_length=1, max_length=100)]
-Email = Annotated[str, Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+$")]
+Email = Annotated[
+    str,
+    Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+$"),
+    AfterValidator(str.lower),  # the DB domain CHECK is case-sensitive
+]
 Role = Literal["employee", "manager", "hr"]
 
 
