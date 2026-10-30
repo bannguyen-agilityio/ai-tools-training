@@ -331,6 +331,20 @@ async def test_get_authz(client, staff, make_login) -> None:  # type: ignore[no-
     assert (await client.get(f"{CREATE}/{uuid.uuid4()}", headers=emp.headers)).status_code == 404
 
 
+async def test_unrelated_manager_cannot_read_pending_sick(
+    client, staff, make_login, owner_engine
+) -> None:  # type: ignore[no-untyped-def]
+    emp, _ = staff
+    await seed_year(owner_engine, emp.employee_id, "entitlement", "7", type="sick")
+    rid = (await post(client, emp, body("2026-06-08", leave_type="sick", note="private"))).json()[
+        "id"
+    ]
+    other_mgr = await make_login("manager")
+    resp = await client.get(f"{CREATE}/{rid}", headers=other_mgr.headers)
+    assert resp.status_code == 403
+    assert "sick" not in resp.text.lower() and "private" not in resp.text
+
+
 async def test_my_requests_list_filters_and_paging(client, staff) -> None:  # type: ignore[no-untyped-def]
     emp, _ = staff
     for d in ("2026-06-08", "2026-06-09", "2026-06-10"):

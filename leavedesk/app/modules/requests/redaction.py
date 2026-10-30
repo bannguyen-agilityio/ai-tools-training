@@ -12,13 +12,11 @@ SENSITIVE_TYPES = frozenset({"sick"})  # leave_type.is_sensitive; Sick is the on
 
 
 def can_view(viewer: Employee, req: LeaveRequest) -> bool:
-    """Owner, assigned approver, HR admin, the deputy for HR-queue items, or a manager covering
-    a Pending request (R20)."""
+    """Owner, assigned approver, HR admin, or the deputy for HR-queue items. Cover access (R20)
+    arrives with the audited "On behalf of" flow (plan 16), not as a blanket manager read."""
     if viewer.id == req.employee_id or viewer.role == "hr" or req.assigned_to == viewer.id:
         return True
-    if viewer.is_hr_deputy and req.queue in ("hr", "deputy"):
-        return True
-    return viewer.role == "manager" and req.status == "pending" and req.queue == "manager"
+    return viewer.is_hr_deputy and req.queue in ("hr", "deputy")
 
 
 def redact(viewer: Employee, req: LeaveRequest) -> RequestOut:
