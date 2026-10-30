@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
+import { SignIn } from "./features/auth/SignIn";
 import { ApprovalList } from "./features/approvals/ApprovalList";
 import { CalendarPage } from "./features/calendar/CalendarPage";
 import { Dashboard } from "./features/dashboard/Dashboard";
@@ -109,7 +110,7 @@ export function AppRoutes() {
             </RequireHr>
           }
         />
-        <Route path="/sign-in" element={<h1>Sign in</h1>} />
+        <Route path="/sign-in" element={<SignIn />} />
         <Route path="*" element={<h1>Page not found</h1>} />
       </Routes>
     </Layout>
