@@ -39,7 +39,6 @@ jobs:
       APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
       COMPANY_TZ: ${{ vars.COMPANY_TZ }}
       APP_BASE_URL: ${{ vars.APP_URL }}
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       EMAIL_FROM: ${{ vars.EMAIL_FROM }}
       EMAIL_BACKEND: sendgrid
       COOKIE_SECURE: "true"
@@ -61,6 +60,10 @@ jobs:
       - name: Exactly one Alembic head
         run: uv run python scripts/check_single_head.py
       - name: Migrate database
+        env:
+          # Alembic loads the app settings, which require the key when EMAIL_BACKEND=sendgrid.
+          # Scoped to this step so build and install steps never see it.
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
         run: uv run alembic upgrade head
       - name: Deploy to FastAPI Cloud
         run: uv run --with "fastapi[standard]" fastapi deploy
