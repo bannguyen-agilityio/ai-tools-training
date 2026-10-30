@@ -100,6 +100,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given an employee who starts on 1 Jul (6 months remaining), when HR saves the start date, then Annual = 12 × 6/12 = 6.0 days and Sick = 7 × 6/12 = 3.5 days, rounded to the nearest 0.5 day.
 - Given a result such as 3.25, when rounded, then it becomes 3.5 (half-up to the nearest 0.5).
 - The method (remaining whole months, mid-month rule, and whether Sick is pro-rated) is **an assumption pending Q2**. HR can override with an audited manual adjustment.
+- **[Assumption, A-8]** Edge cases as implemented: a start in the current year writes `prorata` entries (a January joiner gets the full 12.0 and 7.0; a start on 16 Dec or later has 0 months and writes nothing). A start in an earlier year writes the normal current-year `entitlement`. A start in a future year is refused with 422. The start date and email cannot be changed after create, so no ledger rewrite is needed. Rollover writes `entitlement` only when the start year is before the new year, so a joiner never gets both.
 
 **R10 [P1] Balance display.**
 - Given an employee, when they open the Dashboard, then they see per type: entitlement, carried-over (with its expiry date), used (Approved), reserved (Pending) and available.
@@ -168,6 +169,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 - Given HR, when they create or edit an employee (name, email, team, direct manager, start date, active flag), then the change is saved and audited.
 - Given a manager reference that would create a loop (A manages B manages A), when saved, then it is refused.
 - Given anyone other than HR, when they call these endpoints, then the API returns 403.
+- **[Assumption]** The manager reference may be any other active employee (not only role `manager`), which is what makes A→B→C→A loops possible and testable. Create and edit do not change `is_active`: deactivation is endpoint 19 (R4). A role change is audited as `employee.role_change` (R30); its effect on existing Pending requests is not specified yet.
 
 **R24 [P1] Starting balances by hand.**
 - Given HR, when they enter an employee's opening Annual days, carried days with their expiry date, and Sick days, then the entries are saved as ledger entries with the entering user and time.
