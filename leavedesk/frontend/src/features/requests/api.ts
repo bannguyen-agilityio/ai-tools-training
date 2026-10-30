@@ -89,10 +89,10 @@ export function useRequest(id: string) {
 export function useCancelRequest(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (version: number) =>
+    mutationFn: ({ version, reason }: { version: number; reason?: string }) =>
       api<LeaveRequest>(`/requests/${id}/cancel`, {
         method: "POST",
-        body: { version },
+        body: reason === undefined ? { version } : { version, reason },
       }),
     onSuccess: (updated) => {
       qc.setQueryData(["request", id], updated);
