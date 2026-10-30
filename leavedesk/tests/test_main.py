@@ -26,7 +26,7 @@ async def test_every_non_public_route_returns_401_without_session(
         for method in operations:
             r = await pclient.request(method.upper(), _concrete(path), json={})
             assert r.status_code == 401, f"{method.upper()} {path} -> {r.status_code}"
-            assert r.headers["content-type"].startswith("application/problem+json")
+            assert r.json()["error"]["code"] == "UNAUTHENTICATED"
             checked += 1
     assert checked >= 3
 

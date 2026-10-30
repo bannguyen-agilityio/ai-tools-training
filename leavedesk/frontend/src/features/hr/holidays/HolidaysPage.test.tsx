@@ -22,7 +22,7 @@ function mockApi(impact: number, calls: { method: string; url: string }[] = []) 
     if (url.includes("/hr/holidays/impact")) return respond({ holiday_date: "x", affected_requests: impact });
     if (method === "DELETE") return respond({ holiday: HOLIDAYS[0], affected_requests: impact });
     if (method === "POST") return respond({ holiday: HOLIDAYS[0], affected_requests: impact }, 201);
-    return respond(HOLIDAYS);
+    return respond({ items: HOLIDAYS, next_cursor: null });
   });
   return calls;
 }
@@ -87,5 +87,14 @@ describe("HolidaysPage (R11)", () => {
     await user.click(screen.getByRole("button", { name: "Save holiday" }));
     expect(await screen.findByText(/Holiday added\. 2 requests affected\./)).toBeInTheDocument();
     expect(calls.some((c) => c.method === "POST")).toBe(true);
+  });
+
+  it("counts the old and the new date while a holiday is edited", async () => {
+    const user = userEvent.setup();
+    const calls = mockApi(2);
+    renderPage();
+    await user.click(await screen.findByRole("button", { name: /Edit National Day on Tue 1 Sep 2026/ }));
+    await screen.findByText("2 requests affected on this date.");
+    expect(calls.some((c) => c.url.includes("impact?date=2026-09-01&previous_date=2026-09-01"))).toBe(true);
   });
 });

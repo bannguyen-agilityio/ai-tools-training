@@ -8,7 +8,7 @@ LeaveDesk: internal leave tool for ~250 staff (16 managers, 2 HR), replacing Exc
 - `docs/runbooks/` (deploy, secrets); `.env.example` lists every variable.
 - **Do not read `ref/`** (stale training material). Never open, search or cite it.
 - If code and spec disagree, fix the spec in the same change. Non-intent items are marked **[Assumption]**.
-- Known drift: `app/core/errors.py` returns `problem+json`; spec §6.1 requires the error envelope below. Fix the code. Spec §2 says Python 3.12; it is 3.14.
+- Known drift: spec §2 says Python 3.12; it is 3.14.
 
 ## Phases
 

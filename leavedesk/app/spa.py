@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, Response
 
-from app.core.errors import problem
+from app.core.errors import error_response
 
 DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 # Never answered with the HTML shell, so /docs stays a 404 outside dev.
@@ -26,16 +26,16 @@ def mount_spa(app: FastAPI, dist: Path = DIST) -> None:
     async def spa_or_404(request: Request, _: Exception) -> Response:
         path = request.url.path.lstrip("/")
         if request.method not in ("GET", "HEAD") or path.split("/", 1)[0] in NOT_SPA:
-            return problem(404)
+            return error_response(404)
         try:
             candidate = (root / path).resolve()
             found = bool(path) and candidate.is_relative_to(root) and candidate.is_file()
         except ValueError:  # embedded NUL byte
-            return problem(404)
+            return error_response(404)
         if found:
             return FileResponse(candidate)
         if "." in path.rsplit("/", 1)[-1]:
-            return problem(404)
+            return error_response(404)
         return FileResponse(index)
 
     app.add_exception_handler(404, spa_or_404)

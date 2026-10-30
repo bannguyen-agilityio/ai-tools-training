@@ -21,14 +21,24 @@ export interface HolidayInput {
 export const holidaysKey = (year: number) => ["holidays", year] as const;
 
 export function useHolidays(year: number) {
-  return useQuery({ queryKey: holidaysKey(year), queryFn: () => api<Holiday[]>(`/holidays?year=${year}`) });
+  return useQuery({
+    queryKey: holidaysKey(year),
+    queryFn: () => api<{ items: Holiday[] }>(`/holidays?year=${year}`),
+    select: (r) => r.items,
+  });
 }
 
-/** Pending/Approved requests a holiday on `date` touches, before it is saved (C-8). */
-export function useImpact(date: string) {
+/**
+ * Pending/Approved requests a holiday on `date` touches, before it is saved (C-8). When an
+ * existing holiday moves, pass its current date as `previousDate` to count both.
+ */
+export function useImpact(date: string, previousDate?: string) {
   return useQuery({
-    queryKey: ["holiday-impact", date],
-    queryFn: () => api<{ affected_requests: number }>(`/hr/holidays/impact?date=${date}`),
+    queryKey: ["holiday-impact", date, previousDate ?? null],
+    queryFn: () =>
+      api<{ affected_requests: number }>(
+        `/hr/holidays/impact?date=${date}${previousDate ? `&previous_date=${previousDate}` : ""}`,
+      ),
     enabled: date !== "",
     select: (r) => r.affected_requests,
   });

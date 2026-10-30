@@ -590,23 +590,22 @@ Decided on 2026-10-28 (product owner). Concerns still need a written decision un
 | HR count | HR is 2 people (owner and deputy); intent updated | Product owner | 2026-10-28 |
 | C-16 | Gated on the Q5 hello-world deploy and cost check before building | Product owner | 2026-10-28 |
 
-## Appendix A. Draft Vietnamese public holiday seed (UNVERIFIED)
+## Appendix A. Vietnamese public holiday seed (press-reported, decree text not yet checked)
 
-Seeded by migration `0005` exactly as listed (one row per weekday; 2027-09-02 only, the adjacent day is for HR to add once decreed). Verification against the decree is still open (A-19) and is a go-live gate.
-
-Draft for R11. The developer verifies every date against the government's official decree by 30 Oct 2026 and corrects it in the Holidays screen; 2027 lunar dates are added when the decree is published. Lunar holidays and compensatory days are announced by decree, usually late in the preceding year, so 2027 lunar dates are approximate.
+Seeded by migration `0005` exactly as listed, one row per weekday. Compiled on 30 Oct 2026 from press reports of the Ministry of Home Affairs notices (including notice 11483/TB-BNV of 9 Oct 2026 for Tet and National Day 2027) and the National Assembly resolution making 24 Nov Vietnam Culture Day a paid holiday. The decree and notice texts themselves could not be opened from the build environment, so the developer still confirms each date against them (A-19, go-live gate) and corrects it in the Holidays screen. The public-sector days (2 Jan 2026, 31 Aug 2026, 3 Sep 2027, the Tet block) are included on the Q6 assumption that the company follows the government schedule; Q6 should confirm that for private-sector employers.
 
 | Date | Holiday | Status |
 |---|---|---|
-| 2026-01-01 | New Year's Day | Fixed |
-| 2026-02-16 to 2026-02-20 | Tet (Lunar New Year, 17 Feb 2026), weekdays only | Verify extra days and make-up working Saturday |
-| 2026-04-27 | Hung Kings' Commemoration (lunar 10/3 falls on Sun 26 Apr), compensatory Monday | Verify |
-| 2026-04-30 | Reunification Day | Fixed |
-| 2026-05-01 | International Labour Day | Fixed |
-| 2026-09-01 and 2026-09-02 | National Day | Verify which adjacent day is granted |
+| 2026-01-01, 2026-01-02 | New Year's Day and the extra day | Press-reported (make-up Sat 10 Jan 2026 is not modelled: Saturday shifts are out of scope) |
+| 2026-02-16 to 2026-02-20 | Tet (17 Feb 2026); holiday 14 to 22 Feb, weekdays only | Press-reported |
+| 2026-04-27 | Hung Kings' Commemoration (lunar 10/3 is Sun 26 Apr), compensatory Monday | Verify |
+| 2026-04-30, 2026-05-01 | Reunification Day, International Labour Day | Fixed |
+| 2026-08-31, 2026-09-01, 2026-09-02 | National Day block (29 Aug to 2 Sep; make-up Sat 22 Aug not modelled) | Press-reported |
+| 2026-11-24 | Vietnam Culture Day | Press-reported (sources disagree on whether the day was shifted to Mon 23 Nov; none confirmed) |
 | 2027-01-01 | New Year's Day | Fixed |
-| 2027-02-08 to 2027-02-12 (approx.) | Tet (Lunar New Year, Sat 6 Feb 2027) | To be set by decree |
-| 2027-04-16 | Hung Kings' Commemoration (approx.) | To be set by decree |
+| 2027-02-04, 2027-02-05, 2027-02-08 to 2027-02-10 | Tet (6 Feb 2027); public-sector holiday Thu 4 to Wed 10 Feb | Press-reported |
+| 2027-04-16 | Hung Kings' Commemoration | Verify |
 | 2027-04-30 | Reunification Day | Fixed |
-| 2027-05-03 | Labour Day compensatory Monday (1 May falls on Sat) | Verify |
-| 2027-09-02 | National Day (+ adjacent day) | To be set by decree |
+| 2027-05-03 | Labour Day compensatory Monday (1 May is a Saturday) | Verify |
+| 2027-09-02, 2027-09-03 | National Day and the extra day | Press-reported (private employers may grant 1 Sep or 3 Sep) |
+| 2027-11-24 | Vietnam Culture Day | Press-reported |

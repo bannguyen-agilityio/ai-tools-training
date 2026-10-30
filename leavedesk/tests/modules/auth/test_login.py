@@ -86,7 +86,7 @@ async def test_login_rotates_existing_session(
 
 async def test_strict_body(client: httpx.AsyncClient):
     r = await client.post(URL, json={"email": "a@asnet.com.vn", "password": "x", "admin": True})
-    assert r.status_code == 422
+    assert r.status_code == 400  # unknown fields are a malformed request (spec 6.1)
 
 
 async def test_non_company_email_rejected_by_db(owner_engine: AsyncEngine):

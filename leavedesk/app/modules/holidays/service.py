@@ -49,9 +49,14 @@ async def list_for_year(db: AsyncSession, year: int) -> list[PublicHoliday]:
     return await repository.list_year(db, year)
 
 
-async def impact(db: AsyncSession, actor: Employee, holiday_date: date) -> int:
+async def impact(
+    db: AsyncSession, actor: Employee, holiday_date: date, previous_date: date | None = None
+) -> int:
+    """Requests touched by a holiday on `holiday_date`; when an existing holiday moves, also
+    those on `previous_date`, matching the count the edit itself returns."""
     _require_hr(actor)
-    return await repository.count_affected(db, [holiday_date])
+    dates = {holiday_date} if previous_date is None else {holiday_date, previous_date}
+    return await repository.count_affected(db, dates)
 
 
 async def create(

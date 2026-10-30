@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from decimal import Decimal
 
@@ -17,7 +18,7 @@ async def test_weekend_only_range_is_no_working_days(app_engine: AsyncEngine) ->
     async with AsyncSession(app_engine) as db:
         with pytest.raises(ProblemError) as err:
             await working_half_days(db, date(2026, 11, 7), "full", date(2026, 11, 8), "full")
-    assert (err.value.status, err.value.code) == (422, "no_working_days")
+    assert (err.value.status, err.value.code) == (422, "NO_WORKING_DAYS")
     assert err.value.detail == "This range has no working days."
 
 
@@ -25,7 +26,7 @@ async def test_seeded_holiday_only_range_is_no_working_days(app_engine: AsyncEng
     async with AsyncSession(app_engine) as db:
         with pytest.raises(ProblemError) as err:
             await working_half_days(db, date(2026, 4, 27), "full", date(2026, 4, 27), "full")
-    assert err.value.code == "no_working_days"
+    assert err.value.code == "NO_WORKING_DAYS"
 
 
 async def test_seeded_weekday_holiday_is_excluded(app_engine: AsyncEngine) -> None:
@@ -163,3 +164,23 @@ async def test_request_tables_are_not_deletable_and_anon_reads_nothing(
         for table in ("leave_request", "leave_request_day", "public_holiday"):
             assert (await conn.execute(text(f"SELECT count(*) FROM {table}"))).scalar_one() == 0
         await conn.execute(text("RESET ROLE"))
+
+
+async def test_bulk_loader_matches_days_for_and_queries_once_per_type_and_year(
+    app_engine: AsyncEngine, make_login: MakeLogin, make_request
+) -> None:  # type: ignore[no-untyped-def]
+    from app.modules.balances.service import BulkDays
+
+    a, b = (await make_login()).employee_id, (await make_login()).employee_id
+    await make_request(a, date(2026, 11, 2), date(2026, 11, 3))
+    await make_request(b, date(2026, 11, 9), date(2026, 11, 9), status="pending")
+    async with AsyncSession(app_engine) as db:
+        loader = BulkDays()
+        for emp in (a, b, a):
+            assert sorted(
+                (d.leave_date, d.status) for d in await loader(db, emp, "annual", 2026)
+            ) == sorted(
+                (d.leave_date, d.status) for d in await repository.days_for(db, emp, "annual", 2026)
+            )
+        assert list(loader._cache) == [("annual", 2026)]
+        assert await loader(db, uuid.uuid4(), "annual", 2026) == []

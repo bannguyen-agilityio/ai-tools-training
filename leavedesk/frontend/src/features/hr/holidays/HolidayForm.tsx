@@ -31,7 +31,7 @@ export function HolidayForm({ initial, serverError, busy, onSubmit, onCancel }: 
   const { errors, submitCount } = formState;
   const formRef = useFormFocusFirstError(submitCount, Object.keys(errors).length);
   const date = watch("holiday_date");
-  const impact = useImpact(date);
+  const impact = useImpact(date, initial?.holiday_date);
   const summary = (["holiday_date", "name"] as const).flatMap((k) =>
     errors[k]?.message ? [{ fieldName: k, message: errors[k].message }] : [],
   );

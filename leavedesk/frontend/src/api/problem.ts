@@ -3,7 +3,7 @@ export interface FieldError {
   message: string;
 }
 
-/** Normalised API error. Understands the spec 6.1 envelope and RFC 9457 problem+json. */
+/** Normalised API error from the spec 6.1 envelope. */
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -19,17 +19,8 @@ interface Envelope {
   error?: {
     code?: string;
     message?: string;
-    details?: { field?: string; message?: string }[];
+    details?: { field?: string; issue?: string }[];
   };
-  /** RFC 9457 extension member: a stable reason such as "no_working_days". */
-  code?: string;
-  detail?: string;
-  title?: string;
-  errors?: { field?: string; message?: string }[];
-}
-
-function toFields(list: { field?: string; message?: string }[] = []): FieldError[] {
-  return list.flatMap((d) => (d.field && d.message ? [{ field: d.field, message: d.message }] : []));
 }
 
 export async function parseProblem(res: Response): Promise<ApiError> {
@@ -39,6 +30,8 @@ export async function parseProblem(res: Response): Promise<ApiError> {
   } catch {
     // Non-JSON body: fall back to the status text.
   }
-  const message = body.error?.message ?? body.detail ?? body.title ?? res.statusText ?? "Request failed";
-  return new ApiError(res.status, message, body.error?.code ?? body.code, toFields(body.error?.details ?? body.errors));
+  const fields = (body.error?.details ?? []).flatMap((d) =>
+    d.field && d.issue ? [{ field: d.field, message: d.issue }] : [],
+  );
+  return new ApiError(res.status, body.error?.message ?? res.statusText ?? "Request failed", body.error?.code, fields);
 }

@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -12,6 +12,7 @@ from app.modules.holidays.dependencies import HrUser, YearParam
 from app.modules.holidays.schemas import (
     HolidayChangeOut,
     HolidayCreate,
+    HolidayList,
     HolidayOut,
     HolidayPatch,
     ImpactOut,
@@ -26,26 +27,32 @@ def _changed(holiday: object, affected: int) -> HolidayChangeOut:
     return HolidayChangeOut(holiday=HolidayOut.model_validate(holiday), affected_requests=affected)
 
 
-@router.get("/holidays", response_model=list[HolidayOut])
-async def list_holidays(_: CurrentUser, db: DB, year: YearParam) -> list[HolidayOut]:
-    return [HolidayOut.model_validate(h) for h in await service.list_for_year(db, year)]
+@router.get("/holidays", response_model=HolidayList)
+async def list_holidays(_: CurrentUser, db: DB, year: YearParam) -> HolidayList:
+    rows = await service.list_for_year(db, year)
+    return HolidayList(items=[HolidayOut.model_validate(h) for h in rows])
 
 
 @router.get("/hr/holidays/impact", response_model=ImpactOut)
 async def holiday_impact(
-    user: HrUser, db: DB, holiday_date: Annotated[date, Query(alias="date")]
+    user: HrUser,
+    db: DB,
+    holiday_date: Annotated[date, Query(alias="date")],
+    previous_date: date | None = None,
 ) -> ImpactOut:
     return ImpactOut(
         holiday_date=holiday_date,
-        affected_requests=await service.impact(db, user, holiday_date),
+        affected_requests=await service.impact(db, user, holiday_date, previous_date),
     )
 
 
 @router.post("/hr/holidays", response_model=HolidayChangeOut, status_code=201)
 async def create_holiday(
-    body: HolidayCreate, request: Request, user: HrUser, db: DB
+    body: HolidayCreate, request: Request, response: Response, user: HrUser, db: DB
 ) -> HolidayChangeOut:
-    return _changed(*await service.create(db, user, body, client_ip(request)))
+    holiday, affected = await service.create(db, user, body, client_ip(request))
+    response.headers["Location"] = f"/api/v1/hr/holidays/{holiday.id}"  # spec 6.1 Creates
+    return _changed(holiday, affected)
 
 
 @router.patch("/hr/holidays/{holiday_id}", response_model=HolidayChangeOut)

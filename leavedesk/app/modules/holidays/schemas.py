@@ -42,3 +42,10 @@ class HolidayChangeOut(BaseModel):
 class ImpactOut(BaseModel):
     holiday_date: date
     affected_requests: int
+
+
+class HolidayList(BaseModel):
+    """Spec 6.1 list shape. One year is at most a few dozen rows, so there is never a next page."""
+
+    items: list[HolidayOut]
+    next_cursor: str | None = None

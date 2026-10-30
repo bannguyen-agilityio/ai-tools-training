@@ -9,6 +9,7 @@ from tests.conftest import MakeLogin
 
 APPENDIX_A_2026 = [
     "2026-01-01",
+    "2026-01-02",
     "2026-02-16",
     "2026-02-17",
     "2026-02-18",
@@ -17,20 +18,24 @@ APPENDIX_A_2026 = [
     "2026-04-27",
     "2026-04-30",
     "2026-05-01",
+    "2026-08-31",
     "2026-09-01",
     "2026-09-02",
+    "2026-11-24",
 ]
 APPENDIX_A_2027 = [
     "2027-01-01",
+    "2027-02-04",
+    "2027-02-05",
     "2027-02-08",
     "2027-02-09",
     "2027-02-10",
-    "2027-02-11",
-    "2027-02-12",
     "2027-04-16",
     "2027-04-30",
     "2027-05-03",
     "2027-09-02",
+    "2027-09-03",
+    "2027-11-24",
 ]
 
 
@@ -43,7 +48,9 @@ async def audit_rows(owner: AsyncEngine, action: str) -> list[dict]:  # type: ig
 
 
 async def holiday_id(client: httpx.AsyncClient, hr, day: str) -> str:  # type: ignore[no-untyped-def]
-    rows = (await client.get(f"/api/v1/holidays?year={day[:4]}", headers=hr.headers)).json()
+    rows = (await client.get(f"/api/v1/holidays?year={day[:4]}", headers=hr.headers)).json()[
+        "items"
+    ]
     return str(next(r["id"] for r in rows if r["holiday_date"] == day))
 
 
@@ -57,8 +64,9 @@ async def test_seed_has_every_appendix_a_date(
     emp = await make_login()
     r = await client.get(f"/api/v1/holidays?year={year}", headers=emp.headers)
     assert r.status_code == 200
-    assert [h["holiday_date"] for h in r.json()] == expected
-    assert {h["source"] for h in r.json()} == {"seed"}
+    assert [h["holiday_date"] for h in r.json()["items"]] == expected
+    assert {h["source"] for h in r.json()["items"]} == {"seed"}
+    assert r.json()["next_cursor"] is None
 
 
 async def test_year_defaults_to_the_current_company_year(
@@ -139,9 +147,10 @@ async def test_add_holiday_is_audited_and_listed(
         headers=hr.mutating_headers,
     )
     assert r.status_code == 201
+    assert r.headers["location"] == f"/api/v1/hr/holidays/{r.json()['holiday']['id']}"
     assert r.json()["affected_requests"] == 0
     assert r.json()["holiday"]["source"] == "manual"
-    listed = (await client.get("/api/v1/holidays?year=2026", headers=hr.headers)).json()
+    listed = (await client.get("/api/v1/holidays?year=2026", headers=hr.headers)).json()["items"]
     assert "2026-11-20" in [h["holiday_date"] for h in listed]
     (row,) = await audit_rows(owner_engine, "holiday.create")
     assert row["actor_id"] == hr.employee_id and row["target_type"] == "public_holiday"
@@ -164,7 +173,7 @@ async def test_strict_body_and_validation(client: httpx.AsyncClient, make_login:
     url = "/api/v1/hr/holidays"
     assert (
         await client.post(url, json={"holiday_date": "2026-11-20", "name": "X", "x": 1}, headers=h)
-    ).status_code == 422
+    ).status_code == 400
     assert (
         await client.post(url, json={"holiday_date": "2026-11-20", "name": " "}, headers=h)
     ).status_code == 422
@@ -300,3 +309,17 @@ async def test_noop_edit_writes_no_audit_row_and_keeps_source(
     )
     assert r.status_code == 200 and r.json()["holiday"]["source"] == "seed"
     assert await audit_rows(owner_engine, "holiday.update") == []
+
+
+async def test_impact_of_a_move_counts_both_dates(
+    client: httpx.AsyncClient,
+    make_login: MakeLogin,
+    make_request,  # type: ignore[no-untyped-def]
+) -> None:
+    hr, emp = await make_login("hr"), await make_login()
+    await make_request(emp.employee_id, date(2026, 9, 1), date(2026, 9, 1))
+    await make_request(emp.employee_id, date(2026, 9, 3), date(2026, 9, 3))
+    url = "/api/v1/hr/holidays/impact?date=2026-09-03"
+    assert (await client.get(url, headers=hr.headers)).json()["affected_requests"] == 1
+    both = await client.get(f"{url}&previous_date=2026-09-01", headers=hr.headers)
+    assert both.json()["affected_requests"] == 2

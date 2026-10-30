@@ -19,12 +19,28 @@ def _entries(rows: list) -> list[Entry]:  # type: ignore[type-arg]
     return [Entry(kind=r.kind, days=r.days, expires_on=r.expires_on) for r in rows]
 
 
-async def rollover(db: AsyncSession, year: int, load_days: DaysLoader = repository.days_for) -> int:
+class BulkDays:
+    """Default loader for the jobs: one query per (type, year) instead of one per employee."""
+
+    def __init__(self) -> None:
+        self._cache: dict[tuple[str, int], dict[uuid.UUID, list[DayUse]]] = {}
+
+    async def __call__(
+        self, db: AsyncSession, employee_id: uuid.UUID, code: str, year: int
+    ) -> list[DayUse]:
+        key = (code, year)
+        if key not in self._cache:
+            self._cache[key] = await repository.days_by_employee(db, code, year)
+        return self._cache[key].get(employee_id, [])
+
+
+async def rollover(db: AsyncSession, year: int, load_days: DaysLoader | None = None) -> int:
     """1 Jan job: write `year`'s entitlement and the Annual carry-over (R5, R7, R8).
 
     Sick never carries. Carry = min(6, unused entitlement of the previous year); carried days
     of that year are ignored so nothing is carried twice. Returns the number of rows written.
     """
+    load_days = load_days or BulkDays()
     written = 0
     today = date(year, 1, 1)
     for emp in await repository.active_employees(db):
@@ -61,14 +77,13 @@ async def rollover(db: AsyncSession, year: int, load_days: DaysLoader = reposito
     return written
 
 
-async def expire_carry(
-    db: AsyncSession, today: date, load_days: DaysLoader = repository.days_for
-) -> int:
+async def expire_carry(db: AsyncSession, today: date, load_days: DaysLoader | None = None) -> int:
     """Daily job: record an `expiry` entry for unused carried days past `expires_on` (R7).
 
     The balance is already correct without it (compute_balance derives expiry); the entry is
     the audit record. Returns the number of rows written.
     """
+    load_days = load_days or BulkDays()
     written = 0
     for emp in await repository.active_employees(db):
         for year in (today.year, today.year - 1):

@@ -24,29 +24,36 @@ UUID_DEFAULT = sa.text("gen_random_uuid()")
 NOW = sa.text("now()")
 TABLES = ("public_holiday", "leave_request", "leave_request_day")
 
-# Spec Appendix A. UNVERIFIED (A-19): verify against the government decree before go-live.
+# Spec Appendix A (A-19). Taken from press reports of the Ministry of Home Affairs notices and
+# the Culture Day resolution; the decree texts themselves are not yet checked.
+TET = "Tet (Lunar New Year)"
 SEED = (
     ("2026-01-01", "New Year's Day"),
-    ("2026-02-16", "Tet (Lunar New Year)"),
-    ("2026-02-17", "Tet (Lunar New Year)"),
-    ("2026-02-18", "Tet (Lunar New Year)"),
-    ("2026-02-19", "Tet (Lunar New Year)"),
-    ("2026-02-20", "Tet (Lunar New Year)"),
+    ("2026-01-02", "New Year holiday (extra day)"),
+    ("2026-02-16", TET),
+    ("2026-02-17", TET),
+    ("2026-02-18", TET),
+    ("2026-02-19", TET),
+    ("2026-02-20", TET),
     ("2026-04-27", "Hung Kings' Commemoration (compensatory day)"),
     ("2026-04-30", "Reunification Day"),
     ("2026-05-01", "International Labour Day"),
+    ("2026-08-31", "National Day holiday (extra day)"),
     ("2026-09-01", "National Day"),
     ("2026-09-02", "National Day"),
+    ("2026-11-24", "Vietnam Culture Day"),
     ("2027-01-01", "New Year's Day"),
-    ("2027-02-08", "Tet (Lunar New Year)"),
-    ("2027-02-09", "Tet (Lunar New Year)"),
-    ("2027-02-10", "Tet (Lunar New Year)"),
-    ("2027-02-11", "Tet (Lunar New Year)"),
-    ("2027-02-12", "Tet (Lunar New Year)"),
+    ("2027-02-04", TET),
+    ("2027-02-05", TET),
+    ("2027-02-08", TET),
+    ("2027-02-09", TET),
+    ("2027-02-10", TET),
     ("2027-04-16", "Hung Kings' Commemoration"),
     ("2027-04-30", "Reunification Day"),
     ("2027-05-03", "International Labour Day (compensatory day)"),
     ("2027-09-02", "National Day"),
+    ("2027-09-03", "National Day holiday (extra day)"),
+    ("2027-11-24", "Vietnam Culture Day"),
 )
 
 
