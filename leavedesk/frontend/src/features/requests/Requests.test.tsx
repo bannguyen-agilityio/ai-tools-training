@@ -106,7 +106,7 @@ describe("requests screens", () => {
   });
 
   describe("cancel (R16)", () => {
-    function mockApi(status: string, onCancel?: () => void) {
+    function mockApi(status: string, onCancel?: () => void, role = "employee") {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
         const url = String(input);
         if (url.endsWith("/me"))
@@ -114,7 +114,7 @@ describe("requests screens", () => {
             id: "e1",
             name: "A",
             email: "a@x.test",
-            role: "employee",
+            role,
             is_hr_deputy: false,
           });
         if (url.endsWith("/cancel") && init?.method === "POST") {
@@ -147,6 +147,30 @@ describe("requests screens", () => {
       expect(onCancel).not.toHaveBeenCalled();
       await userEvent.click(
         within(dialog).getByRole("button", { name: "Cancel request" }),
+      );
+      expect(await screen.findByText("Cancelled")).toBeInTheDocument();
+      expect(onCancel).toHaveBeenCalledOnce();
+    });
+
+    it("HR cancels Approved leave only with a reason (R21)", async () => {
+      const onCancel = vi.fn();
+      mockApi("approved", onCancel, "hr");
+      wrap("/requests/r1");
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Cancel leave (HR)" }),
+      );
+      expect(screen.getByRole("button", { name: "Keep" })).toHaveFocus();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Cancel leave" }),
+      );
+      expect(onCancel).not.toHaveBeenCalled();
+      expect(screen.getByLabelText(/reason for cancelling/i)).toHaveFocus();
+      await userEvent.type(
+        screen.getByLabelText(/reason for cancelling/i),
+        "Audit",
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "Cancel leave" }),
       );
       expect(await screen.findByText("Cancelled")).toBeInTheDocument();
       expect(onCancel).toHaveBeenCalledOnce();
