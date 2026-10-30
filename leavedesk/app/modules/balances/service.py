@@ -15,7 +15,7 @@ CARRY_CAP = Decimal(6)
 DaysLoader = Callable[[AsyncSession, uuid.UUID, str, int], Awaitable[list[DayUse]]]
 
 
-def _entries(rows: list) -> list[Entry]:  # type: ignore[type-arg]
+def entries_of(rows: list) -> list[Entry]:  # type: ignore[type-arg]
     return [Entry(kind=r.kind, days=r.days, expires_on=r.expires_on) for r in rows]
 
 
@@ -59,7 +59,7 @@ async def rollover(db: AsyncSession, year: int, load_days: DaysLoader | None = N
         if not rows:
             continue
         previous = compute_balance(
-            _entries(rows), await load_days(db, emp.id, "annual", year - 1), today
+            entries_of(rows), await load_days(db, emp.id, "annual", year - 1), today
         )
         carry = min(CARRY_CAP, previous.unused_entitlement)
         if carry > 0:
@@ -91,7 +91,7 @@ async def expire_carry(db: AsyncSession, today: date, load_days: DaysLoader | No
             if not any(r.kind == "carry_over" for r in rows):
                 continue
             balance = compute_balance(
-                _entries(rows), await load_days(db, emp.id, "annual", year), today
+                entries_of(rows), await load_days(db, emp.id, "annual", year), today
             )
             if balance.expirable_carried > 0:
                 written += await repository.add_entry(

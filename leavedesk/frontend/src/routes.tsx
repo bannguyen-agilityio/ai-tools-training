@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
+import { Dashboard } from "./features/dashboard/Dashboard";
 import { EmployeesPage } from "./features/hr/employees/EmployeesPage";
 import { HolidaysPage } from "./features/hr/holidays/HolidaysPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
@@ -24,7 +25,7 @@ export function AppRoutes() {
   return (
     <Layout nav={nav}>
       <Routes>
-        <Route path="/" element={<h1>LeaveDesk</h1>} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/sample-form" element={<SampleForm />} />
         <Route
           path="/hr/holidays"
