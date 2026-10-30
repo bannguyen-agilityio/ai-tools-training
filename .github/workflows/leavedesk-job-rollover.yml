@@ -7,27 +7,62 @@ on:
   #   - cron: "5 17 31 12 *" # 00:05 on 1 Jan, Asia/Ho_Chi_Minh (UTC+7)
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Override the environment (default - inferred from the branch)."
+        type: choice
+        options: ["", staging, production]
+        default: ""
       year:
         description: Leave year to roll into (default - current year)
         required: false
 
 jobs:
-  run:
+  targets:
     runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.pick.outputs.environments }}
+    steps:
+      - id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          OVERRIDE: ${{ inputs.environment }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          # Schedules only fire on the default branch, so they cover every environment.
+          if [ "$EVENT" = schedule ]; then list='["staging","production"]'
+          elif [ -n "$OVERRIDE" ]; then list="[\"$OVERRIDE\"]"
+          else
+            case "$BRANCH" in
+              main) list='["production"]' ;;
+              staging) list='["staging"]' ;;
+              *) echo "::error::cannot infer an environment from '$BRANCH'; run on main/staging or set the environment input"; exit 1 ;;
+            esac
+          fi
+          echo "environments=$list" >> "$GITHUB_OUTPUT"
+
+  run:
+    needs: targets
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(needs.targets.outputs.environments) }}
+    environment: ${{ matrix.environment }}
     defaults:
       run:
         working-directory: leavedesk
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv sync --frozen
+      - run: uv sync --frozen --python 3.14
       - run: uv run python -m app.jobs.rollover ${YEAR:+"$YEAR"}
         env:
           YEAR: ${{ inputs.year }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ENVIRONMENT: production
+          ENVIRONMENT: ${{ matrix.environment }}
           APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
           SET_ROLE_ON_CONNECT: "true"
           EMAIL_BACKEND: sendgrid
           COOKIE_SECURE: "true"
-          COMPANY_TZ: Asia/Ho_Chi_Minh
+          COMPANY_TZ: ${{ vars.COMPANY_TZ }}
+          APP_BASE_URL: ${{ vars.APP_URL }}

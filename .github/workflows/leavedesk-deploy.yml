@@ -6,8 +6,8 @@ name: leavedesk-deploy
 # Manual runs infer it from the branch they run on; on a tag (rollback) pass `environment`.
 # Per-environment config (Settings > Environments > staging | production):
 #   secrets: FASTAPI_CLOUD_TOKEN, DATABASE_URL (pooled, app role), MIGRATION_DATABASE_URL (owner)
-#   vars:    FASTAPI_CLOUD_APP_ID, APP_URL, APP_DB_ROLE, COMPANY_TZ
-# Runtime secrets (SendGrid key, session key) live in the FastAPI Cloud app environment.
+#   vars:    FASTAPI_CLOUD_APP_ID, APP_URL, APP_DB_ROLE, COMPANY_TZ, APP_BASE_URL
+# Runtime settings and secrets (APP_BASE_URL, SENDGRID_API_KEY, EMAIL_FROM, ...) live in the FastAPI Cloud app environment.
 # See leavedesk/docs/runbooks/secrets.md for the full inventory (names only).
 
 on:
@@ -54,6 +54,8 @@ jobs:
   checks:
     needs: target
     uses: ./.github/workflows/leavedesk-ci.yml
+    with:
+      ref: ${{ inputs.ref }}
 
   deploy:
     needs: [target, checks]

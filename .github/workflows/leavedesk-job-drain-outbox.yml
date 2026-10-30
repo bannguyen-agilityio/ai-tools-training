@@ -1,0 +1,68 @@
+name: leavedesk-job-drain-outbox
+
+# CI backstop for the in-process outbox drain (A-28): sends due email_outbox rows. Idempotent.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Override the environment (default - inferred from the branch)."
+        type: choice
+        options: ["", staging, production]
+        default: ""
+
+jobs:
+  targets:
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.pick.outputs.environments }}
+    steps:
+      - id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          OVERRIDE: ${{ inputs.environment }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          # Schedules only fire on the default branch, so they cover every environment.
+          if [ "$EVENT" = schedule ]; then list='["staging","production"]'
+          elif [ -n "$OVERRIDE" ]; then list="[\"$OVERRIDE\"]"
+          else
+            case "$BRANCH" in
+              main) list='["production"]' ;;
+              staging) list='["staging"]' ;;
+              *) echo "::error::cannot infer an environment from '$BRANCH'; run on main/staging or set the environment input"; exit 1 ;;
+            esac
+          fi
+          echo "environments=$list" >> "$GITHUB_OUTPUT"
+
+  run:
+    needs: targets
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(needs.targets.outputs.environments) }}
+    environment: ${{ matrix.environment }}
+    concurrency:
+      group: leavedesk-job-drain-outbox-${{ matrix.environment }}
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: leavedesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen --python 3.14
+      - run: uv run python -m app.jobs.drain_outbox
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENVIRONMENT: ${{ matrix.environment }}
+          APP_DB_ROLE: ${{ vars.APP_DB_ROLE }}
+          SET_ROLE_ON_CONNECT: "true"
+          EMAIL_BACKEND: sendgrid
+          COOKIE_SECURE: "true"
+          COMPANY_TZ: ${{ vars.COMPANY_TZ }}
+          APP_BASE_URL: ${{ vars.APP_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
