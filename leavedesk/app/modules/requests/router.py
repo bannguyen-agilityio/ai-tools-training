@@ -9,9 +9,10 @@ from app.core.db import get_db
 from app.modules.auth.router import client_ip
 from app.modules.balances.me_router import get_today
 from app.modules.identity.dependencies import CurrentUser
-from app.modules.requests import service
+from app.modules.requests import cancel, service
 from app.modules.requests.redaction import redact
 from app.modules.requests.schemas import (
+    CancelIn,
     PreviewOut,
     RequestIn,
     RequestList,
@@ -46,6 +47,14 @@ async def create_request(
 @router.get("/requests/{request_id}", response_model=RequestOut)
 async def get_request(request_id: uuid.UUID, user: CurrentUser, db: DB) -> RequestOut:
     return await service.get(db, user, request_id)
+
+
+@router.post("/requests/{request_id}/cancel", response_model=RequestOut)
+async def cancel_request(
+    request_id: uuid.UUID, body: CancelIn, request: Request, user: CurrentUser, db: DB
+) -> RequestOut:
+    req = await cancel.cancel_own(db, user, request_id, body.version, client_ip(request))
+    return redact(user, req)
 
 
 @router.get("/me/requests", response_model=RequestList)

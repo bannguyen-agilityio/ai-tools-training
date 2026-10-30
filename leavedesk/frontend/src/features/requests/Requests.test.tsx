@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { MyRequests } from "./MyRequests";
@@ -103,5 +103,65 @@ describe("requests screens", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "short by 1 day",
     );
+  });
+
+  describe("cancel (R16)", () => {
+    function mockApi(status: string, onCancel?: () => void) {
+      vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+        const url = String(input);
+        if (url.endsWith("/me"))
+          return json({
+            id: "e1",
+            name: "A",
+            email: "a@x.test",
+            role: "employee",
+            is_hr_deputy: false,
+          });
+        if (url.endsWith("/cancel") && init?.method === "POST") {
+          onCancel?.();
+          return json({ ...base, status: "cancelled", version: 2 });
+        }
+        return json({ ...base, leave_type: "annual", status });
+      });
+    }
+
+    it("offers no cancel button once the request is decided", async () => {
+      mockApi("approved");
+      wrap("/requests/r1");
+      await screen.findByText("Approved");
+      expect(
+        screen.queryByRole("button", { name: /cancel request/i }),
+      ).toBeNull();
+    });
+
+    it("confirms with the dates, defaults to Keep, then cancels", async () => {
+      const onCancel = vi.fn();
+      mockApi("pending", onCancel);
+      wrap("/requests/r1");
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Cancel request" }),
+      );
+      const dialog = await screen.findByRole("alertdialog");
+      expect(dialog).toHaveTextContent("Mon 2 Nov 2026");
+      expect(screen.getByRole("button", { name: "Keep" })).toHaveFocus();
+      expect(onCancel).not.toHaveBeenCalled();
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Cancel request" }),
+      );
+      expect(await screen.findByText("Cancelled")).toBeInTheDocument();
+      expect(onCancel).toHaveBeenCalledOnce();
+    });
+
+    it("keeping closes the dialog without calling the API", async () => {
+      const onCancel = vi.fn();
+      mockApi("pending", onCancel);
+      wrap("/requests/r1");
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Cancel request" }),
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Keep" }));
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+      expect(onCancel).not.toHaveBeenCalled();
+    });
   });
 });
