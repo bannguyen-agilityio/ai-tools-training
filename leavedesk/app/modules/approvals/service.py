@@ -24,13 +24,26 @@ async def list_assigned(db: AsyncSession, actor: Employee) -> ApprovalList:
     return ApprovalList(items=[redact(actor, r) for r in rows])
 
 
+async def list_cover(db: AsyncSession, actor: Employee) -> ApprovalList:
+    """The "On behalf of" tab (R20): managers only; the default list never includes these."""
+    if actor.role != "manager":
+        raise ProblemError(403, "Not allowed")
+    rows = await repository.pending_cover(db, actor)
+    return ApprovalList(items=[redact(actor, r) for r in rows])
+
+
 async def _authorise(
-    db: AsyncSession, actor: Employee, request_id: uuid.UUID, action: str, ip: str | None
+    db: AsyncSession,
+    actor: Employee,
+    request_id: uuid.UUID,
+    action: str,
+    ip: str | None,
+    on_behalf_of: uuid.UUID | None,
 ) -> LeaveRequest:
     req = await requests_repo.get(db, request_id)
     if req is None:
         raise ProblemError(404, "Request not found")
-    if not can_decide(actor, req):
+    if not can_decide(actor, req, on_behalf_of):
         # Committed before raising, so the refused attempt survives the error response (R22).
         await audit.record(
             db,
@@ -55,14 +68,26 @@ async def _decide(
     action: str,
     status: str,
     event: Event,
+    cover_event: Event,
     reason: str | None,
     ip: str | None,
+    on_behalf_of: uuid.UUID | None,
 ) -> RequestOut:
-    req = await _authorise(db, actor, request_id, action, ip)
+    req = await _authorise(db, actor, request_id, action, ip, on_behalf_of)
+    # Cover only when the manager-queue cover branch of can_decide authorised it: an assigned
+    # manager or an HR approver never records (or emails) a stand-in relationship.
+    is_cover = req.queue == "manager" and req.assigned_to != actor.id
+    cover = req.assigned_to if is_cover else None
     owner = await db.get(Employee, req.employee_id)
     assert owner is not None  # FK
     decided = await repository.decide(
-        db, request_id, version, status=status, actor_id=actor.id, reason=reason
+        db,
+        request_id,
+        version,
+        status=status,
+        actor_id=actor.id,
+        reason=reason,
+        on_behalf_of=cover,
     )
     if decided is None:
         await db.rollback()
@@ -77,16 +102,27 @@ async def _decide(
         target_type="leave_request",
         target_id=str(request_id),
         detail={"request_id": str(request_id), "status": status, "version": decided.version},
+        acting_for_id=cover,
         ip=ip,
     )
     ref = RequestRef(decided.id, owner.id, owner.name, decided.start_date, decided.end_date)
     await emit(db, event, owner, ref=ref, rejection_reason=reason)
+    if cover is not None:
+        # The direct manager learns of it; no type, note or reason in the message.
+        direct = await db.get(Employee, cover)
+        assert direct is not None  # FK
+        await emit(db, cover_event, direct, ref=ref, actor=actor)
     await db.commit()
     return redact(actor, decided)
 
 
 async def approve(
-    db: AsyncSession, actor: Employee, request_id: uuid.UUID, version: int, ip: str | None = None
+    db: AsyncSession,
+    actor: Employee,
+    request_id: uuid.UUID,
+    version: int,
+    ip: str | None = None,
+    on_behalf_of: uuid.UUID | None = None,
 ) -> RequestOut:
     """Pending -> Approved: reserved days become used; the day rows stay active (R18)."""
     return await _decide(
@@ -97,8 +133,10 @@ async def approve(
         action="approve",
         status="approved",
         event=Event.REQUEST_APPROVED,
+        cover_event=Event.REQUEST_APPROVED_ON_BEHALF,
         reason=None,
         ip=ip,
+        on_behalf_of=on_behalf_of,
     )
 
 
@@ -109,6 +147,7 @@ async def reject(
     version: int,
     reason: str,
     ip: str | None = None,
+    on_behalf_of: uuid.UUID | None = None,
 ) -> RequestOut:
     """Pending -> Rejected with a reason; the days are released (R19)."""
     return await _decide(
@@ -119,6 +158,8 @@ async def reject(
         action="reject",
         status="rejected",
         event=Event.REQUEST_REJECTED,
+        cover_event=Event.REQUEST_REJECTED_ON_BEHALF,
         reason=reason,
         ip=ip,
+        on_behalf_of=on_behalf_of,
     )

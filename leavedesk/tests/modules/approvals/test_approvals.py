@@ -230,7 +230,7 @@ async def test_list_assigned_scoped_and_redacted(
     items = (await client.get(LIST, headers=mgr.headers)).json()["items"]
     assert [i["id"] for i in items] == [rid]
     assert items[0]["leave_type"] == "sick" and items[0]["note"] == "flu"  # while deciding
-    assert (await client.get(f"{LIST}?scope=cover", headers=mgr.headers)).status_code == 422
+    assert (await client.get(f"{LIST}?scope=bogus", headers=mgr.headers)).status_code == 422
     done = await decide(client, mgr, rid)
     assert done.json()["leave_type"] is None and done.json()["note"] is None
     assert (await client.get(LIST, headers=mgr.headers)).json()["items"] == []

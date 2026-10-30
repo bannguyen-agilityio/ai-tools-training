@@ -14,6 +14,7 @@ PAYLOAD = {
     "employee_name": REF.owner_name,
     "dates": privacy.date_range(REF.start_date, REF.end_date),
     "link": "http://x/requests/1",
+    "actor_name": "Cover Manager",
 }
 
 

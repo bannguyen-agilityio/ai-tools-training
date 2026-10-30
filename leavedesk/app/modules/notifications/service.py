@@ -24,6 +24,7 @@ async def emit(
     ref: privacy.RequestRef | None = None,
     link: str | None = None,
     rejection_reason: str | None = None,
+    actor: Employee | None = None,
     occurrence: str = "",
 ) -> bool:
     """Write the email (outbox) and the in-app notification in the caller's transaction (R26, R35).
@@ -44,6 +45,8 @@ async def emit(
             "end_date": ref.end_date.isoformat(),
             "link": f"{settings.app_base_url}/requests/{ref.request_id}",
         }
+        if actor is not None:
+            payload["actor_name"] = actor.name
         if rejection_reason is not None:
             if event is not Event.REQUEST_REJECTED or recipient.id != ref.owner_id:
                 raise privacy.PrivacyError("rejection reason goes to the employee only")

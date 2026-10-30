@@ -19,8 +19,10 @@ DB = Annotated[AsyncSession, Depends(get_db)]
 async def list_approvals(
     user: CurrentUser,
     db: DB,
-    scope: Annotated[Literal["assigned"], Query()] = "assigned",  # `cover` arrives with plan 14
+    scope: Annotated[Literal["assigned", "cover"], Query()] = "assigned",
 ) -> ApprovalList:
+    if scope == "cover":
+        return await service.list_cover(db, user)
     return await service.list_assigned(db, user)
 
 
@@ -28,11 +30,15 @@ async def list_approvals(
 async def approve(
     request_id: uuid.UUID, body: ApproveIn, request: Request, user: CurrentUser, db: DB
 ) -> RequestOut:
-    return await service.approve(db, user, request_id, body.version, client_ip(request))
+    return await service.approve(
+        db, user, request_id, body.version, client_ip(request), body.on_behalf_of
+    )
 
 
 @router.post("/approvals/{request_id}/reject", response_model=RequestOut)
 async def reject(
     request_id: uuid.UUID, body: RejectIn, request: Request, user: CurrentUser, db: DB
 ) -> RequestOut:
-    return await service.reject(db, user, request_id, body.version, body.reason, client_ip(request))
+    return await service.reject(
+        db, user, request_id, body.version, body.reason, client_ip(request), body.on_behalf_of
+    )

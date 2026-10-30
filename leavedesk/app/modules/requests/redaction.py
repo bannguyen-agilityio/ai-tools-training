@@ -12,8 +12,8 @@ SENSITIVE_TYPES = frozenset({"sick"})  # leave_type.is_sensitive; Sick is the on
 
 
 def can_view(viewer: Employee, req: LeaveRequest) -> bool:
-    """Owner, assigned approver, HR admin, or the deputy for HR-queue items. Cover access (R20)
-    arrives with the audited "On behalf of" flow (plan 16), not as a blanket manager read."""
+    """Owner, assigned approver, HR admin, or the deputy for HR-queue items. Cover managers decide
+    from the `scope=cover` list, which carries what they need; detail stays closed to them."""
     if viewer.id == req.employee_id or viewer.role == "hr" or req.assigned_to == viewer.id:
         return True
     return viewer.is_hr_deputy and req.queue in ("hr", "deputy")

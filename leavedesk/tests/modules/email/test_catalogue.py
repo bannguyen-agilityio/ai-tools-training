@@ -1,6 +1,6 @@
 """Event catalogue conformance (R26).
 
-Templates for all eight events exist. Call sites for request events ship with the plan that
+Templates for all nine events exist. Call sites for request events ship with the plan that
 creates each event; each of those plans removes its event from PENDING_WIRING, and the last
 one to merge deletes the set.
 """
@@ -12,12 +12,13 @@ WIRED = {
     Event.PASSWORD_RESET,
     Event.REQUEST_CREATED,
     Event.REQUEST_CANCELLED_BY_EMPLOYEE,
-}  # plans 04, 10, 12
+    Event.REQUEST_APPROVED_ON_BEHALF,
+    Event.REQUEST_REJECTED_ON_BEHALF,
+}  # plans 04, 10, 12, 14
 PENDING_WIRING = {
     Event.REQUEST_APPROVED,  # plan 13
     Event.REQUEST_REJECTED,  # plan 13
     Event.REQUEST_CANCELLED_BY_HR,  # plan 14
-    Event.REQUEST_APPROVED_ON_BEHALF,  # plan 15/16
 }
 
 
@@ -26,5 +27,5 @@ def test_every_event_is_wired_or_pending() -> None:
     assert not WIRED & PENDING_WIRING
 
 
-def test_eight_events() -> None:
-    assert len(Event) == 8
+def test_nine_events() -> None:
+    assert len(Event) == 9
