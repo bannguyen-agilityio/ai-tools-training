@@ -6,6 +6,7 @@ import { Button } from "../../ui/Button";
 import { ConfirmDialog } from "../../ui/ConfirmDialog";
 import { useToast } from "../../ui/Toast";
 import { useCancelRequest, useRequest } from "./api";
+import { HrCancelDialog } from "./HrCancelDialog";
 import { daysText, rangeText, statusText, typeLabel } from "./format";
 
 export function RequestDetail() {
@@ -30,15 +31,20 @@ export function RequestDetail() {
   }
   // R16: only the owner, only while Pending. The server enforces it too (403).
   const canCancel = data.status === "pending" && me?.id === data.employee_id;
+  // R21: HR cancels Approved leave with a reason. The deputy cannot (server 403).
+  const canHrCancel = data.status === "approved" && me?.role === "hr";
   const { version } = data;
   function confirmCancel() {
     setConfirming(false);
-    cancel.mutate(version, {
-      onSuccess: () =>
-        toast("success", "Request cancelled. The days are released."),
-      // Stale version or no longer Pending: show the server's current state, not the old one.
-      onError: () => void refetch(),
-    });
+    cancel.mutate(
+      { version },
+      {
+        onSuccess: () =>
+          toast("success", "Request cancelled. The days are released."),
+        // Stale version or no longer Pending: show the server's current state, not the old one.
+        onError: () => void refetch(),
+      },
+    );
   }
   return (
     <section aria-labelledby="request-title">
@@ -76,6 +82,22 @@ export function RequestDetail() {
         >
           Cancel request
         </Button>
+      )}
+      {canHrCancel && (
+        <HrCancelDialog
+          consequence={`Cancels the approved leave for ${rangeText(data)} (${daysText(data.working_days)}) and refunds the days. The employee and their manager are emailed.`}
+          pending={cancel.isPending}
+          onSubmit={(reason) =>
+            cancel.mutate(
+              { version, reason },
+              {
+                onSuccess: () =>
+                  toast("success", "Leave cancelled. The days are refunded."),
+                onError: () => void refetch(),
+              },
+            )
+          }
+        />
       )}
       <ConfirmDialog
         open={confirming}

@@ -15,6 +15,7 @@ class Event(StrEnum):
     REQUEST_REJECTED = "request_rejected"
     REQUEST_CANCELLED_BY_EMPLOYEE = "request_cancelled_by_employee"
     REQUEST_CANCELLED_BY_HR = "request_cancelled_by_hr"
+    REQUEST_CANCELLED_ON_DEACTIVATION = "request_cancelled_on_deactivation"
     REQUEST_APPROVED_ON_BEHALF = "request_approved_on_behalf"
     REQUEST_REJECTED_ON_BEHALF = "request_rejected_on_behalf"
     INVITE = "invite"
@@ -52,6 +53,9 @@ def _request(event: Event, p: dict[str, Any]) -> Rendered:
         case Event.REQUEST_CANCELLED_BY_HR:
             line = f"HR cancelled the leave for {when}."
             subject = "Leave cancelled by HR"
+        case Event.REQUEST_CANCELLED_ON_DEACTIVATION:
+            line = f"The leave of {who} for {when} was cancelled: their account was deactivated."
+            subject = "Leave request cancelled"
         case Event.REQUEST_APPROVED_ON_BEHALF:
             line = f"{p['actor_name']} approved the leave of {who} for {when} on your behalf."
             subject = "Leave approved on your behalf"

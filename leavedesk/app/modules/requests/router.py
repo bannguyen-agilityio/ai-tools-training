@@ -53,7 +53,7 @@ async def get_request(request_id: uuid.UUID, user: CurrentUser, db: DB) -> Reque
 async def cancel_request(
     request_id: uuid.UUID, body: CancelIn, request: Request, user: CurrentUser, db: DB
 ) -> RequestOut:
-    req = await cancel.cancel_own(db, user, request_id, body.version, client_ip(request))
+    req = await cancel.cancel(db, user, request_id, body.version, body.reason, client_ip(request))
     return redact(user, req)
 
 

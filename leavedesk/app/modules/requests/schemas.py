@@ -30,9 +30,12 @@ class RequestIn(StrictModel):
 
 
 class CancelIn(StrictModel):
-    """Body of `POST /requests/{id}/cancel` (spec 6.2 #12). HR's `reason` arrives with R21."""
+    """Body of `POST /requests/{id}/cancel` (spec 6.2 #12). HR must give a `reason` (R21)."""
 
     version: Annotated[int, Field(ge=1)]
+    reason: Annotated[
+        str | None, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)
+    ] = None
 
 
 class HrRequestIn(RequestIn):

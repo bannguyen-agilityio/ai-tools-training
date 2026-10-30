@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.modules.auth.router import client_ip
-from app.modules.employees import service
+from app.modules.employees import deactivate, service
 from app.modules.employees.dependencies import HrUser
 from app.modules.employees.schemas import (
     EmployeeCreate,
@@ -57,3 +57,11 @@ async def update_employee(
 @router.post("/{employee_id}/invite", status_code=204)
 async def resend_invite(employee_id: uuid.UUID, request: Request, user: HrUser, db: DB) -> None:
     await service.resend_invite(db, user, employee_id, client_ip(request))
+
+
+@router.post("/{employee_id}/deactivate", response_model=EmployeeOut)
+async def deactivate_employee(
+    employee_id: uuid.UUID, request: Request, user: HrUser, db: DB
+) -> EmployeeOut:
+    employee = await deactivate.deactivate(db, user, employee_id, client_ip(request))
+    return EmployeeOut.model_validate(employee)

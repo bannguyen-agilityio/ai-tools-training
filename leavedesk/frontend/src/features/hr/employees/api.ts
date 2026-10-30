@@ -58,6 +58,10 @@ export function useEmployeeMutations() {
         api<Employee>(`/hr/employees/${id}`, { method: "PATCH", body }),
       onSuccess: done,
     }),
+    deactivate: useMutation({
+      mutationFn: (id: string) => api<Employee>(`/hr/employees/${id}/deactivate`, { method: "POST" }),
+      onSuccess: done,
+    }),
     invite: useMutation({
       mutationFn: (id: string) => api<void>(`/hr/employees/${id}/invite`, { method: "POST" }),
     }),
