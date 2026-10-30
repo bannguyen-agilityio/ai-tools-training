@@ -20,6 +20,7 @@ function mockApi(calls: { method: string; url: string; body?: string }[] = []) {
     const url = String(input);
     const method = init?.method ?? "GET";
     calls.push({ method, url, body: init?.body as string | undefined });
+    if (method === "POST" && url.endsWith("/deactivate")) return respond({ ...EMPLOYEES[1], is_active: false });
     if (method === "POST" && url.endsWith("/invite")) return new Response(null, { status: 204 });
     if (method === "POST") return respond(EMPLOYEES[1], 201);
     if (url.includes("/hr/teams")) return respond({ items: TEAMS, next_cursor: null });
@@ -69,5 +70,19 @@ describe("EmployeesPage (R23)", () => {
     await user.click(await screen.findByRole("button", { name: "Re-send invite to Eli Employee" }));
     expect(await screen.findByText("Invite re-sent to Eli Employee.")).toBeInTheDocument();
     expect(calls.some((c) => c.method === "POST" && c.url.endsWith("/hr/employees/e/invite"))).toBe(true);
+  });
+
+  it("deactivation names the effects, defaults to Keep, and only then calls the API (R4)", async () => {
+    const user = userEvent.setup();
+    const calls = mockApi();
+    renderPage();
+    await user.click(await screen.findByRole("button", { name: "Deactivate Eli Employee" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("Pending requests are cancelled");
+    expect(screen.getByRole("button", { name: "Keep" })).toHaveFocus();
+    await user.click(screen.getByRole("button", { name: "Keep" }));
+    expect(calls.some((c) => c.url.endsWith("/deactivate"))).toBe(false);
+    await user.click(screen.getByRole("button", { name: "Deactivate Eli Employee" }));
+    await user.click(screen.getByRole("button", { name: "Deactivate" }));
+    await vi.waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.endsWith("/hr/employees/e/deactivate"))).toBe(true));
   });
 });

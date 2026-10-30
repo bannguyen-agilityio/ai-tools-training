@@ -14,7 +14,7 @@ Any other branch fails at the `target` job. Promote by merging `staging` into `m
 Steps for the chosen environment:
 
 1. CI checks (ruff, mypy, single Alembic head, pytest, migration cycle).
-2. Single-head check, `alembic upgrade head` as the owner (a failed migration stops the run before any deploy), `fastapi deploy`, then `/healthz` must return `{"status":"ok"}`.
+2. Build the frontend (`npm ci && npm run build` in `leavedesk/frontend`; a failed build stops the run), single-head check, `alembic upgrade head` as the owner (a failed migration stops the run before any deploy), `fastapi deploy`, then `/healthz` must return `{"status":"ok"}` and `/` must return the SPA shell.
 3. Production only: `tag-production` tags the commit `prod-<UTC timestamp>-<sha>`.
 
 Deploys per environment never run in parallel and are never cancelled mid-run.

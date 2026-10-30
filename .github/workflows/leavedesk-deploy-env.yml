@@ -50,13 +50,14 @@ jobs:
           ref: ${{ inputs.ref || github.sha }}
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --python 3.14 --no-dev
-      - name: Build frontend (once frontend/ exists)
-        run: |
-          if [ -f ../frontend/package.json ]; then
-            (cd ../frontend && npm ci && npm run build)
-          else
-            echo "no frontend/ yet; deploying the API only"
-          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: leavedesk/frontend/package-lock.json
+      - name: Build frontend
+        working-directory: leavedesk/frontend
+        run: npm ci && npm run build
       - name: Exactly one Alembic head
         run: uv run python scripts/check_single_head.py
       - name: Migrate database
@@ -78,3 +79,14 @@ jobs:
             echo "attempt $i: not healthy yet"; sleep 10
           done
           echo "::error::$APP_URL/healthz did not become healthy"; exit 1
+      - name: Verify the SPA is served at /
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          for i in $(seq 1 12); do
+            if curl -fsS "$APP_URL/" | grep -qi '<div id="root"'; then
+              echo "SPA served"; exit 0
+            fi
+            echo "attempt $i: SPA shell not served yet"; sleep 10
+          done
+          echo "::error::$APP_URL/ did not return the SPA shell (is frontend/dist in the upload?)"; exit 1

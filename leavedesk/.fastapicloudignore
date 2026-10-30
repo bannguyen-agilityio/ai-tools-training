@@ -1,0 +1,2 @@
+# Re-include the built SPA: it is gitignored but must ship with the API (app/spa.py).
+!frontend/dist/
