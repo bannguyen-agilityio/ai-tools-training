@@ -36,6 +36,9 @@ class Balance:
     reserved: Decimal
     unused_entitlement: Decimal  # rollover input: entitlement left, never carried days
     expirable_carried: Decimal  # unused carried days whose block is past expires_on
+    entitlement: Decimal = Decimal(0)  # granted entitlement, for display (R10)
+    carried: Decimal = Decimal(0)  # granted carry-over, for display (R10)
+    carried_expires_on: date | None = None  # latest carry block expiry (one block per year, A-24)
 
     @property
     def available(self) -> Decimal:
@@ -46,6 +49,7 @@ class Balance:
 class _Block:
     expires_on: date
     left: Decimal
+    granted: Decimal
 
 
 def compute_balance(entries: Iterable[Entry], days: Iterable[DayUse], today: date) -> Balance:
@@ -59,7 +63,11 @@ def compute_balance(entries: Iterable[Entry], days: Iterable[DayUse], today: dat
     entries = list(entries)
     entitlement = sum((x.days for x in entries if x.kind in ENTITLEMENT_KINDS), Decimal(0))
     blocks = sorted(
-        (_Block(x.expires_on, x.days) for x in entries if x.kind == "carry_over" and x.expires_on),
+        (
+            _Block(x.expires_on, x.days, x.days)
+            for x in entries
+            if x.kind == "carry_over" and x.expires_on
+        ),
         key=lambda b: b.expires_on,
     )
     used = reserved = from_entitlement = Decimal(0)
@@ -84,4 +92,7 @@ def compute_balance(entries: Iterable[Entry], days: Iterable[DayUse], today: dat
         reserved=reserved,
         unused_entitlement=max(Decimal(0), remaining),
         expirable_carried=expirable,
+        entitlement=entitlement,
+        carried=sum((b.granted for b in blocks), Decimal(0)),
+        carried_expires_on=max((b.expires_on for b in blocks), default=None),
     )
