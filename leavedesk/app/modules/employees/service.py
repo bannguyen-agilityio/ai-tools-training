@@ -114,7 +114,7 @@ async def _write_entitlement(db: AsyncSession, employee: Employee, actor: Employ
             leave_year=year,
             kind=kind,
             days=days,
-            source="hr",
+            source="system",  # computed, not typed in by HR; created_by records who triggered it
             idempotency_key=f"{kind}:{year}:{employee.id}:{code}",
             created_by=actor.id,
         )

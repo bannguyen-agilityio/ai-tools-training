@@ -112,7 +112,7 @@ async def test_duplicate_email_is_409(client: httpx.AsyncClient, make_login: Mak
 async def test_unknown_field_refused(client: httpx.AsyncClient, make_login: MakeLogin) -> None:
     hr = await make_login("hr")
     r = await client.post(URL, json=body(is_active=False), headers=hr.mutating_headers)
-    assert r.status_code == 422
+    assert r.status_code == 400  # unknown fields are a malformed request (spec 6.1)
 
 
 async def test_future_year_start_refused(client: httpx.AsyncClient, make_login: MakeLogin) -> None:
@@ -153,16 +153,24 @@ async def test_role_change_is_its_own_audit_action(
     )
 
 
-@pytest.mark.parametrize("payload", [{"email": "x@asnet.com.vn"}, {"start_date": "2026-02-02"}, {}])
+@pytest.mark.parametrize(
+    ("payload", "status"),
+    [
+        ({"email": "x@asnet.com.vn"}, 400),  # unknown fields: malformed request (spec 6.1)
+        ({"start_date": "2026-02-02"}, 400),
+        ({}, 422),
+    ],
+)
 async def test_patch_refuses_immutable_or_empty(
     client: httpx.AsyncClient,
     make_login: MakeLogin,
-    payload: dict,  # type: ignore[type-arg]
+    payload: dict[str, Any],
+    status: int,
 ) -> None:
     hr = await make_login("hr")
     emp = await create(client, hr)
     r = await client.patch(f"{URL}/{emp['id']}", json=payload, headers=hr.mutating_headers)
-    assert r.status_code == 422
+    assert r.status_code == status
 
 
 async def test_missing_employee_is_404(client: httpx.AsyncClient, make_login: MakeLogin) -> None:
