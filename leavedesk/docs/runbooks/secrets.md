@@ -34,7 +34,7 @@ Settings > Environments. Create `staging` and `production`, each with its own va
 | `COMPANY_TZ` | `Asia/Ho_Chi_Minh` |
 | `EMAIL_FROM` | Verified SendGrid sender, read by the `drain_outbox` job |
 
-Scheduled jobs (`leavedesk-job-*`) run once per environment (staging and production; manual runs follow the branch) and read `DATABASE_URL`, `APP_DB_ROLE`, `COMPANY_TZ`, `APP_URL` (as `APP_BASE_URL`) and, for `drain_outbox`, the two email values above.
+Scheduled jobs (`leavedesk-job-*`; schedules are disabled for now, manual runs only) run once per environment (staging and production; manual runs follow the branch) and read `DATABASE_URL`, `APP_DB_ROLE`, `COMPANY_TZ`, `APP_URL` (as `APP_BASE_URL`) and, for `drain_outbox`, the two email values above.
 
 ### Protection rules
 

@@ -62,3 +62,5 @@ jobs:
           COOKIE_SECURE: "true"
           COMPANY_TZ: ${{ vars.COMPANY_TZ }}
           APP_BASE_URL: ${{ vars.APP_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}

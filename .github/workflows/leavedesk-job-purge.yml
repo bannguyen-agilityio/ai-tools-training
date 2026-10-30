@@ -2,9 +2,10 @@ name: leavedesk-job-purge
 
 # Deletes expired sessions, used or expired one-time tokens and login attempts older than 30 days.
 # Idempotent (spec 5.6, R2, R3).
+# Schedule disabled until the job environments (no required reviewers) exist; run manually meanwhile.
 on:
-  schedule:
-    - cron: "30 17 * * *" # 00:30 daily, Asia/Ho_Chi_Minh (UTC+7)
+  # schedule:
+  #   - cron: "30 17 * * *" # 00:30 daily, Asia/Ho_Chi_Minh (UTC+7)
   workflow_dispatch:
     inputs:
       environment:
@@ -62,3 +63,5 @@ jobs:
           COOKIE_SECURE: "true"
           COMPANY_TZ: ${{ vars.COMPANY_TZ }}
           APP_BASE_URL: ${{ vars.APP_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}

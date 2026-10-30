@@ -1,9 +1,10 @@
 name: leavedesk-job-drain-outbox
 
 # CI backstop for the in-process outbox drain (A-28): sends due email_outbox rows. Idempotent.
+# Schedule disabled until the job environments (no required reviewers) exist; run manually meanwhile.
 on:
-  schedule:
-    - cron: "*/15 * * * *"
+  # schedule:
+  #   - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       environment:
