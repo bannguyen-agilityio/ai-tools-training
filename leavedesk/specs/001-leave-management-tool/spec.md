@@ -184,6 +184,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 
 **R25 [P1] HR sees all approved leave.**
 - Given HR, when they open "All leave", then they see all Approved leave (and can filter by Pending, date range, employee, team and type), with real leave types.
+- **[Assumption]** `from`/`to` match any request overlapping the range; results are ordered by start date then id, 50 per page (max 200), status defaults to Approved and takes one value at a time. The deputy gets 403.
 
 ### 4.6 Notifications
 
