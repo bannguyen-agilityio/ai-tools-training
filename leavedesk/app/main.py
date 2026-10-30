@@ -14,6 +14,7 @@ from app.core.errors import ProblemError, install_error_handlers
 from app.core.logging import configure_logging
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.jobs.drain_outbox import run_forever
+from app.modules.approvals.router import router as approvals_router
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.router import router as auth_router
 from app.modules.balances.hr_router import router as balances_router
@@ -74,6 +75,7 @@ def create_app() -> FastAPI:
     app.include_router(notifications_router)
     app.include_router(requests_router)
     app.include_router(hr_requests_router)
+    app.include_router(approvals_router)
     mount_spa(app)  # last: it serves the catch-all for client routes
     return app
 
