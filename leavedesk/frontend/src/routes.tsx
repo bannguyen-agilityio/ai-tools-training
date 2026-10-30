@@ -10,6 +10,7 @@ import { BalancesPage } from "./features/hr/balances/BalancesPage";
 import { EmployeesPage } from "./features/hr/employees/EmployeesPage";
 import { HolidaysPage } from "./features/hr/holidays/HolidaysPage";
 import { AllLeavePage } from "./features/hr/leave/AllLeavePage";
+import { SettingsPage } from "./features/hr/settings/SettingsPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
 import { Layout } from "./ui/Layout";
@@ -26,6 +27,7 @@ const HR_NAV: NavItem[] = [
   { to: "/hr/balances", label: "Balances" },
   { to: "/hr/teams", label: "Teams" },
   { to: "/hr/holidays", label: "Holidays" },
+  { to: "/hr/settings", label: "Settings" },
 ];
 
 export function AppRoutes() {
@@ -83,6 +85,14 @@ export function AppRoutes() {
           element={
             <RequireHr>
               <AllLeavePage />
+            </RequireHr>
+          }
+        />
+        <Route
+          path="/hr/settings"
+          element={
+            <RequireHr>
+              <SettingsPage />
             </RequireHr>
           }
         />
