@@ -45,7 +45,7 @@ export function ConfirmSummary({ summary, busy, serverError, onSave, onBack }: P
         <dd>{summary.resulting_available}</dd>
       </dl>
       {Number(summary.resulting_available) < 0 && (
-        <Alert tone="warning">
+        <Alert tone="warning" urgent>
           Warning: this leaves {summary.employee_name} with a negative balance.
         </Alert>
       )}

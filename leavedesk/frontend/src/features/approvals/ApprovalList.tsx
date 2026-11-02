@@ -5,7 +5,7 @@ import { formatDate } from "../../lib/dates";
 import { daysText, rangeText, typeLabel } from "../requests/format";
 import { useApprovals, type ApprovalScope } from "./api";
 import { DecisionPanel } from "./DecisionPanel";
-import { Alert, Loading, Skeleton } from "../../components/ui/Feedback";
+import { Alert, EmptyState, Loading, Skeleton } from "../../components/ui/Feedback";
 import { PageHeader } from "../../components/ui/Card";
 
 export function ApprovalList() {
@@ -27,7 +27,7 @@ export function ApprovalList() {
       {isError && (
         <Alert tone="danger">Could not load the approvals. Try again later.</Alert>
       )}
-      {data && data.length === 0 && <p>Nothing is waiting for your decision.</p>}
+      {data && data.length === 0 && <EmptyState title="Nothing is waiting for your decision." />}
       {data && data.length > 0 && (
         <ul className="approvals">
           {data.map((r) => (

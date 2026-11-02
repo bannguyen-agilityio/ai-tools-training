@@ -19,6 +19,7 @@ import { MonthlyReportPage } from "./features/hr/report/MonthlyReportPage";
 import { SettingsPage } from "./features/hr/settings/SettingsPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
+import { AuthCard } from "./components/ui/AuthCard";
 import { Layout } from "./components/ui/Layout";
 
 export function AppRoutes() {
@@ -88,11 +89,11 @@ export function AppRoutes() {
             </RequireHr>
           }
         />
-        <Route path="/sign-in" element={<div className="auth card"><SignIn /></div>} />
-        <Route path="/set-password" element={<div className="auth card"><SetPassword /></div>} />
-        <Route path="/forgot-password" element={<div className="auth card"><ForgotPassword /></div>} />
-        <Route path="/reset-password" element={<div className="auth card"><ResetPassword /></div>} />
-        <Route path="/account/password" element={<div className="auth card"><ChangePassword /></div>} />
+        <Route path="/sign-in" element={<AuthCard><SignIn /></AuthCard>} />
+        <Route path="/set-password" element={<AuthCard><SetPassword /></AuthCard>} />
+        <Route path="/forgot-password" element={<AuthCard><ForgotPassword /></AuthCard>} />
+        <Route path="/reset-password" element={<AuthCard><ResetPassword /></AuthCard>} />
+        <Route path="/account/password" element={<AuthCard><ChangePassword /></AuthCard>} />
         <Route path="*" element={<h1>Page not found</h1>} />
       </Routes>
     </Layout>
