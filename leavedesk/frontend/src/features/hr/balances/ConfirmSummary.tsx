@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { formatDate } from "../../../lib/dates";
-import { Button } from "../../../ui/Button";
+import { Button } from "../../../components/ui/Button";
 import type { Summary } from "./api";
 
 const KIND = { opening: "Opening balance", carry_over: "Carried days", adjustment: "Correction" } as const;

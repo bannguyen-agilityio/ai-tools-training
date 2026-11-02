@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "../../../ui/Button";
-import { Field } from "../../../ui/Field";
+import { Button } from "../../../components/ui/Button";
+import { Field } from "../../../components/ui/Field";
 import { daysText, rangeText, statusText, TYPE_LABEL } from "../../requests/format";
 import { useEmployees } from "../employees/api";
 import { useTeams } from "../teams/api";

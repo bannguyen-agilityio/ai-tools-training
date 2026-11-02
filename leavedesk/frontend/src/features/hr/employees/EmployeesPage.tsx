@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ApiError } from "../../../api/problem";
 import { formatDate } from "../../../lib/dates";
-import { Button } from "../../../ui/Button";
-import { ConfirmDialog } from "../../../ui/ConfirmDialog";
-import { useToast } from "../../../ui/Toast";
+import { Button } from "../../../components/ui/Button";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
+import { useToast } from "../../../components/ui/Toast";
 import { useTeams } from "../teams/api";
 import { useEmployeeMutations, useEmployees, type Employee } from "./api";
 import { EmployeeForm } from "./EmployeeForm";

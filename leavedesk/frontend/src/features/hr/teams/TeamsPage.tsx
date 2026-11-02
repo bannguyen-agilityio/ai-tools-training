@@ -3,12 +3,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ApiError } from "../../../api/problem";
-import { Button } from "../../../ui/Button";
-import { ErrorSummary } from "../../../ui/ErrorSummary";
-import { Select } from "../../../ui/Select";
-import { TextField } from "../../../ui/TextField";
-import { useToast } from "../../../ui/Toast";
-import { useFormFocusFirstError } from "../../../ui/useFormFocusFirstError";
+import { Button } from "../../../components/ui/Button";
+import { ErrorSummary } from "../../../components/ui/ErrorSummary";
+import { Select } from "../../../components/ui/Select";
+import { TextField } from "../../../components/ui/TextField";
+import { useToast } from "../../../components/ui/Toast";
+import { useFormFocusFirstError } from "../../../components/ui/useFormFocusFirstError";
 import { useEmployees } from "../employees/api";
 import { useTeamMutations, useTeams, type Team } from "./api";
 

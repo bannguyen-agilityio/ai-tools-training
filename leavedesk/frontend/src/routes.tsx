@@ -20,8 +20,8 @@ import { MonthlyReportPage } from "./features/hr/report/MonthlyReportPage";
 import { SettingsPage } from "./features/hr/settings/SettingsPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
-import { Layout } from "./ui/Layout";
-import type { NavItem } from "./ui/Nav";
+import { Layout } from "./components/ui/Layout";
+import type { NavItem } from "./components/ui/Nav";
 
 const NAV: NavItem[] = [
   { to: "/", label: "Home" },

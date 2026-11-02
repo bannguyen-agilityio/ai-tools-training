@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api, setCsrfToken, signInPath } from "../api/client";
+import { api, setCsrfToken, signInPath } from "../../api/client";
 import { Button } from "./Button";
 
 /** Ends the session on the server, then drops the local CSRF token and returns to sign-in (R2). */

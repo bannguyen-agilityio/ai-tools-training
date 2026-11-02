@@ -4,10 +4,10 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { api } from "../../api/client";
-import { Button } from "../../ui/Button";
-import { ErrorSummary } from "../../ui/ErrorSummary";
-import { TextField } from "../../ui/TextField";
-import { useFormFocusFirstError } from "../../ui/useFormFocusFirstError";
+import { Button } from "../../components/ui/Button";
+import { ErrorSummary } from "../../components/ui/ErrorSummary";
+import { TextField } from "../../components/ui/TextField";
+import { useFormFocusFirstError } from "../../components/ui/useFormFocusFirstError";
 
 const schema = z.object({
   email: z.string().trim().min(1, "Enter your work email, for example linh.tran@asnet.com.vn."),

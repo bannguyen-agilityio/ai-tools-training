@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { ApiError } from "../../../api/problem";
-import { Button } from "../../../ui/Button";
-import { Field } from "../../../ui/Field";
-import { useToast } from "../../../ui/Toast";
+import { Button } from "../../../components/ui/Button";
+import { Field } from "../../../components/ui/Field";
+import { useToast } from "../../../components/ui/Toast";
 import { useEmployees } from "../employees/api";
 import { useAssignDeputy, useDeputy } from "./api";
 

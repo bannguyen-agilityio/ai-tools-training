@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError } from "../../api/problem";
-import { Button } from "../../ui/Button";
-import { DateField } from "../../ui/DateField";
-import { ErrorSummary, type SummaryItem } from "../../ui/ErrorSummary";
-import { Select } from "../../ui/Select";
-import { TextField } from "../../ui/TextField";
+import { Button } from "../../components/ui/Button";
+import { DateField } from "../../components/ui/DateField";
+import { ErrorSummary, type SummaryItem } from "../../components/ui/ErrorSummary";
+import { Select } from "../../components/ui/Select";
+import { TextField } from "../../components/ui/TextField";
 import {
   useCreateRequest,
   usePreview,

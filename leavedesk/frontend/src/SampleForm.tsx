@@ -1,12 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "./ui/Button";
-import { DateField } from "./ui/DateField";
-import { ErrorSummary } from "./ui/ErrorSummary";
-import { Select } from "./ui/Select";
-import { TextField } from "./ui/TextField";
-import { useFormFocusFirstError } from "./ui/useFormFocusFirstError";
+import { Button } from "./components/ui/Button";
+import { DateField } from "./components/ui/DateField";
+import { ErrorSummary } from "./components/ui/ErrorSummary";
+import { Select } from "./components/ui/Select";
+import { TextField } from "./components/ui/TextField";
+import { useFormFocusFirstError } from "./components/ui/useFormFocusFirstError";
 
 const schema = z.object({
   name: z.string().min(1, "Enter your name, for example Linh Tran."),

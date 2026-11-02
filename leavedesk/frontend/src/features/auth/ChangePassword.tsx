@@ -3,10 +3,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { api, setCsrfToken } from "../../api/client";
-import { Button } from "../../ui/Button";
-import { ErrorSummary } from "../../ui/ErrorSummary";
-import { TextField } from "../../ui/TextField";
-import { useFormFocusFirstError } from "../../ui/useFormFocusFirstError";
+import { Button } from "../../components/ui/Button";
+import { ErrorSummary } from "../../components/ui/ErrorSummary";
+import { TextField } from "../../components/ui/TextField";
+import { useFormFocusFirstError } from "../../components/ui/useFormFocusFirstError";
 import { newPassword, PASSWORD_MIN } from "./passwordSchema";
 
 const schema = z

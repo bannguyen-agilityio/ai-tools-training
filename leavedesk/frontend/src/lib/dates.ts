@@ -36,3 +36,11 @@ export function parseDate(text: string): string | null {
 export function todayIso(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: COMPANY_TZ }).format(now);
 }
+
+const SHORT_DAY = /^(\w{3} \d{1,2} \w{3})/;
+
+/** "Mon 9 Nov", or "Mon 9 Nov 2027" when the year is not `currentYear`. */
+export function formatDateShort(iso: string, currentYear: number = Number(todayIso().slice(0, 4))): string {
+  const full = formatDate(iso);
+  return Number(iso.slice(0, 4)) === currentYear ? SHORT_DAY.exec(full)![1] : full;
+}

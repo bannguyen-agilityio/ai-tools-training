@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { todayIso } from "../../../lib/dates";
-import { Field } from "../../../ui/Field";
+import { Field } from "../../../components/ui/Field";
 
 function previousMonth(today: string): string {
   const [y, m] = today.split("-").map(Number);

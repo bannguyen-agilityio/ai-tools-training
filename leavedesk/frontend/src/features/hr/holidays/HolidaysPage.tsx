@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ApiError } from "../../../api/problem";
 import { formatDate, todayIso } from "../../../lib/dates";
-import { Button } from "../../../ui/Button";
-import { ConfirmDialog } from "../../../ui/ConfirmDialog";
-import { useToast } from "../../../ui/Toast";
+import { Button } from "../../../components/ui/Button";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
+import { useToast } from "../../../components/ui/Toast";
 import { useHolidayMutations, useHolidays, useImpact, type Holiday } from "./api";
 import { HolidayForm } from "./HolidayForm";
 

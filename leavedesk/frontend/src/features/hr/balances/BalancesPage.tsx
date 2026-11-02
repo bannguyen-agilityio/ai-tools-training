@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ApiError } from "../../../api/problem";
-import { Button } from "../../../ui/Button";
-import { useToast } from "../../../ui/Toast";
+import { Button } from "../../../components/ui/Button";
+import { useToast } from "../../../components/ui/Toast";
 import { useBalanceList, useEmployeeBalances, useEntryMutations, type BalanceRow, type EntryInput } from "./api";
 import { BalanceList } from "./BalanceList";
 import { ConfirmSummary } from "./ConfirmSummary";

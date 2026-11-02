@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { applyTheme, readTheme, saveTheme, THEME_MODES, type ThemeMode } from "../lib/theme";
+import { applyTheme, readTheme, saveTheme, THEME_MODES, type ThemeMode } from "../../lib/theme";
 
 const LABEL: Record<ThemeMode, string> = { system: "System", light: "Light", dark: "Dark" };
 const ICON: Record<ThemeMode, string> = { system: "◐", light: "☀", dark: "☾" };

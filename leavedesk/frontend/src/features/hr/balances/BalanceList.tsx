@@ -1,4 +1,4 @@
-import { Button } from "../../../ui/Button";
+import { Button } from "../../../components/ui/Button";
 import type { Balance, BalanceRow } from "./api";
 
 function find(balances: Balance[], code: "annual" | "sick"): Balance | undefined {
