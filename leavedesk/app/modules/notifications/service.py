@@ -16,13 +16,15 @@ from app.modules.notifications.models import Notification
 REQUEST_EVENTS = frozenset(e for e in Event if e not in (Event.INVITE, Event.PASSWORD_RESET))
 
 
-def announce_mock_link(environment: str, event: Event, to: str, link: str | None) -> None:
-    """Local development only: with EMAIL_BACKEND=mock nothing is sent, so show the one-time link.
+def announce_mock(event: Event, to: str, subject: str, body: str, notification: str | None) -> None:
+    """With EMAIL_BACKEND=mock nothing is sent, so print the email and notification (any env).
 
-    Never runs outside `dev` (tests, staging, production stay silent): the link is a credential.
+    TODO: restrict to `dev` later. The output holds one-time links and, for a rejection, the
+    reason, so it must not run where logs are shared. Production refuses the mock backend.
     """
-    if environment == "dev" and link and event in (Event.INVITE, Event.PASSWORD_RESET):
-        print(f"[mock email] {event.value} for {to}: {link}", flush=True)
+    print(f"[mock email] {event.value} to {to}\n  subject: {subject}\n  body: {body}", flush=True)
+    if notification is not None:
+        print(f"[mock notification] {event.value} for {to}: {notification}", flush=True)
 
 
 async def emit(
@@ -104,7 +106,15 @@ async def emit(
     if inserted is None:
         return False
     if mocked:
-        announce_mock_link(settings.environment, event, recipient.email, link)
+        announce_mock(
+            event,
+            recipient.email,
+            out.subject,
+            out.body,
+            f"{out.notification_title}: {out.notification_body}"
+            if ref and out.notification_title
+            else None,
+        )
 
     if out.notification_title is not None and out.notification_body is not None and ref:
         db.add(

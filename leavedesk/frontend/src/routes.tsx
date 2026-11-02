@@ -49,7 +49,7 @@ export function AppRoutes() {
   const base = [...NAV, ...deciders];
   const nav = role === "hr" ? [...base, ...HR_NAV] : base;
   return (
-    <Layout nav={nav}>
+    <Layout nav={nav} signedIn={Boolean(me.data)}>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<MyRequests />} />
