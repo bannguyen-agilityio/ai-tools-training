@@ -5,7 +5,7 @@ import re
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 
-MIN_LENGTH = 12
+MIN_LENGTH = 8
 
 _hasher = PasswordHasher()
 

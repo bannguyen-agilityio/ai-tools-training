@@ -62,7 +62,7 @@ Format: **R#** [phase] statement, then acceptance criteria. Every R has at least
 
 **R2 [P1] Account protection.**
 - Given 5 failed sign-ins for one email within 15 minutes, when a 6th is attempted, then it is refused for 15 minutes, whatever the password. The attempt is logged. A per-IP limit also applies.
-- Given a new password, when it is set, then it must be at least 12 characters and not be a common password. It is stored only as an Argon2id hash.
+- Given a new password, when it is set, then it must be at least 8 characters and not be a common password. It is stored only as an Argon2id hash.
 - Given 8 hours of inactivity (and a 24-hour maximum session age), when the user acts, then they are signed out. All sessions are invalidated on password change.
 - Given the SPA receives a 401 from any call, when it happens, then it clears local state and shows the sign-in page, keeping the page the user was on so they return to it.
 
