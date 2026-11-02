@@ -19,14 +19,17 @@ export function DataList<T>({
   columns,
   rows,
   rowKey,
+  compact = false,
 }: {
   caption: string;
   columns: Column<T>[];
   rows: T[];
   rowKey: (row: T) => string;
+  /** Below 768 px: dates, then "Type · Days", status at the right (dashboard list). */
+  compact?: boolean;
 }) {
   return (
-    <table className="data-list">
+    <table className={compact ? "data-list data-list--compact" : "data-list"}>
       <caption className="visually-hidden">{caption}</caption>
       <thead>
         <tr>

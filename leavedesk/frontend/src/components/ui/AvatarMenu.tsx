@@ -3,15 +3,6 @@ import { Link } from "react-router-dom";
 import { SignOutButton } from "./SignOutButton";
 import { useDismiss } from "./useDismiss";
 
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0].toUpperCase())
-    .join("");
-}
-
 export function AvatarMenu({ name }: { name: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -27,7 +18,10 @@ export function AvatarMenu({ name }: { name: string }) {
         aria-controls="account-panel"
         onClick={() => setOpen((o) => !o)}
       >
-        <span aria-hidden="true">{initials(name)}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+        </svg>
       </button>
       {open && (
         <div id="account-panel" className="menu__panel">

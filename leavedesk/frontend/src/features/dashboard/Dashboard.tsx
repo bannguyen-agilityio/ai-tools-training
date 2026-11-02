@@ -72,6 +72,7 @@ function UpcomingCard({ rows, loading, error, retry }: { rows: LeaveRequest[]; l
       )}
       {rows.length > 0 && (
         <DataList
+          compact
           caption="Your upcoming leave"
           rows={rows}
           rowKey={(r) => r.id}

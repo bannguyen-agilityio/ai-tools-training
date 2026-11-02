@@ -21,6 +21,7 @@ const pairs = [
   ["primary btn", "color-primary-contrast", "color-primary", 4.5],
   ["danger btn", "color-danger-contrast", "color-danger", 4.5],
   ["danger text on surface", "color-danger", "color-surface", 4.5],
+  ["warning text on surface", "color-warning-fg", "color-surface", 4.5],
   ["focus ring on bg", "color-focus-ring", "color-bg", 3],
   ["focus ring on surface", "color-focus-ring", "color-surface", 3],
   ["control border on surface", "color-border-strong", "color-surface", 3],

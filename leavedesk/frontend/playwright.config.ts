@@ -9,6 +9,7 @@ export default defineConfig({
   use: { baseURL: process.env.E2E_BASE_URL ?? "http://localhost:8000", launchOptions },
   projects: [
     { name: "mobile-360", testMatch: /a11y\.spec\.ts/, use: { viewport: { width: 360, height: 640 } } },
+    { name: "ui-system", testMatch: /ui-system\.spec\.ts/ },
     { name: "desktop-1280", testDir: "e2e/features", use: { viewport: { width: 1280, height: 800 } } },
     { name: "desktop-1024", testDir: "e2e/features", use: { viewport: { width: 1024, height: 768 } } },
   ],
