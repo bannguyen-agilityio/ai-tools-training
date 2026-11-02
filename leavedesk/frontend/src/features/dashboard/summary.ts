@@ -61,5 +61,3 @@ export function oldestSubmitted(items: Pick<LeaveRequest, "submitted_at">[]): st
   const oldest = items.map((i) => i.submitted_at).sort()[0];
   return formatDateShort(todayIso(new Date(oldest)));
 }
-
-export { formatDate };

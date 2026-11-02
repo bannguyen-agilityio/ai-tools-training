@@ -13,7 +13,7 @@ export function readTheme(): ThemeMode {
   }
 }
 
-/** Sets data-theme (absent for System, so prefers-color-scheme applies) and color-scheme. */
+/** Sets data-theme (absent for System, so prefers-color-scheme applies). tokens.css sets color-scheme from it. */
 export function applyTheme(mode: ThemeMode): void {
   const root = document.documentElement;
   if (mode === "system") {

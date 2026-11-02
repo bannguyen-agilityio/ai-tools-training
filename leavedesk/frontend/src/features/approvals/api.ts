@@ -4,12 +4,11 @@ import type { LeaveRequest } from "../requests/api";
 
 export type ApprovalScope = "assigned" | "cover";
 
-export function useApprovals(scope: ApprovalScope = "assigned", enabled = true) {
+export function useApprovals(scope: ApprovalScope = "assigned") {
   return useQuery({
     queryKey: ["approvals", scope],
     queryFn: () => api<{ items: LeaveRequest[] }>(`/approvals?scope=${scope}`),
     select: (r) => r.items,
-    enabled,
   });
 }
 

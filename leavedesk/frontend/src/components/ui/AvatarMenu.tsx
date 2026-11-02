@@ -15,7 +15,7 @@ export function AvatarMenu({ name }: { name: string }) {
         className="icon-btn avatar"
         aria-label={`Account menu, ${name}`}
         aria-expanded={open}
-        aria-controls="account-panel"
+        aria-controls={open ? "account-panel" : undefined}
         onClick={() => setOpen((o) => !o)}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

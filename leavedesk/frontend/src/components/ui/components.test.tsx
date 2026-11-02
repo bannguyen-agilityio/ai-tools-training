@@ -41,6 +41,8 @@ describe("days formatting", () => {
   it.each([
     [0.5, "½ day"],
     [1, "1 day"],
+    [0, "0 days"],
+    [-0.5, "-½ days"],
     [8, "8 days"],
     [8.5, "8½ days"],
     [0.30000000000000004 + 0.2, "½ day"],

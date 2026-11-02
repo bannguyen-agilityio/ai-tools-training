@@ -24,7 +24,7 @@ export function NotificationBell() {
         className="icon-btn bell"
         aria-label={name}
         aria-expanded={open}
-        aria-controls="notif-panel"
+        aria-controls={open ? "notif-panel" : undefined}
         onClick={() => setOpen((o) => !o)}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
