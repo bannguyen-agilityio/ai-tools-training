@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
-import { useMe } from "./auth/useMe";
 import { ChangePassword } from "./features/auth/ChangePassword";
 import { ForgotPassword } from "./features/auth/ForgotPassword";
 import { ResetPassword } from "./features/auth/ResetPassword";
@@ -21,35 +20,10 @@ import { SettingsPage } from "./features/hr/settings/SettingsPage";
 import { TeamsPage } from "./features/hr/teams/TeamsPage";
 import { SampleForm } from "./SampleForm";
 import { Layout } from "./components/ui/Layout";
-import type { NavItem } from "./components/ui/Nav";
-
-const NAV: NavItem[] = [
-  { to: "/", label: "Home" },
-  { to: "/requests", label: "My requests" },
-  { to: "/calendar", label: "Calendar" },
-  { to: "/sample-form", label: "Sample form" },
-];
-const HR_NAV: NavItem[] = [
-  { to: "/hr/leave", label: "All leave" },
-  { to: "/hr/employees", label: "Employees" },
-  { to: "/hr/balances", label: "Balances" },
-  { to: "/hr/teams", label: "Teams" },
-  { to: "/hr/holidays", label: "Holidays" },
-  { to: "/hr/settings", label: "Settings" },
-  { to: "/hr/report", label: "Monthly report" },
-];
 
 export function AppRoutes() {
-  const me = useMe();
-  const role = me.data?.role;
-  const deciders: NavItem[] =
-    role === "manager" || role === "hr" || me.data?.is_hr_deputy
-      ? [{ to: "/approvals", label: "Approvals" }]
-      : [];
-  const base = [...NAV, ...deciders];
-  const nav = role === "hr" ? [...base, ...HR_NAV] : base;
   return (
-    <Layout nav={nav} signedIn={Boolean(me.data)}>
+    <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<MyRequests />} />
