@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Nav, type NavItem } from "./Nav";
+import { ThemeToggle } from "./ThemeToggle";
 import { SignOutButton } from "./SignOutButton";
 
 export function Layout({
@@ -19,7 +20,10 @@ export function Layout({
       <header className="header">
         <div className="header__top">
           <span className="header__brand">LeaveDesk</span>
-          {signedIn && <SignOutButton />}
+          <div className="header__actions">
+            <ThemeToggle />
+            {signedIn && <SignOutButton />}
+          </div>
         </div>
         <Nav items={nav} />
       </header>
