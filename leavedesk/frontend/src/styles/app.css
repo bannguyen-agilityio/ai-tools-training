@@ -298,3 +298,6 @@ a {
 .leave-table td {
   overflow-wrap: anywhere;
 }
+.header__error {
+  color: var(--danger);
+}

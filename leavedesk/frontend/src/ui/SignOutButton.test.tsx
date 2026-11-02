@@ -22,3 +22,21 @@ it("posts logout with the CSRF token, clears it and goes to sign-in", async () =
   expect(init.headers["X-CSRF-Token"]).toBe("tok");
   expect(sessionStorage.getItem("leavedesk.csrf")).toBeNull();
 });
+
+it("stays on the page and warns when logout fails (session may still be live)", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ error: { code: "forbidden", message: "CSRF", details: [] } }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+    ),
+  );
+  const assign = vi.fn();
+  vi.stubGlobal("location", { ...window.location, assign });
+  render(<SignOutButton />);
+  await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Could not sign out");
+  expect(assign).not.toHaveBeenCalled();
+});
