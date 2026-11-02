@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "../../components/ui/Button";
 import { formatDate } from "../../lib/dates";
 import { daysText, rangeText, typeLabel } from "../requests/format";
 import { useApprovals, type ApprovalScope } from "./api";
@@ -13,20 +14,12 @@ export function ApprovalList() {
     <section aria-labelledby="approvals-title">
       <h1 id="approvals-title">Approvals</h1>
       <div role="group" aria-label="Approval lists">
-        <button
-          type="button"
-          aria-pressed={!cover}
-          onClick={() => setScope("assigned")}
-        >
+        <Button variant={cover ? "secondary" : "primary"} aria-pressed={!cover} onClick={() => setScope("assigned")}>
           My team
-        </button>{" "}
-        <button
-          type="button"
-          aria-pressed={cover}
-          onClick={() => setScope("cover")}
-        >
+        </Button>{" "}
+        <Button variant={cover ? "primary" : "secondary"} aria-pressed={cover} onClick={() => setScope("cover")}>
           On behalf of
-        </button>
+        </Button>
       </div>
       {isPending && <p>Loading requests awaiting your decision…</p>}
       {isError && (

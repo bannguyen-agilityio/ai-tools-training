@@ -1,4 +1,5 @@
 import { formatDate } from "../../lib/dates";
+import { formatDays } from "../../lib/days";
 import type { LeaveRequest, LeaveType, Part } from "./api";
 
 export const TYPE_LABEL: Record<LeaveType, string> = {
@@ -34,8 +35,9 @@ export function rangeText(
   return `${side(r.start_date, r.start_part)} to ${side(r.end_date, r.end_part)}`;
 }
 
+/** "½ day", "1 day", "2½ days": one formatter for all day counts. */
 export function daysText(n: number): string {
-  return `${n} ${n === 1 ? "day" : "days"}`;
+  return formatDays(n);
 }
 
 export function statusText(status: LeaveRequest["status"]): string {

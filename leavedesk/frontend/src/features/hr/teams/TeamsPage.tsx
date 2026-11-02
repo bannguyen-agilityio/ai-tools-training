@@ -105,7 +105,7 @@ export function TeamsPage() {
       {teams.isError && <p role="alert">Could not load teams.</p>}
       {teams.data && teams.data.length === 0 && <p>No teams yet.</p>}
       {teams.data && teams.data.length > 0 && (
-        <table>
+        <table className="data-list">
           <caption className="visually-hidden">Teams</caption>
           <thead>
             <tr>
@@ -117,9 +117,9 @@ export function TeamsPage() {
           <tbody>
             {teams.data.map((t) => (
               <tr key={t.id}>
-                <th scope="row">{t.name}</th>
-                <td>{managerName(t.manager_id)}</td>
-                <td>
+                <th scope="row" data-label="Team">{t.name}</th>
+                <td data-label="Manager">{managerName(t.manager_id)}</td>
+                <td data-label="Actions">
                   <Button variant="secondary" aria-label={`Edit ${t.name}`} disabled={!employees.data} onClick={() => setMode({ kind: "edit", team: t })}>
                     Edit
                   </Button>

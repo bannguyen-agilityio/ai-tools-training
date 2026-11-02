@@ -1,49 +1,52 @@
 import { Link } from "react-router-dom";
+import { ButtonLink } from "../../components/ui/Button";
+import { PageHeader } from "../../components/ui/Card";
+import { DataList } from "../../components/ui/DataList";
+import { DaysText } from "../../components/ui/DateText";
+import { Alert, EmptyState, Loading, Skeleton } from "../../components/ui/Feedback";
+import { LeaveTypeTag } from "../../components/ui/LeaveTypeTag";
+import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useMyRequests } from "./api";
-import { daysText, rangeText, statusText, typeLabel } from "./format";
+import { rangeText } from "./format";
 
 export function MyRequests() {
-  const { data, isPending, isError } = useMyRequests();
+  const { data, isPending, isError, refetch } = useMyRequests();
   return (
-    <section aria-labelledby="my-requests-title">
-      <h1 id="my-requests-title">My requests</h1>
-      <Link to="/requests/new" className="btn btn--primary">
-        Request leave
-      </Link>
-      {isPending && <p>Loading your requests…</p>}
+    <>
+      <PageHeader
+        title="My requests"
+        action={<ButtonLink to="/requests/new" variant="primary">Request leave</ButtonLink>}
+      />
+      {isPending && (
+        <Loading label="Loading your requests">
+          <Skeleton className="skeleton--row" />
+          <Skeleton className="skeleton--row" />
+          <Skeleton className="skeleton--row" />
+        </Loading>
+      )}
       {isError && (
-        <p role="alert">Could not load your requests. Try again later.</p>
+        <Alert tone="danger" onRetry={() => void refetch()}>
+          Could not load your requests.
+        </Alert>
       )}
       {data && data.length === 0 && (
-        <p>You have not requested any leave yet.</p>
+        <EmptyState title="No requests yet">Leave you request is listed here.</EmptyState>
       )}
       {data && data.length > 0 && (
-        <table>
-          <caption className="visually-hidden">
-            Your leave requests, newest first
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Dates</th>
-              <th scope="col">Type</th>
-              <th scope="col">Days</th>
-              <th scope="col">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((r) => (
-              <tr key={r.id}>
-                <th scope="row">
-                  <Link to={`/requests/${r.id}`}>{rangeText(r)}</Link>
-                </th>
-                <td>{typeLabel(r)}</td>
-                <td>{daysText(r.working_days)}</td>
-                <td>{statusText(r.status)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="card">
+          <DataList
+            caption="Your leave requests, newest first"
+            rows={data}
+            rowKey={(r) => r.id}
+            columns={[
+              { key: "dates", header: "Dates", primary: true, cell: (r) => <Link to={`/requests/${r.id}`}>{rangeText(r)}</Link> },
+              { key: "type", header: "Type", cell: (r) => <LeaveTypeTag type={r.leave_type} label={r.label} /> },
+              { key: "days", header: "Days", numeric: true, cell: (r) => <DaysText value={r.working_days} /> },
+              { key: "status", header: "Status", numeric: true, cell: (r) => <StatusBadge status={r.status} /> },
+            ]}
+          />
+        </div>
       )}
-    </section>
+    </>
   );
 }

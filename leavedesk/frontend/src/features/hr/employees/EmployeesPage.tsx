@@ -67,7 +67,7 @@ export function EmployeesPage() {
       {employees.isError && <p role="alert">Could not load employees.</p>}
       {employees.data && employees.data.length === 0 && <p>No employees yet.</p>}
       {employees.data && employees.data.length > 0 && (
-        <table>
+        <table className="data-list">
           <caption className="visually-hidden">Employees</caption>
           <thead>
             <tr>
@@ -83,16 +83,16 @@ export function EmployeesPage() {
           <tbody>
             {employees.data.map((e) => (
               <tr key={e.id}>
-                <th scope="row">
+                <th scope="row" data-label="Name">
                   {e.name}
                   {!e.is_active && " (inactive)"}
                 </th>
-                <td>{e.email}</td>
-                <td>{ROLE_LABEL[e.role]}</td>
-                <td>{teamOf(e.team_id)}</td>
-                <td>{nameOf(e.manager_id)}</td>
-                <td>{formatDate(e.start_date)}</td>
-                <td>
+                <td data-label="Email">{e.email}</td>
+                <td data-label="Role">{ROLE_LABEL[e.role]}</td>
+                <td data-label="Team">{teamOf(e.team_id)}</td>
+                <td data-label="Manager">{nameOf(e.manager_id)}</td>
+                <td data-label="Start date">{formatDate(e.start_date)}</td>
+                <td data-label="Actions">
                   <Button variant="secondary" aria-label={`Edit ${e.name}`} disabled={!teams.data} onClick={() => setMode({ kind: "edit", employee: e })}>
                     Edit
                   </Button>{" "}
