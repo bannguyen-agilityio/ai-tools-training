@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
-import { ToastProvider } from "../../../ui/Toast";
+import { ToastProvider } from "../../../components/ui/Toast";
 import { TeamsPage } from "./TeamsPage";
 
 function respond(body: unknown, status = 200) {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ApiError } from "../../api/problem";
-import { Button } from "../../ui/Button";
+import { Button } from "../../components/ui/Button";
 import type { LeaveRequest } from "../requests/api";
 import { useDecide } from "./api";
 import { RejectForm } from "./RejectForm";

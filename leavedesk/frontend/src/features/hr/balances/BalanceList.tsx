@@ -1,4 +1,4 @@
-import { Button } from "../../../ui/Button";
+import { Button } from "../../../components/ui/Button";
 import type { Balance, BalanceRow } from "./api";
 
 function find(balances: Balance[], code: "annual" | "sick"): Balance | undefined {
@@ -14,7 +14,7 @@ interface Props {
 
 export function BalanceList({ rows, onSelect, checkColumn }: Props) {
   return (
-    <table className="balance-table">
+    <table className="balance-table data-list">
       <caption className="visually-hidden">Leave balances</caption>
       <thead>
         <tr>
@@ -28,14 +28,14 @@ export function BalanceList({ rows, onSelect, checkColumn }: Props) {
       <tbody>
         {rows.map((r) => (
           <tr key={r.employee_id}>
-            <th scope="row">
+            <th scope="row" data-label="Employee">
               {r.employee_name}
               <br />
               <span className="balance-table__email">{r.email}</span>
             </th>
-            <td>{find(r.balances, "annual")?.available ?? "0.0"}</td>
-            <td>{find(r.balances, "annual")?.carried_remaining ?? "0.0"}</td>
-            <td>{find(r.balances, "sick")?.available ?? "0.0"}</td>
+            <td data-label="Annual available" className="num">{find(r.balances, "annual")?.available ?? "0.0"}</td>
+            <td data-label="Of which carried" className="num">{find(r.balances, "annual")?.carried_remaining ?? "0.0"}</td>
+            <td data-label="Sick available" className="num">{find(r.balances, "sick")?.available ?? "0.0"}</td>
             {checkColumn ? (
               <td className="balance-table__check" />
             ) : (

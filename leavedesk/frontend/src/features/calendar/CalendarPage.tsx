@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMe } from "../../auth/useMe";
 import { formatDate, todayIso } from "../../lib/dates";
-import { Button } from "../../ui/Button";
-import { Field } from "../../ui/Field";
+import { Button } from "../../components/ui/Button";
+import { Field } from "../../components/ui/Field";
 import { useTeams } from "../hr/teams/api";
 import { useCalendar } from "./api";
 import { groupByDay } from "./labels";

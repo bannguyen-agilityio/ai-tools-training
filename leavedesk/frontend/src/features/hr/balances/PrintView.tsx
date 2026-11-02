@@ -1,5 +1,5 @@
 import { formatDate, todayIso } from "../../../lib/dates";
-import { Button } from "../../../ui/Button";
+import { Button } from "../../../components/ui/Button";
 import { BalanceList } from "./BalanceList";
 import type { BalanceRow } from "./api";
 

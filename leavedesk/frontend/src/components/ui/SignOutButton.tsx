@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api, setCsrfToken, signInPath } from "../api/client";
+import { api, setCsrfToken, signInPath } from "../../api/client";
 import { Button } from "./Button";
 
 /** Ends the session on the server, then drops the local CSRF token and returns to sign-in (R2). */
@@ -25,11 +25,11 @@ export function SignOutButton() {
   }
   return (
     <>
-      <Button variant="secondary" onClick={signOut} disabled={busy}>
+      <Button variant="ghost" className="menu__item" onClick={signOut} loading={busy}>
         Sign out
       </Button>
       {failed && (
-        <span role="alert" className="header__error">
+        <span role="alert" className="menu__error">
           Could not sign out. Try again.
         </span>
       )}

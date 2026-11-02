@@ -45,7 +45,8 @@ for (const [who, path] of SCREENS) {
         vw,
       );
       expect(wide).toBe(0);
-      await expect(page.getByRole("navigation", { name: "Main" })).toBeVisible();
+      // Top tabs from 768 px, bottom bar below; exactly one is visible.
+      await expect(page.locator("nav[aria-label^='Main']:visible")).toHaveCount(1);
     });
   });
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { HrNav } from "../components/ui/HrNav";
 import { signInUrl } from "../api/client";
 import { ApiError } from "../api/problem";
 import { useMe } from "./useMe";
@@ -24,5 +25,10 @@ export function RequireHr({ children }: { children: ReactNode }) {
       </section>
     );
   }
-  return <>{children}</>;
+  return (
+    <>
+      <HrNav />
+      {children}
+    </>
+  );
 }

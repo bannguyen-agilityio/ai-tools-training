@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ApiError } from "../../../api/problem";
 import { formatDate, todayIso } from "../../../lib/dates";
-import { Button } from "../../../ui/Button";
-import { ConfirmDialog } from "../../../ui/ConfirmDialog";
-import { useToast } from "../../../ui/Toast";
+import { Button } from "../../../components/ui/Button";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
+import { useToast } from "../../../components/ui/Toast";
 import { useHolidayMutations, useHolidays, useImpact, type Holiday } from "./api";
 import { HolidayForm } from "./HolidayForm";
 
@@ -86,7 +86,7 @@ export function HolidaysPage() {
       {holidays.isError && <p role="alert">Could not load holidays.</p>}
       {holidays.data && holidays.data.length === 0 && <p>No holidays are set for {year}.</p>}
       {holidays.data && holidays.data.length > 0 && (
-        <table>
+        <table className="data-list">
           <caption className="visually-hidden">Public holidays in {year}</caption>
           <thead>
             <tr>
@@ -98,9 +98,9 @@ export function HolidaysPage() {
           <tbody>
             {holidays.data.map((h) => (
               <tr key={h.id}>
-                <th scope="row">{formatDate(h.holiday_date)}</th>
-                <td>{h.name}</td>
-                <td>
+                <th scope="row" data-label="Date">{formatDate(h.holiday_date)}</th>
+                <td data-label="Name">{h.name}</td>
+                <td data-label="Actions">
                   <Button
                     variant="secondary"
                     aria-label={`Edit ${h.name} on ${formatDate(h.holiday_date)}`}

@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError } from "../../api/problem";
-import { Button } from "../../ui/Button";
-import { DateField } from "../../ui/DateField";
-import { ErrorSummary, type SummaryItem } from "../../ui/ErrorSummary";
-import { Select } from "../../ui/Select";
-import { TextField } from "../../ui/TextField";
+import { Button } from "../../components/ui/Button";
+import { DateField } from "../../components/ui/DateField";
+import { ErrorSummary, type SummaryItem } from "../../components/ui/ErrorSummary";
+import { Select } from "../../components/ui/Select";
+import { TextField } from "../../components/ui/TextField";
 import {
   useCreateRequest,
   usePreview,
@@ -13,6 +13,7 @@ import {
   type Part,
   type RequestInput,
 } from "./api";
+import { Alert } from "../../components/ui/Feedback";
 import { daysText } from "./format";
 
 const TYPES = [
@@ -185,12 +186,12 @@ export function NewRequest() {
           )}
         </p>
         {preview.data?.notice_warning && (
-          <p role="status">
+          <Alert tone="warning">
             Warning: a long request is best given a week's notice. You can still
             submit it, and your approver will see this note.
-          </p>
+          </Alert>
         )}
-        <Button type="submit" disabled={create.isPending}>
+        <Button type="submit" loading={create.isPending}>
           Submit request
         </Button>
       </form>

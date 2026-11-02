@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "../../../ui/Button";
-import { Field } from "../../../ui/Field";
-import { daysText, rangeText, statusText, TYPE_LABEL } from "../../requests/format";
+import { Button } from "../../../components/ui/Button";
+import { Field } from "../../../components/ui/Field";
+import { DataList } from "../../../components/ui/DataList";
+import { DaysText } from "../../../components/ui/DateText";
+import { LeaveTypeTag } from "../../../components/ui/LeaveTypeTag";
+import { PageHeader } from "../../../components/ui/Card";
+import { StatusBadge } from "../../../components/ui/StatusBadge";
+import { rangeText, TYPE_LABEL } from "../../requests/format";
 import { useEmployees } from "../employees/api";
 import { useTeams } from "../teams/api";
 import { NO_FILTERS, useAllLeave, type LeaveFilters } from "./api";
@@ -18,8 +23,8 @@ export function AllLeavePage() {
   const invalidRange = filters.from !== "" && filters.to !== "" && filters.to < filters.from;
 
   return (
-    <section aria-labelledby="all-leave-title">
-      <h1 id="all-leave-title">All leave</h1>
+    <section aria-label="All leave">
+      <PageHeader title="All leave" />
       <form className="filters" aria-label="Filter leave" onSubmit={(e) => e.preventDefault()}>
         <Field label="Status">
           {(c) => (
@@ -82,33 +87,21 @@ export function AllLeavePage() {
       {leave.isError && <p role="alert">Could not load the leave list. Try again later.</p>}
       {leave.data && rows.length === 0 && <p>No leave matches these filters.</p>}
       {rows.length > 0 && (
-        <table className="leave-table">
-          <caption className="visually-hidden">Leave, earliest first</caption>
-          <thead>
-            <tr>
-              <th scope="col">Employee</th>
-              <th scope="col">Dates</th>
-              <th scope="col">Type</th>
-              <th scope="col">Days</th>
-              <th scope="col">Status</th>
-              <th scope="col">Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <th scope="row" data-label="Employee">
-                  <Link to={`/requests/${r.id}`}>{r.employee_name}</Link>
-                </th>
-                <td data-label="Dates">{rangeText(r)}</td>
-                <td data-label="Type">{TYPE_LABEL[r.leave_type]}</td>
-                <td data-label="Days">{daysText(r.working_days)}</td>
-                <td data-label="Status">{statusText(r.status)}</td>
-                <td data-label="Note">{r.note ?? ""}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="card">
+          <DataList
+            caption="Leave, earliest first"
+            rows={rows}
+            rowKey={(r) => r.id}
+            columns={[
+              { key: "emp", header: "Employee", primary: true, cell: (r) => <Link to={`/requests/${r.id}`}>{r.employee_name}</Link> },
+              { key: "dates", header: "Dates", cell: (r) => rangeText(r) },
+              { key: "type", header: "Type", cell: (r) => <LeaveTypeTag type={r.leave_type} /> },
+              { key: "days", header: "Days", numeric: true, cell: (r) => <DaysText value={r.working_days} /> },
+              { key: "status", header: "Status", numeric: true, cell: (r) => <StatusBadge status={r.status} /> },
+              { key: "note", header: "Note", cell: (r) => r.note ?? "" },
+            ]}
+          />
+        </div>
       )}
       {leave.hasNextPage && (
         <Button variant="secondary" onClick={() => void leave.fetchNextPage()} disabled={leave.isFetchingNextPage}>

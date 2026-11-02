@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Button } from "../../ui/Button";
-import { Field } from "../../ui/Field";
+import { Button } from "../../components/ui/Button";
+import { Field } from "../../components/ui/Field";
 
 export const MAX_REASON = 500;
 

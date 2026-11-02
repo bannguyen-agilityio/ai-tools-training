@@ -2,13 +2,16 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../../api/problem";
 import { useMe } from "../../auth/useMe";
-import { Button } from "../../ui/Button";
-import { ConfirmDialog } from "../../ui/ConfirmDialog";
-import { useToast } from "../../ui/Toast";
+import { Button } from "../../components/ui/Button";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { useToast } from "../../components/ui/Toast";
 import { DecisionPanel } from "../approvals/DecisionPanel";
 import { useCancelRequest, useRequest } from "./api";
 import { HrCancelDialog } from "./HrCancelDialog";
-import { daysText, rangeText, statusText, typeLabel } from "./format";
+import { Alert } from "../../components/ui/Feedback";
+import { LeaveTypeTag } from "../../components/ui/LeaveTypeTag";
+import { StatusBadge } from "../../components/ui/StatusBadge";
+import { daysText, rangeText } from "./format";
 
 export function RequestDetail() {
   const { id = "" } = useParams();
@@ -59,19 +62,21 @@ export function RequestDetail() {
     <section aria-labelledby="request-title">
       <h1 id="request-title">Leave request</h1>
       {data.notice_warning && (
-        <p role="status">
-          Short notice: this long request starts within a week.
-        </p>
+        <Alert tone="warning">Short notice: this long request starts within a week.</Alert>
       )}
       <dl>
         <dt>Dates</dt>
         <dd>{rangeText(data)}</dd>
         <dt>Type</dt>
-        <dd>{typeLabel(data)}</dd>
+        <dd>
+          <LeaveTypeTag type={data.leave_type} label={data.label} />
+        </dd>
         <dt>Working days</dt>
         <dd>{daysText(data.working_days)}</dd>
         <dt>Status</dt>
-        <dd>{statusText(data.status)}</dd>
+        <dd>
+          <StatusBadge status={data.status} />
+        </dd>
         {data.note && (
           <>
             <dt>Note</dt>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ApiError } from "../../../api/problem";
-import { Button } from "../../../ui/Button";
-import { useToast } from "../../../ui/Toast";
+import { Button } from "../../../components/ui/Button";
+import { useToast } from "../../../components/ui/Toast";
 import { useBalanceList, useEmployeeBalances, useEntryMutations, type BalanceRow, type EntryInput } from "./api";
 import { BalanceList } from "./BalanceList";
 import { ConfirmSummary } from "./ConfirmSummary";
@@ -126,7 +126,7 @@ function EntryFlow({ employee, step, setStep, serverError, setServerError, onDon
           {ledger.data.ledger.length === 0 ? (
             <p>No entries yet.</p>
           ) : (
-            <table>
+            <table className="data-list">
               <caption className="visually-hidden">Ledger entries</caption>
               <thead>
                 <tr>
@@ -139,10 +139,10 @@ function EntryFlow({ employee, step, setStep, serverError, setServerError, onDon
               <tbody>
                 {ledger.data.ledger.map((e) => (
                   <tr key={e.id}>
-                    <td>{e.leave_type_code === "sick" ? "Sick" : "Annual"}</td>
-                    <td>{e.kind.replace("_", " ")}</td>
-                    <td>{e.days}</td>
-                    <td>{e.reason ?? ""}</td>
+                    <td data-label="Type">{e.leave_type_code === "sick" ? "Sick" : "Annual"}</td>
+                    <td data-label="Entry">{e.kind.replace("_", " ")}</td>
+                    <td data-label="Days">{e.days}</td>
+                    <td data-label="Reason">{e.reason ?? ""}</td>
                   </tr>
                 ))}
               </tbody>

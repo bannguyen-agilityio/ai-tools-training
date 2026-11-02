@@ -103,3 +103,16 @@ export function useCancelRequest(id: string) {
     },
   });
 }
+
+/** Pending and approved requests, newest page of up to 200 each (one call per status). */
+export function useActiveRequests() {
+  return useQuery({
+    queryKey: ["my-requests", "active"],
+    queryFn: async () => {
+      const get = (status: string) =>
+        api<{ items: LeaveRequest[] }>(`/me/requests?status=${status}&limit=200`).then((r) => r.items);
+      const [pending, approved] = await Promise.all([get("pending"), get("approved")]);
+      return { pending, approved };
+    },
+  });
+}
