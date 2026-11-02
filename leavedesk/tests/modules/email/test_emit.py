@@ -95,3 +95,15 @@ async def test_rejection_reason_only_to_the_employee(
         with pytest.raises(privacy.PrivacyError):
             await emit(db, Event.REQUEST_CREATED, emp, ref=ref, rejection_reason="no")
         assert await emit(db, Event.REQUEST_REJECTED, emp, ref=ref, rejection_reason="no")
+
+
+# Local dev with EMAIL_BACKEND=mock: the one-time link is printed, and only in `dev`
+def test_mock_link_is_printed_only_in_dev(capsys: pytest.CaptureFixture[str]) -> None:
+    from app.modules.notifications.service import announce_mock_link
+
+    announce_mock_link("dev", Event.INVITE, "a@asnet.com.vn", "http://x/set-password?token=t")
+    assert "http://x/set-password?token=t" in capsys.readouterr().out
+    for env in ("test", "staging", "production"):
+        announce_mock_link(env, Event.INVITE, "a@asnet.com.vn", "http://x/set-password?token=t")
+    announce_mock_link("dev", Event.REQUEST_APPROVED, "a@asnet.com.vn", "http://x/requests/1")
+    assert capsys.readouterr().out == ""
