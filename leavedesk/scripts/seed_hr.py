@@ -1,8 +1,8 @@
 """Create the first HR admin (there is no sign-up; HR invites everyone else).
 
-    MIGRATION_DATABASE_URL=postgresql://owner... uv run python scripts/seed_hr.py <email> "<Name>"
+    MIGRATION_DATABASE_URL=postgresql://owner... uv run python -m scripts.seed_hr <email> "<Name>"
 
-The password is read from SEED_HR_PASSWORD or prompted for (>= 12 characters). Additive and
+The password is read from SEED_HR_PASSWORD or prompted for (R2 policy). Additive and
 idempotent: an existing employee with that email is left untouched. Run as the owner role.
 """
 
@@ -13,18 +13,25 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import psycopg
+from dotenv import dotenv_values
 
-from app.modules.auth.passwords import hash_password
+from app.modules.auth.passwords import PasswordPolicyError, hash_password, validate_password
 
 
 def main(email: str, name: str) -> None:
     email = email.strip().lower()
     if not email.endswith("@asnet.com.vn"):
         sys.exit("Email must end with @asnet.com.vn (R1).")
-    password = os.environ.get("SEED_HR_PASSWORD") or getpass.getpass("Password (min 12): ")
-    if len(password) < 12:
-        sys.exit("Password must be at least 12 characters (R2).")
-    url = os.environ["MIGRATION_DATABASE_URL"].replace("postgresql+psycopg://", "postgresql://")
+    password = os.environ.get("SEED_HR_PASSWORD") or getpass.getpass("Password: ")
+    try:
+        validate_password(password)
+    except PasswordPolicyError as e:
+        sys.exit(f"{e} (R2)")
+    env = {**dotenv_values(".env"), **os.environ}  # real env wins over .env
+    raw = env.get("MIGRATION_DATABASE_URL") or env.get("DATABASE_URL")
+    if not raw:
+        sys.exit("Set MIGRATION_DATABASE_URL (or DATABASE_URL) in .env or the environment.")
+    url = raw.replace("postgresql+psycopg://", "postgresql://")
     year = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).year  # COMPANY_TZ
     with psycopg.connect(url) as c:
         if c.execute("SELECT 1 FROM employee WHERE lower(email) = lower(%s)", (email,)).fetchone():
