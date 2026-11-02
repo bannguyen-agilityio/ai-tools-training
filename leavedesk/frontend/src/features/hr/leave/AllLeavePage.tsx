@@ -11,6 +11,7 @@ import { rangeText, TYPE_LABEL } from "../../requests/format";
 import { useEmployees } from "../employees/api";
 import { useTeams } from "../teams/api";
 import { NO_FILTERS, useAllLeave, type LeaveFilters } from "./api";
+import { Alert, EmptyState, Loading, Skeleton } from "../../../components/ui/Feedback";
 
 /** HR: All leave (R25). Approved by default; real types are shown. */
 export function AllLeavePage() {
@@ -83,9 +84,9 @@ export function AllLeavePage() {
         </Button>
       </form>
 
-      {leave.isPending && <p>Loading leave…</p>}
-      {leave.isError && <p role="alert">Could not load the leave list. Try again later.</p>}
-      {leave.data && rows.length === 0 && <p>No leave matches these filters.</p>}
+      {leave.isPending && <Loading label="Loading leave…"><Skeleton className="skeleton--row" /></Loading>}
+      {leave.isError && <Alert tone="danger">Could not load the leave list. Try again later.</Alert>}
+      {leave.data && rows.length === 0 && <EmptyState title="No leave matches these filters." />}
       {rows.length > 0 && (
         <div className="card">
           <DataList

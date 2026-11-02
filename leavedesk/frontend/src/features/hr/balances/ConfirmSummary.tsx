@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { formatDate } from "../../../lib/dates";
 import { Button } from "../../../components/ui/Button";
 import type { Summary } from "./api";
+import { Alert } from "../../../components/ui/Feedback";
 
 const KIND = { opening: "Opening balance", carry_over: "Carried days", adjustment: "Correction" } as const;
 const TYPE = { annual: "Annual", sick: "Sick" } as const;
@@ -44,12 +45,12 @@ export function ConfirmSummary({ summary, busy, serverError, onSave, onBack }: P
         <dd>{summary.resulting_available}</dd>
       </dl>
       {Number(summary.resulting_available) < 0 && (
-        <p role="alert">
+        <Alert tone="warning">
           Warning: this leaves {summary.employee_name} with a negative balance.
-        </p>
+        </Alert>
       )}
       <p>Saved entries cannot be edited or deleted. A mistake is fixed with a new correction.</p>
-      {serverError && <p role="alert">{serverError}</p>}
+      {serverError && <Alert tone="danger">{serverError}</Alert>}
       <Button variant="secondary" onClick={onBack}>
         Back to edit
       </Button>{" "}

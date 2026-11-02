@@ -6,6 +6,7 @@ import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 import { useToast } from "../../../components/ui/Toast";
 import { useHolidayMutations, useHolidays, useImpact, type Holiday } from "./api";
 import { HolidayForm } from "./HolidayForm";
+import { Alert, EmptyState } from "../../../components/ui/Feedback";
 
 type Mode = { kind: "list" } | { kind: "add" } | { kind: "edit"; holiday: Holiday };
 
@@ -83,8 +84,8 @@ export function HolidaysPage() {
         </Button>{" "}
         <Button onClick={() => setMode({ kind: "add" })}>Add holiday</Button>
       </p>
-      {holidays.isError && <p role="alert">Could not load holidays.</p>}
-      {holidays.data && holidays.data.length === 0 && <p>No holidays are set for {year}.</p>}
+      {holidays.isError && <Alert tone="danger">Could not load holidays.</Alert>}
+      {holidays.data && holidays.data.length === 0 && <EmptyState title={`No holidays are set for ${year}.`} />}
       {holidays.data && holidays.data.length > 0 && (
         <table className="data-list">
           <caption className="visually-hidden">Public holidays in {year}</caption>

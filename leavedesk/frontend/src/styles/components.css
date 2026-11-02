@@ -597,3 +597,10 @@ h2 {
     color: var(--color-text-muted);
   }
 }
+
+/* Auth pages: one centred card */
+.auth {
+  max-width: 26rem;
+  margin: var(--space-8) auto;
+  padding: var(--space-6);
+}

@@ -194,7 +194,7 @@ describe("requests screens", () => {
       json({ ...base, leave_type: "annual", notice_warning: true }),
     );
     wrap("/requests/r1");
-    expect(await screen.findByRole("status")).toHaveTextContent(/Short notice/);
+    expect((await screen.findByText(/Short notice/)).closest("[role=status]")).not.toBeNull();
   });
 
   it("shows no warning when notice is fine", async () => {

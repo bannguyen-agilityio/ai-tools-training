@@ -5,6 +5,8 @@ import { Field } from "../../../components/ui/Field";
 import { useToast } from "../../../components/ui/Toast";
 import { useEmployees } from "../employees/api";
 import { useAssignDeputy, useDeputy } from "./api";
+import { Alert, Loading, Skeleton } from "../../../components/ui/Feedback";
+import { PageHeader } from "../../../components/ui/Card";
 
 /** HR: Settings. One deputy HR admin, approval and cover only (R36). */
 export function SettingsPage() {
@@ -15,9 +17,9 @@ export function SettingsPage() {
   const [choice, setChoice] = useState<string>();
   const [error, setError] = useState<string>();
 
-  if (deputy.isPending || employees.isPending) return <p>Loading settings…</p>;
+  if (deputy.isPending || employees.isPending) return <Loading label="Loading settings…"><Skeleton className="skeleton--row" /></Loading>;
   if (deputy.error || employees.error || !deputy.data || !employees.data) {
-    return <p role="alert">Could not load the settings.</p>;
+    return <Alert tone="danger">Could not load the settings.</Alert>;
   }
   const current = deputy.data.employee_id ?? "";
   const value = choice ?? current;
@@ -34,7 +36,7 @@ export function SettingsPage() {
 
   return (
     <section aria-labelledby="settings-title">
-      <h1 id="settings-title">Settings</h1>
+      <PageHeader title="Settings" titleId="settings-title" />
       <form onSubmit={save} noValidate>
         <Field
           label="Deputy HR admin"

@@ -8,6 +8,8 @@ import { Button } from "../../components/ui/Button";
 import { ErrorSummary } from "../../components/ui/ErrorSummary";
 import { TextField } from "../../components/ui/TextField";
 import { useFormFocusFirstError } from "../../components/ui/useFormFocusFirstError";
+import { Alert } from "../../components/ui/Feedback";
+import { PageHeader } from "../../components/ui/Card";
 
 const schema = z.object({
   email: z.string().trim().min(1, "Enter your work email, for example linh.tran@asnet.com.vn."),
@@ -38,11 +40,11 @@ export function ForgotPassword() {
   if (sent) {
     return (
       <section aria-labelledby="sent-title">
-        <h1 id="sent-title">Check your email</h1>
-        <p role="status">
+        <PageHeader title="Check your email" titleId="sent-title" />
+        <Alert tone="success">
           If that address belongs to a LeaveDesk account, we have sent a link to reset the password. It works once, for
           1 hour.
-        </p>
+        </Alert>
         <p>
           <Link to="/sign-in">Back to sign in</Link>
         </p>

@@ -8,10 +8,11 @@ import { useToast } from "../../components/ui/Toast";
 import { DecisionPanel } from "../approvals/DecisionPanel";
 import { useCancelRequest, useRequest } from "./api";
 import { HrCancelDialog } from "./HrCancelDialog";
-import { Alert } from "../../components/ui/Feedback";
+import { Alert, Loading, Skeleton } from "../../components/ui/Feedback";
 import { LeaveTypeTag } from "../../components/ui/LeaveTypeTag";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { daysText, rangeText } from "./format";
+import { PageHeader } from "../../components/ui/Card";
 
 export function RequestDetail() {
   const { id = "" } = useParams();
@@ -20,17 +21,17 @@ export function RequestDetail() {
   const cancel = useCancelRequest(id);
   const toast = useToast();
   const [confirming, setConfirming] = useState(false);
-  if (isPending) return <p>Loading the request…</p>;
+  if (isPending) return <Loading label="Loading the request…"><Skeleton className="skeleton--row" /></Loading>;
   if (error || !data) {
     const denied =
       error instanceof ApiError &&
       (error.status === 403 || error.status === 404);
     return (
-      <p role="alert">
+      <Alert tone="danger">
         {denied
           ? "You cannot view this request."
           : "Could not load the request."}
-      </p>
+      </Alert>
     );
   }
   // R16: only the owner, only while Pending. The server enforces it too (403).
@@ -60,7 +61,7 @@ export function RequestDetail() {
   }
   return (
     <section aria-labelledby="request-title">
-      <h1 id="request-title">Leave request</h1>
+      <PageHeader title="Leave request" titleId="request-title" />
       {data.notice_warning && (
         <Alert tone="warning">Short notice: this long request starts within a week.</Alert>
       )}
@@ -85,7 +86,7 @@ export function RequestDetail() {
         )}
       </dl>
       {canDecide && <DecisionPanel request={data} />}
-      {cancel.error && <p role="alert">{cancel.error.message}</p>}
+      {cancel.error && <Alert tone="danger">{cancel.error.message}</Alert>}
       {canCancel && (
         <Button
           variant="danger"

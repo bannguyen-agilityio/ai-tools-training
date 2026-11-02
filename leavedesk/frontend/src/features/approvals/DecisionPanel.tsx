@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/Button";
 import type { LeaveRequest } from "../requests/api";
 import { useDecide } from "./api";
 import { RejectForm } from "./RejectForm";
+import { Alert } from "../../components/ui/Feedback";
 
 function message(error: unknown): string | undefined {
   if (!error) return undefined;
@@ -33,16 +34,16 @@ export function DecisionPanel({
 
   if (decide.isSuccess) {
     return (
-      <p role="status">
+      <Alert tone="success">
         {decide.variables.action === "approve"
           ? "Request approved."
           : "Request rejected."}
-      </p>
+      </Alert>
     );
   }
   return (
     <section aria-label="Decision">
-      {failure && !reasonError && <p role="alert">{failure}</p>}
+      {failure && !reasonError && <Alert tone="danger">{failure}</Alert>}
       {rejecting ? (
         <RejectForm
           pending={decide.isPending}

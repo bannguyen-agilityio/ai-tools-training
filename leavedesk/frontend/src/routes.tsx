@@ -88,11 +88,11 @@ export function AppRoutes() {
             </RequireHr>
           }
         />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/set-password" element={<SetPassword />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/account/password" element={<ChangePassword />} />
+        <Route path="/sign-in" element={<div className="auth card"><SignIn /></div>} />
+        <Route path="/set-password" element={<div className="auth card"><SetPassword /></div>} />
+        <Route path="/forgot-password" element={<div className="auth card"><ForgotPassword /></div>} />
+        <Route path="/reset-password" element={<div className="auth card"><ResetPassword /></div>} />
+        <Route path="/account/password" element={<div className="auth card"><ChangePassword /></div>} />
         <Route path="*" element={<h1>Page not found</h1>} />
       </Routes>
     </Layout>

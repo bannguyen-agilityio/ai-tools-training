@@ -9,6 +9,7 @@ import { TextField } from "../../../components/ui/TextField";
 import { useFormFocusFirstError } from "../../../components/ui/useFormFocusFirstError";
 import type { Team } from "../teams/api";
 import type { Employee, EmployeeCreateInput, Role } from "./api";
+import { Alert } from "../../../components/ui/Feedback";
 
 const COMPANY_DOMAIN = "@asnet.com.vn";
 
@@ -78,7 +79,7 @@ export function EmployeeForm({ employee, employees, teams, serverError, busy, on
     >
       <h2>{employee ? "Edit employee" : "Add employee"}</h2>
       <ErrorSummary items={summary} />
-      {serverError && <p role="alert">{serverError}</p>}
+      {serverError && <Alert tone="danger">{serverError}</Alert>}
       <TextField label="Name" error={errors.name?.message} {...register("name")} />
       <TextField
         label="Work email"

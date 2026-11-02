@@ -6,6 +6,8 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { z } from "zod";
 import { api, safeNext, setCsrfToken, signInPath } from "../../api/client";
 import { Button } from "../../components/ui/Button";
+import { PageHeader } from "../../components/ui/Card";
+import { Alert } from "../../components/ui/Feedback";
 import { ErrorSummary } from "../../components/ui/ErrorSummary";
 import { TextField } from "../../components/ui/TextField";
 import { useFormFocusFirstError } from "../../components/ui/useFormFocusFirstError";
@@ -62,8 +64,8 @@ export function SignIn() {
 
   return (
     <form ref={formRef} noValidate onSubmit={handleSubmit(onSubmit)} aria-label="Sign in">
-      <h1>Sign in</h1>
-      {passwordSet && <p role="status">Password saved. Sign in with it.</p>}
+      <PageHeader title="Sign in" />
+      {passwordSet && <Alert tone="success">Password saved. Sign in with it.</Alert>}
       <ErrorSummary items={summary} />
       <TextField
         label="Work email"

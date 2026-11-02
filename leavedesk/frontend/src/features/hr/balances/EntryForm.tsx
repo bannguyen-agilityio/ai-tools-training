@@ -8,6 +8,7 @@ import { Select } from "../../../components/ui/Select";
 import { TextField } from "../../../components/ui/TextField";
 import { useFormFocusFirstError } from "../../../components/ui/useFormFocusFirstError";
 import type { EntryInput } from "./api";
+import { Alert } from "../../../components/ui/Feedback";
 
 const schema = z
   .object({
@@ -91,7 +92,7 @@ export function EntryForm({ employeeName, serverError, busy, onSubmit, onCancel 
     >
       <h2>Balance entry for {employeeName}</h2>
       <ErrorSummary items={summary} />
-      {serverError && <p role="alert">{serverError}</p>}
+      {serverError && <Alert tone="danger">{serverError}</Alert>}
       <Select label="Leave year" options={YEARS} {...register("leave_year")} />
       <Select label="Leave type" options={TYPES} {...register("leave_type_code")} />
       <Select label="Entry" options={KINDS} {...register("kind")} />
