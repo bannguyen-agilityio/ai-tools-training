@@ -42,6 +42,12 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 8px var(--gap);
 }
+.header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .header__brand {
   font-weight: 700;
   display: block;
