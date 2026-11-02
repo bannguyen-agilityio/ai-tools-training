@@ -1,6 +1,10 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireHr } from "./auth/RequireHr";
 import { useMe } from "./auth/useMe";
+import { ChangePassword } from "./features/auth/ChangePassword";
+import { ForgotPassword } from "./features/auth/ForgotPassword";
+import { ResetPassword } from "./features/auth/ResetPassword";
+import { SetPassword } from "./features/auth/SetPassword";
 import { SignIn } from "./features/auth/SignIn";
 import { ApprovalList } from "./features/approvals/ApprovalList";
 import { CalendarPage } from "./features/calendar/CalendarPage";
@@ -111,6 +115,10 @@ export function AppRoutes() {
           }
         />
         <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/set-password" element={<SetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/account/password" element={<ChangePassword />} />
         <Route path="*" element={<h1>Page not found</h1>} />
       </Routes>
     </Layout>

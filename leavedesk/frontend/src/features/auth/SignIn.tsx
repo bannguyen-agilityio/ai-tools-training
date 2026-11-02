@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { api, safeNext, setCsrfToken, signInPath } from "../../api/client";
 import { Button } from "../../ui/Button";
@@ -24,6 +24,7 @@ interface Me {
 export function SignIn() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const passwordSet = (useLocation().state as { passwordSet?: boolean } | null)?.passwordSet;
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
   const { register, handleSubmit, formState } = useForm<Values>({
@@ -62,6 +63,7 @@ export function SignIn() {
   return (
     <form ref={formRef} noValidate onSubmit={handleSubmit(onSubmit)} aria-label="Sign in">
       <h1>Sign in</h1>
+      {passwordSet && <p role="status">Password saved. Sign in with it.</p>}
       <ErrorSummary items={summary} />
       <TextField
         label="Work email"
@@ -80,6 +82,9 @@ export function SignIn() {
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Signing in…" : "Sign in"}
       </Button>
+      <p>
+        <Link to="/forgot-password">Forgot your password?</Link>
+      </p>
     </form>
   );
 }
