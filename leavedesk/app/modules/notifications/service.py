@@ -16,6 +16,15 @@ from app.modules.notifications.models import Notification
 REQUEST_EVENTS = frozenset(e for e in Event if e not in (Event.INVITE, Event.PASSWORD_RESET))
 
 
+def announce_mock_link(environment: str, event: Event, to: str, link: str | None) -> None:
+    """Local development only: with EMAIL_BACKEND=mock nothing is sent, so show the one-time link.
+
+    Never runs outside `dev` (tests, staging, production stay silent): the link is a credential.
+    """
+    if environment == "dev" and link and event in (Event.INVITE, Event.PASSWORD_RESET):
+        print(f"[mock email] {event.value} for {to}: {link}", flush=True)
+
+
 async def emit(
     db: AsyncSession,
     event: Event,
@@ -94,6 +103,8 @@ async def emit(
     )
     if inserted is None:
         return False
+    if mocked:
+        announce_mock_link(settings.environment, event, recipient.email, link)
 
     if out.notification_title is not None and out.notification_body is not None and ref:
         db.add(
