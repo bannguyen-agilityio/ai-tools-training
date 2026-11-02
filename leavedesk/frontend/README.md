@@ -16,7 +16,7 @@ npm run e2e        # Playwright + axe at 360x640; E2E_BASE_URL defaults to http:
 |---|---|
 | `Field` | Visible label, hint and error around any control; passes `id`, `aria-invalid`, `aria-describedby` to a render prop (R31b) |
 | `TextField`, `Select` | `Field` + input/select, `forwardRef` so React Hook Form `register` works |
-| `DateField` | Shows and accepts "Mon 2 Nov 2026"; value in and out is ISO (R31c) |
+| `DateField` | Native calendar picker (`type="date"`); value in and out is ISO (R31c) |
 | `FormError` | Error text with icon and hidden "Error:" prefix, so colour is never the only signal |
 | `ErrorSummary` | `role="alert"` list of what to fix, each linking to its field |
 | `useFormFocusFirstError(submitCount, errorCount)` | Returns the form ref; focuses the first `aria-invalid` control after a failed submit (R31d) |

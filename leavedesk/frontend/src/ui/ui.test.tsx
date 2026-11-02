@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { axe } from "vitest-axe";
@@ -107,39 +107,12 @@ describe("DateField (R31c)", () => {
       </>
     );
   }
-  it("shows the unambiguous format and round-trips to ISO", async () => {
-    const user = userEvent.setup();
+  it("is a calendar picker whose value is ISO", () => {
     render(<Harness />);
     const input = screen.getByLabelText("Day");
-    expect(input).toHaveValue("Mon 2 Nov 2026");
-    await user.clear(input);
-    await user.type(input, "3 Nov 2026");
+    expect(input).toHaveAttribute("type", "date");
+    expect(input).toHaveValue("2026-11-02");
+    fireEvent.change(input, { target: { value: "2026-11-03" } });
     expect(screen.getByRole("status")).toHaveTextContent("2026-11-03");
-    await user.tab();
-    expect(input).toHaveValue("Tue 3 Nov 2026");
-  });
-  it("follows an external change of the value", async () => {
-    function Reset() {
-      const [iso, setIso] = useState("2026-11-02");
-      return (
-        <>
-          <DateField label="Day" value={iso} onChange={setIso} />
-          <button type="button" onClick={() => setIso("2026-12-01")}>
-            Load
-          </button>
-        </>
-      );
-    }
-    const user = userEvent.setup();
-    render(<Reset />);
-    await user.click(screen.getByRole("button", { name: "Load" }));
-    expect(screen.getByLabelText("Day")).toHaveValue("Tue 1 Dec 2026");
-  });
-  it("explains an unreadable date", async () => {
-    const user = userEvent.setup();
-    render(<Harness />);
-    await user.clear(screen.getByLabelText("Day"));
-    await user.type(screen.getByLabelText("Day"), "11/02/2026");
-    expect(screen.getByLabelText("Day")).toHaveAccessibleDescription(/Not a date/);
   });
 });

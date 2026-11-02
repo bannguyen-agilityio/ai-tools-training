@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { formatDate, parseDate } from "../lib/dates";
 import { Field } from "./Field";
 
 interface DateFieldProps {
@@ -12,50 +10,20 @@ interface DateFieldProps {
   name?: string;
 }
 
-const FORMAT_HINT = "Type a date like Mon 2 Nov 2026";
-
-function show(iso: string): string {
-  try {
-    return iso ? formatDate(iso) : "";
-  } catch {
-    return iso;
-  }
-}
-
 /**
- * Text input that shows and accepts "Mon 2 Nov 2026" (R31c), avoiding the
- * locale-dependent native date input. Emits ISO, or "" while the text is not a date.
+ * Native calendar picker (R31c): the user picks a day instead of typing text.
+ * Value in and out is ISO; "" while empty.
  */
 export function DateField({ label, value, onChange, error, hint, name }: DateFieldProps) {
-  const [text, setText] = useState(show(value));
-  const [typed, setTyped] = useState(false);
-  // Follow external changes (form reset, loaded defaults) without fighting what is being typed.
-  useEffect(() => {
-    setText((current) => (parseDate(current) === (value || null) ? current : show(value)));
-    if (!value) setTyped(false);
-  }, [value]);
-  const unparsable = typed && text.trim() !== "" && parseDate(text) === null;
-  const shownError = error ?? (unparsable ? `Not a date. ${FORMAT_HINT}.` : undefined);
-
   return (
-    <Field label={label} error={shownError} hint={hint ?? FORMAT_HINT}>
+    <Field label={label} error={error} hint={hint ?? "Pick a date from the calendar."}>
       {(control) => (
         <input
           className="input"
+          type="date"
           name={name}
-          inputMode="text"
-          autoComplete="off"
-          placeholder="Mon 2 Nov 2026"
-          value={text}
-          onChange={(e) => {
-            setTyped(true);
-            setText(e.target.value);
-            onChange(parseDate(e.target.value) ?? "");
-          }}
-          onBlur={() => {
-            const iso = parseDate(text);
-            if (iso) setText(formatDate(iso));
-          }}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           {...control}
         />
       )}
