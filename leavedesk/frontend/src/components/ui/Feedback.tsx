@@ -10,13 +10,16 @@ export function Alert({
   tone = "info",
   children,
   onRetry,
+  urgent = false,
 }: {
   tone?: Tone;
   children: ReactNode;
   onRetry?: () => void;
+  /** Interrupting announcement (role=alert) for warnings the user must hear before acting. */
+  urgent?: boolean;
 }) {
   return (
-    <div className={`alert alert--${tone}`} role={tone === "danger" ? "alert" : "status"}>
+    <div className={`alert alert--${tone}`} role={tone === "danger" || urgent ? "alert" : "status"}>
       <span aria-hidden="true">{ICON[tone]}</span>
       <p className="alert__text">
         <span className="visually-hidden">{SR[tone]}: </span>

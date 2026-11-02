@@ -15,6 +15,7 @@ import {
 } from "./api";
 import { Alert } from "../../components/ui/Feedback";
 import { daysText } from "./format";
+import { PageHeader } from "../../components/ui/Card";
 
 const TYPES = [
   { value: "annual", label: "Annual" },
@@ -111,7 +112,7 @@ export function NewRequest() {
   const year = preview.data?.per_year;
   return (
     <section aria-labelledby="new-request-title">
-      <h1 id="new-request-title">Request leave</h1>
+      <PageHeader title="Request leave" titleId="new-request-title" />
       <ErrorSummary items={summary} />
       <form onSubmit={onSubmit} noValidate>
         <Select

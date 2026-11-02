@@ -7,6 +7,8 @@ import { useToast } from "../../../components/ui/Toast";
 import { useTeams } from "../teams/api";
 import { useEmployeeMutations, useEmployees, type Employee } from "./api";
 import { EmployeeForm } from "./EmployeeForm";
+import { Alert, EmptyState } from "../../../components/ui/Feedback";
+import { PageHeader } from "../../../components/ui/Card";
 
 type Mode = { kind: "list" } | { kind: "add" } | { kind: "edit"; employee: Employee };
 
@@ -58,14 +60,14 @@ export function EmployeesPage() {
 
   return (
     <section aria-labelledby="employees-title">
-      <h1 id="employees-title">Employees</h1>
+      <PageHeader title="Employees" titleId="employees-title" />
       <p>
         <Button onClick={() => setMode({ kind: "add" })} disabled={!employees.data || !teams.data}>
           Add employee
         </Button>
       </p>
-      {employees.isError && <p role="alert">Could not load employees.</p>}
-      {employees.data && employees.data.length === 0 && <p>No employees yet.</p>}
+      {employees.isError && <Alert tone="danger">Could not load employees.</Alert>}
+      {employees.data && employees.data.length === 0 && <EmptyState title="No employees yet." />}
       {employees.data && employees.data.length > 0 && (
         <table className="data-list">
           <caption className="visually-hidden">Employees</caption>

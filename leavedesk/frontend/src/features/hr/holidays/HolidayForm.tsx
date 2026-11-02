@@ -7,6 +7,7 @@ import { ErrorSummary } from "../../../components/ui/ErrorSummary";
 import { TextField } from "../../../components/ui/TextField";
 import { useFormFocusFirstError } from "../../../components/ui/useFormFocusFirstError";
 import { useImpact, type HolidayInput } from "./api";
+import { Alert } from "../../../components/ui/Feedback";
 
 const schema = z.object({
   holiday_date: z.string().min(1, "Enter the date, for example Wed 2 Sep 2026."),
@@ -40,7 +41,7 @@ export function HolidayForm({ initial, serverError, busy, onSubmit, onCancel }: 
     <form ref={formRef} noValidate onSubmit={handleSubmit(onSubmit)} aria-label={initial ? "Edit holiday" : "Add holiday"}>
       <h2>{initial ? "Edit holiday" : "Add holiday"}</h2>
       <ErrorSummary items={summary} />
-      {serverError && <p role="alert">{serverError}</p>}
+      {serverError && <Alert tone="danger">{serverError}</Alert>}
       <Controller
         control={control}
         name="holiday_date"

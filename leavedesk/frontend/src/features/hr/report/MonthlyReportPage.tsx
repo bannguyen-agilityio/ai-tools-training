@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { todayIso } from "../../../lib/dates";
 import { Field } from "../../../components/ui/Field";
+import { PageHeader } from "../../../components/ui/Card";
 
 function previousMonth(today: string): string {
   const [y, m] = today.split("-").map(Number);
@@ -17,7 +18,7 @@ export function MonthlyReportPage() {
   const href = (format: "xlsx" | "csv") => `/api/v1/hr/reports/monthly?month=${month}&format=${format}`;
   return (
     <section aria-labelledby="report-title">
-      <h1 id="report-title">Monthly report</h1>
+      <PageHeader title="Monthly report" titleId="report-title" />
       <p>
         Days taken per person and type, remaining balances at the end of the month, and who was off and when. Approved
         leave only. Every export is recorded.

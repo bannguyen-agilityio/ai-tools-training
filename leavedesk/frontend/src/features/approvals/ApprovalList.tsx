@@ -5,6 +5,8 @@ import { formatDate } from "../../lib/dates";
 import { daysText, rangeText, typeLabel } from "../requests/format";
 import { useApprovals, type ApprovalScope } from "./api";
 import { DecisionPanel } from "./DecisionPanel";
+import { Alert, EmptyState, Loading, Skeleton } from "../../components/ui/Feedback";
+import { PageHeader } from "../../components/ui/Card";
 
 export function ApprovalList() {
   const [scope, setScope] = useState<ApprovalScope>("assigned");
@@ -12,7 +14,7 @@ export function ApprovalList() {
   const cover = scope === "cover";
   return (
     <section aria-labelledby="approvals-title">
-      <h1 id="approvals-title">Approvals</h1>
+      <PageHeader title="Approvals" titleId="approvals-title" />
       <div role="group" aria-label="Approval lists">
         <Button variant={cover ? "secondary" : "primary"} aria-pressed={!cover} onClick={() => setScope("assigned")}>
           My team
@@ -21,11 +23,11 @@ export function ApprovalList() {
           On behalf of
         </Button>
       </div>
-      {isPending && <p>Loading requests awaiting your decision…</p>}
+      {isPending && <Loading label="Loading requests awaiting your decision…"><Skeleton className="skeleton--row" /></Loading>}
       {isError && (
-        <p role="alert">Could not load the approvals. Try again later.</p>
+        <Alert tone="danger">Could not load the approvals. Try again later.</Alert>
       )}
-      {data && data.length === 0 && <p>Nothing is waiting for your decision.</p>}
+      {data && data.length === 0 && <EmptyState title="Nothing is waiting for your decision." />}
       {data && data.length > 0 && (
         <ul className="approvals">
           {data.map((r) => (

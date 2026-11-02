@@ -10,6 +10,7 @@ import { ErrorSummary } from "../../components/ui/ErrorSummary";
 import { TextField } from "../../components/ui/TextField";
 import { useFormFocusFirstError } from "../../components/ui/useFormFocusFirstError";
 import { newPassword, PASSWORD_MIN } from "./passwordSchema";
+import { PageHeader } from "../../components/ui/Card";
 
 const schema = z
   .object({ password: newPassword, confirm: z.string() })
@@ -49,7 +50,7 @@ export function TokenPasswordForm({ title, endpoint, submitLabel, newLinkTo, new
   if (badLink) {
     return (
       <section aria-labelledby="link-title">
-        <h1 id="link-title">This link has expired or was already used</h1>
+        <PageHeader title="This link has expired or was already used" titleId="link-title" />
         <p>{expiredHint ?? "Links work once. Request a new one and use it within the time shown in the email."}</p>
         <p>
           <Link to={newLinkTo ?? "/sign-in"} className="btn btn--primary">

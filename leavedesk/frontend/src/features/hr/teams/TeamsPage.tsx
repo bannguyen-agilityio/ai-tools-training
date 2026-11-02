@@ -11,6 +11,8 @@ import { useToast } from "../../../components/ui/Toast";
 import { useFormFocusFirstError } from "../../../components/ui/useFormFocusFirstError";
 import { useEmployees } from "../employees/api";
 import { useTeamMutations, useTeams, type Team } from "./api";
+import { Alert, EmptyState } from "../../../components/ui/Feedback";
+import { PageHeader } from "../../../components/ui/Card";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Enter the team name.").max(100, "Use 100 characters or fewer."),
@@ -46,7 +48,7 @@ function TeamForm(props: {
     >
       <h2>{team ? "Edit team" : "Add team"}</h2>
       <ErrorSummary items={summary} />
-      {serverError && <p role="alert">{serverError}</p>}
+      {serverError && <Alert tone="danger">{serverError}</Alert>}
       <TextField label="Team name" error={errors.name?.message} {...register("name")} />
       <Select label="Team manager" options={[{ value: "", label: "No manager" }, ...managers]} {...register("manager_id")} />
       <Button type="submit" disabled={busy}>
@@ -96,14 +98,14 @@ export function TeamsPage() {
   const managerName = (id: string | null) => employees.data?.find((e) => e.id === id)?.name ?? "";
   return (
     <section aria-labelledby="teams-title">
-      <h1 id="teams-title">Teams</h1>
+      <PageHeader title="Teams" titleId="teams-title" />
       <p>
         <Button onClick={() => setMode({ kind: "add" })} disabled={!employees.data}>
           Add team
         </Button>
       </p>
-      {teams.isError && <p role="alert">Could not load teams.</p>}
-      {teams.data && teams.data.length === 0 && <p>No teams yet.</p>}
+      {teams.isError && <Alert tone="danger">Could not load teams.</Alert>}
+      {teams.data && teams.data.length === 0 && <EmptyState title="No teams yet." />}
       {teams.data && teams.data.length > 0 && (
         <table className="data-list">
           <caption className="visually-hidden">Teams</caption>

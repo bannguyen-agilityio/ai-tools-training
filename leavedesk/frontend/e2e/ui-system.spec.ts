@@ -56,6 +56,12 @@ const SCREENS: [string, string, Role][] = [
   ["hr-balances", "/hr/balances", "hr"],
   ["hr-holidays", "/hr/holidays", "hr"],
   ["hr-settings", "/hr/settings", "hr"],
+  ["hr-teams", "/hr/teams", "hr"],
+  ["hr-report", "/hr/report", "hr"],
+  ["calendar", "/calendar", "employee"],
+  ["set-password", "/set-password?token=abc", "employee"],
+  ["reset-password", "/reset-password?token=abc", "employee"],
+  ["change-password", "/account/password", "employee"],
 ];
 
 for (const [name, path, role] of SCREENS) {

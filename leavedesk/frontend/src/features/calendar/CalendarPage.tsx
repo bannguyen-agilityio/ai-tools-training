@@ -6,6 +6,8 @@ import { Field } from "../../components/ui/Field";
 import { useTeams } from "../hr/teams/api";
 import { useCalendar } from "./api";
 import { groupByDay } from "./labels";
+import { Alert, EmptyState, Loading, Skeleton } from "../../components/ui/Feedback";
+import { PageHeader } from "../../components/ui/Card";
 
 function shift(month: string, by: number): string {
   const [y, m] = month.split("-").map(Number);
@@ -47,7 +49,7 @@ export function CalendarPage() {
 
   return (
     <section aria-labelledby="calendar-title">
-      <h1 id="calendar-title">Team calendar</h1>
+      <PageHeader title="Team calendar" titleId="calendar-title" />
       <div className="calendar-nav">
         <Button variant="secondary" onClick={() => setMonth(shift(month, -1))}>
           Previous month
@@ -58,9 +60,9 @@ export function CalendarPage() {
         </Button>
       </div>
       {isHr && <TeamFilter value={teamId} onChange={setTeamId} />}
-      {calendar.isPending && <p>Loading the calendar…</p>}
-      {calendar.isError && <p role="alert">Could not load the calendar. Try again later.</p>}
-      {calendar.data && days.length === 0 && <p>No one in {isHr && !teamId ? "any team" : "your team"} is on leave this month.</p>}
+      {calendar.isPending && <Loading label="Loading the calendar…"><Skeleton className="skeleton--row" /></Loading>}
+      {calendar.isError && <Alert tone="danger">Could not load the calendar. Try again later.</Alert>}
+      {calendar.data && days.length === 0 && <EmptyState title={`No one in ${isHr && !teamId ? "any team" : "your team"} is on leave this month.`} />}
       {days.length > 0 && (
         <ul className="calendar-list">
           {days.map((day) => (

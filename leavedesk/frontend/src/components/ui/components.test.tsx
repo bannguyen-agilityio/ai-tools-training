@@ -77,3 +77,12 @@ describe("Feedback", () => {
     expect(screen.getByText("No upcoming leave")).toBeInTheDocument();
   });
 });
+
+describe("Alert urgency", () => {
+  it("interrupts only when urgent", () => {
+    const { rerender } = render(<Alert tone="warning">Careful.</Alert>);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    rerender(<Alert tone="warning" urgent>Careful.</Alert>);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+});

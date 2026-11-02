@@ -7,6 +7,8 @@ import { BalanceList } from "./BalanceList";
 import { ConfirmSummary } from "./ConfirmSummary";
 import { EntryForm } from "./EntryForm";
 import { PrintView } from "./PrintView";
+import { Alert, EmptyState } from "../../../components/ui/Feedback";
+import { PageHeader } from "../../../components/ui/Card";
 
 type Step = { kind: "list" } | { kind: "print" } | { kind: "form" } | { kind: "confirm"; entry: EntryInput };
 
@@ -56,13 +58,13 @@ export function BalancesPage() {
 
   return (
     <section aria-labelledby="balances-title">
-      <h1 id="balances-title">Starting balances</h1>
+      <PageHeader title="Starting balances" titleId="balances-title" />
       <p>
         <Button variant="secondary" onClick={() => setStep({ kind: "print" })} disabled={!list.data}>
           Balances at launch (printable)
         </Button>
       </p>
-      {list.isError && <p role="alert">Could not load balances.</p>}
+      {list.isError && <Alert tone="danger">Could not load balances.</Alert>}
       {list.data && (
         <BalanceList
           rows={list.data.items}
@@ -124,7 +126,7 @@ function EntryFlow({ employee, step, setStep, serverError, setServerError, onDon
         <section aria-labelledby="ledger-title">
           <h2 id="ledger-title">Ledger {ledger.data.leave_year}, newest first</h2>
           {ledger.data.ledger.length === 0 ? (
-            <p>No entries yet.</p>
+            <EmptyState title="No entries yet." />
           ) : (
             <table className="data-list">
               <caption className="visually-hidden">Ledger entries</caption>
