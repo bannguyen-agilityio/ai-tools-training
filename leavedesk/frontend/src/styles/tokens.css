@@ -1,18 +1,212 @@
-/* Contrast ratios are against --bg (#fff) unless noted; all pass WCAG 2.1 AA. */
+/*
+ * Design tokens: the single source for colour, type, space, shape and motion.
+ * Components use only these tokens, never raw values. Contrast pairs are
+ * checked by scripts/check-contrast.mjs (WCAG 2.1 AA, both themes).
+ * Light is the :root default; dark applies for [data-theme="dark"], and for
+ * System mode (no data-theme) through prefers-color-scheme, so there is no
+ * flash even before theme-init.js runs.
+ */
 :root {
-  --bg: #ffffff;
-  --surface: #f4f6f8;
-  --text: #1a2330; /* 15.9:1 */
-  --text-muted: #4a5568; /* 7.5:1 */
-  --border: #6b7280; /* 4.8:1, meets 3:1 for UI components */
-  --primary: #1d4ed8; /* 6.7:1; white on it 6.7:1 */
-  --primary-text: #ffffff;
-  --danger: #b91c1c; /* 6.5:1; white on it 6.5:1 */
-  --success: #166534; /* 7.1:1 */
-  --focus: #1d4ed8;
+  color-scheme: light;
+
+  /* Surfaces */
+  --color-bg: #f6f7f8;
+  --color-surface: #ffffff;
+  --color-surface-raised: #eceef1;
+  --color-border: #d5d9de; /* hairline, decorative */
+  --color-border-strong: #6b7280; /* controls, 3:1 */
+  --color-text: #16191d;
+  --color-text-muted: #4b5563;
+  --color-focus-ring: #1d4ed8;
+  --color-backdrop: rgb(15 17 20 / 60%);
+
+  /* Actions */
+  --color-primary: #16191d;
+  --color-primary-contrast: #ffffff;
+  --color-danger: #b42318;
+  --color-danger-contrast: #ffffff;
+
+  /* Status: bg, fg, border */
+  --color-pending-bg: #fef3c7;
+  --color-pending-fg: #78350f;
+  --color-pending-border: #b45309;
+  --color-approved-bg: #dcfce7;
+  --color-approved-fg: #14532d;
+  --color-approved-border: #15803d;
+  --color-rejected-bg: #fee2e2;
+  --color-rejected-fg: #991b1b;
+  --color-rejected-border: #b91c1c;
+  --color-cancelled-bg: #eceef1;
+  --color-cancelled-fg: #374151;
+  --color-cancelled-border: #6b7280;
+  --color-info-bg: #dbeafe;
+  --color-info-fg: #1e3a8a;
+  --color-info-border: #1d4ed8;
+  --color-warning-bg: #ffedd5;
+  --color-warning-fg: #7c2d12;
+  --color-warning-border: #c2410c;
+  --color-success-bg: #dcfce7;
+  --color-success-fg: #14532d;
+  --color-success-border: #15803d;
+
+  /* Leave types. "off" is the neutral style for masked Sick; there is
+     deliberately no sick colour (privacy, spec section 8). */
+  --color-annual-bg: #ccfbf1;
+  --color-annual-fg: #134e4a;
+  --color-annual-border: #0f766e;
+  --color-unpaid-bg: #ede9fe;
+  --color-unpaid-fg: #4c1d95;
+  --color-unpaid-border: #6d28d9;
+  --color-off-bg: #eceef1;
+  --color-off-fg: #374151;
+  --color-off-border: #6b7280;
+
+  /* Typography: weights 400 and 500 only */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-size-title: 1.25rem; /* 20px page title */
+  --font-size-heading: 0.875rem; /* 14px card heading */
+  --font-size-figure: 1.625rem; /* 26px key figure */
+  --font-size-body: 0.875rem; /* 14px */
+  --font-size-control: 1rem; /* 16px: stops iOS zoom on focus */
+  --font-size-caption: 0.75rem; /* 12px */
+  --line-height: 1.5;
+
+  /* Spacing, 4px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
   --target: 44px;
-  --gap: 16px;
-  --radius: 6px;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 16px;
+  --topbar-height: 56px;
+  --content-max: 72rem;
+  --dialog-max: 28rem;
+
+  /* Shape and elevation: none on cards, subtle on floating layers */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --shadow-none: none;
+  --shadow-floating: 0 4px 16px rgb(15 17 20 / 16%);
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --ease: ease-out;
+
+  /* Layers */
+  --z-bar: 10;
+  --z-menu: 20;
+  --z-dialog: 30;
+  --z-toast: 40;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+  }
+}
+
+/* Dark values, written once as a block and applied twice below. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0f1114;
+  --color-surface: #181b20;
+  --color-surface-raised: #262b33;
+  --color-border: #2f353d;
+  --color-border-strong: #8b93a0;
+  --color-text: #eceef1;
+  --color-text-muted: #a3abb7;
+  --color-focus-ring: #7aa2ff;
+  --color-backdrop: rgb(0 0 0 / 70%);
+  --color-primary: #eceef1;
+  --color-primary-contrast: #0f1114;
+  --color-danger: #f87171;
+  --color-danger-contrast: #0f1114;
+  --color-pending-bg: #3a2a08;
+  --color-pending-fg: #fcd34d;
+  --color-pending-border: #d97706;
+  --color-approved-bg: #0f2d1a;
+  --color-approved-fg: #86efac;
+  --color-approved-border: #22c55e;
+  --color-rejected-bg: #3b1212;
+  --color-rejected-fg: #fca5a5;
+  --color-rejected-border: #ef4444;
+  --color-cancelled-bg: #262b33;
+  --color-cancelled-fg: #c4cad3;
+  --color-cancelled-border: #8b93a0;
+  --color-info-bg: #112444;
+  --color-info-fg: #93c5fd;
+  --color-info-border: #3b82f6;
+  --color-warning-bg: #3a1a08;
+  --color-warning-fg: #fdba74;
+  --color-warning-border: #f97316;
+  --color-success-bg: #0f2d1a;
+  --color-success-fg: #86efac;
+  --color-success-border: #22c55e;
+  --color-annual-bg: #0b2f2c;
+  --color-annual-fg: #5eead4;
+  --color-annual-border: #14b8a6;
+  --color-unpaid-bg: #2a1a4d;
+  --color-unpaid-fg: #c4b5fd;
+  --color-unpaid-border: #8b5cf6;
+  --color-off-bg: #262b33;
+  --color-off-fg: #c4cad3;
+  --color-off-border: #8b93a0;
+  --shadow-floating: 0 4px 16px rgb(0 0 0 / 50%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+  color-scheme: dark;
+  --color-bg: #0f1114;
+  --color-surface: #181b20;
+  --color-surface-raised: #262b33;
+  --color-border: #2f353d;
+  --color-border-strong: #8b93a0;
+  --color-text: #eceef1;
+  --color-text-muted: #a3abb7;
+  --color-focus-ring: #7aa2ff;
+  --color-backdrop: rgb(0 0 0 / 70%);
+  --color-primary: #eceef1;
+  --color-primary-contrast: #0f1114;
+  --color-danger: #f87171;
+  --color-danger-contrast: #0f1114;
+  --color-pending-bg: #3a2a08;
+  --color-pending-fg: #fcd34d;
+  --color-pending-border: #d97706;
+  --color-approved-bg: #0f2d1a;
+  --color-approved-fg: #86efac;
+  --color-approved-border: #22c55e;
+  --color-rejected-bg: #3b1212;
+  --color-rejected-fg: #fca5a5;
+  --color-rejected-border: #ef4444;
+  --color-cancelled-bg: #262b33;
+  --color-cancelled-fg: #c4cad3;
+  --color-cancelled-border: #8b93a0;
+  --color-info-bg: #112444;
+  --color-info-fg: #93c5fd;
+  --color-info-border: #3b82f6;
+  --color-warning-bg: #3a1a08;
+  --color-warning-fg: #fdba74;
+  --color-warning-border: #f97316;
+  --color-success-bg: #0f2d1a;
+  --color-success-fg: #86efac;
+  --color-success-border: #22c55e;
+  --color-annual-bg: #0b2f2c;
+  --color-annual-fg: #5eead4;
+  --color-annual-border: #14b8a6;
+  --color-unpaid-bg: #2a1a4d;
+  --color-unpaid-fg: #c4b5fd;
+  --color-unpaid-border: #8b5cf6;
+  --color-off-bg: #262b33;
+  --color-off-fg: #c4cad3;
+  --color-off-border: #8b93a0;
+  --shadow-floating: 0 4px 16px rgb(0 0 0 / 50%);
+  }
 }
