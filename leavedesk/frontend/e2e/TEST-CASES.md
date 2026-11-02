@@ -63,7 +63,7 @@ Default viewport 360 x 640 (R31). Unless stated, "sees" means visible on screen,
 | E2E-REQ-17 | P1 | Note over the maximum length | Field error |
 | E2E-REQ-18 | P0 | Employee with no active manager | Clear refusal, nothing saved |
 | E2E-REQ-19 | P0 | Manager submits | Routed to HR; HR admin's request routed to deputy |
-| E2E-REQ-20 | P1 | Date field accepts "Mon 2 Nov 2026" typed and rejects gibberish | ISO round trip; helpful error |
+| E2E-REQ-20 | P1 | Date fields are native calendar pickers (type=date), no free text | ISO value round trip |
 
 ## 4. My requests, detail, cancel (R16, R21)
 

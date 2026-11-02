@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { ToastProvider } from "../../../ui/Toast";
@@ -81,7 +81,7 @@ describe("HolidaysPage (R11)", () => {
     await user.click(screen.getByRole("button", { name: "Save holiday" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("2 things need fixing");
     expect(screen.getByLabelText("Date")).toHaveFocus();
-    await user.type(screen.getByLabelText("Date"), "Fri 20 Nov 2026");
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-11-20" } });
     await user.type(screen.getByLabelText("Name"), "Teachers' Day");
     expect(await screen.findByText("2 requests affected on this date.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Save holiday" }));

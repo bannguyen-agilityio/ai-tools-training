@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { email, label, outbox, requestLeave, reseed, signIn, sql, workday, type Persona } from "../support";
+import { email, iso, outbox, requestLeave, reseed, signIn, sql, workday, type Persona } from "../support";
 
 test.beforeEach(() => reseed());
 
@@ -36,7 +36,7 @@ test.describe("Employees and teams (R23, R4, R9)", () => {
     const form = page.getByRole("form", { name: "Add employee" });
     await form.getByLabel("Name").fill("Nia New");
     await form.getByLabel("Work email").fill("nia@gmail.com");
-    await form.getByLabel("Start date").fill(label(workday(1)));
+    await form.getByLabel("Start date").fill(iso(workday(1)));
     await form.getByRole("button", { name: "Save employee" }).click();
     await expect(form.locator('[aria-invalid="true"]').first()).toBeFocused();
     await form.getByLabel("Work email").fill("nia@asnet.com.vn");
@@ -95,7 +95,7 @@ test.describe("Balances (R24)", () => {
     await page.getByRole("button", { name: "Enter or correct balances for Olga Orphan" }).click();
     await page.getByLabel("Entry", { exact: true }).selectOption({ label: "Carried days (with expiry)" });
     await page.getByLabel("Days", { exact: true }).fill("6.5");
-    await page.getByLabel("Carried days expire on").fill(`Thu 31 Dec ${new Date().getFullYear()}`);
+    await page.getByLabel("Carried days expire on").fill(`${new Date().getFullYear()}-12-31`);
     await page.getByRole("button", { name: "Review entry" }).click();
     await expect(page.locator(".form-error", { hasText: "Carried days are at most 6." })).toBeVisible();
   });

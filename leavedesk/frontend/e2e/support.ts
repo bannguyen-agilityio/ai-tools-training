@@ -35,7 +35,7 @@ export async function signIn(page: Page, who: Persona, password = PASSWORD): Pro
 
 const DAY = 24 * 3600 * 1000;
 const fmt = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" });
-const iso = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" });
+export const iso = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" });
 /** "Mon 2 Nov 2026", the format the date fields show and accept. */
 export const label = (d: Date) => fmt.format(d).replace(",", "");
 
@@ -59,8 +59,8 @@ export async function requestLeave(
 ): Promise<void> {
   await page.goto("/requests/new");
   if (o.type) await page.getByLabel("Leave type").selectOption({ label: o.type });
-  await page.getByLabel("Start date").fill(label(o.start));
-  await page.getByLabel("End date").fill(label(o.end ?? o.start));
+  await page.getByLabel("Start date").fill(iso(o.start));
+  await page.getByLabel("End date").fill(iso(o.end ?? o.start));
   if (o.note) await page.getByLabel("Note (optional)").fill(o.note);
   await page.getByRole("button", { name: "Submit request" }).click();
 }

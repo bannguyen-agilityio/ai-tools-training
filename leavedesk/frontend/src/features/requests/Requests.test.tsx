@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { MyRequests } from "./MyRequests";
@@ -97,8 +97,8 @@ describe("requests screens", () => {
       }),
     );
     wrap("/requests/new");
-    await userEvent.type(screen.getByLabelText(/Start date/), "Mon 2 Nov 2026");
-    await userEvent.type(screen.getByLabelText(/End date/), "Tue 3 Nov 2026");
+    fireEvent.change(screen.getByLabelText(/Start date/), { target: { value: "2026-11-02" } });
+    fireEvent.change(screen.getByLabelText(/End date/), { target: { value: "2026-11-03" } });
     expect(await screen.findByText("2 days")).toBeInTheDocument();
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "short by 1 day",
