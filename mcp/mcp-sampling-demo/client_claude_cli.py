@@ -18,7 +18,6 @@ from mcp.client.stdio import StdioServerParameters
 from mcp.types import (
     CreateMessageRequestParams,
     CreateMessageResult,
-    LoggingMessageNotificationParams,
     SamplingMessage,
     TextContent,
 )
@@ -113,12 +112,6 @@ async def sampling_callback(
     )
 
 
-async def logging_callback(params: LoggingMessageNotificationParams) -> None:
-    """Print a log message sent by the server (`ctx.info(...)` on the server)."""
-
-    print(f"[server log] {params.level}: {params.data}", file=sys.stderr)
-
-
 async def progress_callback(
     progress: float, total: float | None, message: str | None
 ) -> None:
@@ -136,10 +129,6 @@ async def run(text: str) -> None:
     async with Client(
         server_params,
         sampling_callback=sampling_callback,
-        # Receive the server's log messages. `log_level` is the opt-in: without
-        # it the server sends no logs, even when a logging_callback is set.
-        logging_callback=logging_callback,
-        log_level="info",
     ) as client:
         # The server sends a sampling request back to us during this call, and
         # `sampling_callback` answers it before the call returns.

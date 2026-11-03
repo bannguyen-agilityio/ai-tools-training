@@ -13,17 +13,10 @@ Changes from the lesson for the latest SDK (`mcp>=2.3.0`):
   client, and the LLM's reply is passed into the tool as an argument.
 """
 
-import warnings
 from typing import Annotated
 
 from mcp.server.mcpserver import Context, MCPServer, Resolve, Sample
-from mcp.shared.exceptions import MCPDeprecationWarning
 from mcp.types import CreateMessageResult, SamplingMessage, TextContent
-
-# The SDK warns that logging (`ctx.info`) is deprecated in the 2026-07-28 MCP
-# spec. This demo uses it on purpose, to show the lesson's log notifications,
-# so hide that one warning. Remove this line if you drop `ctx.info`.
-warnings.filterwarnings("ignore", category=MCPDeprecationWarning)
 
 # The name shown to clients.
 mcp = MCPServer(name="Demo Server")
@@ -61,18 +54,14 @@ async def summarize(
     # The caller does not pass `result` in. If the client did not declare the
     # sampling capability, the call fails with error -32021 before this runs.
     result: Annotated[CreateMessageResult, Resolve(build_summary_request)],
-    # `ctx` gives the tool a way to talk to the client while it runs: log
-    # messages and progress updates. The caller does not pass it in either.
+    # `ctx` gives the tool a way to talk to the client while it runs: here, to
+    # send progress updates. The caller does not pass it in either.
     ctx: Context,
 ) -> str:
     """Summarize text using the connected client's LLM (via sampling)."""
 
     # Note: the sampling request already ran before this body starts (see
-    # `Resolve` above), so these notifications report what happens after it.
-    # Log message: sent to the client's `logging_callback`. Logging is
-    # deprecated in the 2026-07-28 MCP spec, and the client must opt in with
-    # `log_level` to receive these.
-    await ctx.info(f"Sampling finished, got a {result.content.type} reply")
+    # `Resolve` above), so these updates report what happens after it.
     # Progress: step 1 of 2, sent to the client's `progress_callback`.
     await ctx.report_progress(1, 2, "Checking the reply")
 
