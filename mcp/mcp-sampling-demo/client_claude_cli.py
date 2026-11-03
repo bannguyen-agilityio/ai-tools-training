@@ -18,6 +18,7 @@ from mcp.client.stdio import StdioServerParameters
 from mcp.types import (
     CreateMessageRequestParams,
     CreateMessageResult,
+    LoggingMessageNotificationParams,
     SamplingMessage,
     TextContent,
 )
@@ -112,12 +113,42 @@ async def sampling_callback(
     )
 
 
+async def logging_callback(params: LoggingMessageNotificationParams) -> None:
+    """Print a log message sent by the server (`ctx.info(...)` on the server)."""
+
+    print(f"[server log] {params.level}: {params.data}", file=sys.stderr)
+
+
+async def progress_callback(
+    progress: float, total: float | None, message: str | None
+) -> None:
+    """Print a progress update sent by the server (`ctx.report_progress(...)`).
+
+    Show a percentage when the server gave a total, otherwise the raw value.
+    """
+
+    shown = f"{progress / total:.0%}" if total else f"{progress:g}"
+    print(f"[progress] {shown} {message or ''}".rstrip(), file=sys.stderr)
+
+
 async def run(text: str) -> None:
     # Registering the callback is what declares the sampling capability.
-    async with Client(server_params, sampling_callback=sampling_callback) as client:
+    async with Client(
+        server_params,
+        sampling_callback=sampling_callback,
+        # Receive the server's log messages. `log_level` is the opt-in: without
+        # it the server sends no logs, even when a logging_callback is set.
+        logging_callback=logging_callback,
+        log_level="info",
+    ) as client:
         # The server sends a sampling request back to us during this call, and
         # `sampling_callback` answers it before the call returns.
-        result = await client.call_tool("summarize", {"text_to_summarize": text})
+        # `progress_callback` is passed per call, not per session.
+        result = await client.call_tool(
+            "summarize",
+            {"text_to_summarize": text},
+            progress_callback=progress_callback,
+        )
         # A failed tool call still returns text (the error message), so check the flag.
         if result.is_error:
             raise RuntimeError(f"The summarize tool failed: {result.content}")

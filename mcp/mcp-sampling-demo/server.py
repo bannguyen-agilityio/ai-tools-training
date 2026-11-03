@@ -15,7 +15,7 @@ Changes from the lesson for the latest SDK (`mcp>=2.3.0`):
 
 from typing import Annotated
 
-from mcp.server.mcpserver import MCPServer, Resolve, Sample
+from mcp.server.mcpserver import Context, MCPServer, Resolve, Sample
 from mcp.types import CreateMessageResult, SamplingMessage, TextContent
 
 # The name shown to clients.
@@ -54,13 +54,27 @@ async def summarize(
     # The caller does not pass `result` in. If the client did not declare the
     # sampling capability, the call fails with error -32021 before this runs.
     result: Annotated[CreateMessageResult, Resolve(build_summary_request)],
+    # `ctx` gives the tool a way to talk to the client while it runs: log
+    # messages and progress updates. The caller does not pass it in either.
+    ctx: Context,
 ) -> str:
     """Summarize text using the connected client's LLM (via sampling)."""
 
+    # Note: the sampling request already ran before this body starts (see
+    # `Resolve` above), so these notifications report what happens after it.
+    # Log message: sent to the client's `logging_callback`. Logging is
+    # deprecated in the 2026-07-28 MCP spec, and the client must opt in with
+    # `log_level` to receive these.
+    await ctx.info(f"Sampling finished, got a {result.content.type} reply")
+    # Progress: step 1 of 2, sent to the client's `progress_callback`.
+    await ctx.report_progress(1, 2, "Checking the reply")
+
     # The client may reply with images or audio; this tool only accepts text.
-    if result.content.type == "text":
-        return result.content.text
-    raise ValueError("Sampling failed")
+    if result.content.type != "text":
+        raise ValueError("Sampling failed")
+
+    await ctx.report_progress(2, 2, "Summary ready")
+    return result.content.text
 
 
 if __name__ == "__main__":
