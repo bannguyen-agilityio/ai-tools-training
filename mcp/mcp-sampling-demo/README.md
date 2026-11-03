@@ -69,7 +69,7 @@ Without an argument, either client summarizes a built-in sentence.
 <a short summary of your text, written by Claude>
 ```
 
-The lines that start with `[...]` go to stderr. `[client]` shows that the server's sampling request reached the client, and `[server log]` and `[progress]` are the notifications described [below](#log-and-progress-notifications). The last line is the summary returned by the `summarize` tool. The wording of the summary differs on each run. You may also see `MCPDeprecationWarning` lines from the server: the SDK marks logging as deprecated, and they are harmless.
+The lines that start with `[...]` go to stderr. `[client]` shows that the server's sampling request reached the client, and `[server log]` and `[progress]` are the notifications described [below](#log-and-progress-notifications). The last line is the summary returned by the `summarize` tool. The wording of the summary differs on each run.
 
 **Checks**
 
@@ -109,7 +109,7 @@ Differences from the lesson in the latest SDK:
 - `ctx` is the tool's `Context` argument, imported from `mcp.server.mcpserver`.
 - The client must opt in to logs with `log_level="info"`. A `logging_callback` alone receives nothing.
 - `progress_callback` is passed per `call_tool`, not per session. The client prints a percentage when the server gives a total, and the raw value otherwise.
-- Logging is deprecated in the 2026-07-28 MCP spec. Progress is not.
+- Logging is deprecated in the 2026-07-28 MCP spec, and the SDK warns about `ctx.info` with an `MCPDeprecationWarning`. `server.py` hides that one warning because the demo uses logging on purpose; remove the `warnings.filterwarnings(...)` line if you drop `ctx.info`. Progress is not deprecated.
 - The sampling request runs before the tool body starts, because `Resolve` runs first. The notifications here therefore report what happens after sampling, not the sampling itself.
 
 ## Why not Claude Desktop or Claude Code?

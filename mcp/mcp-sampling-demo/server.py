@@ -13,10 +13,17 @@ Changes from the lesson for the latest SDK (`mcp>=2.3.0`):
   client, and the LLM's reply is passed into the tool as an argument.
 """
 
+import warnings
 from typing import Annotated
 
 from mcp.server.mcpserver import Context, MCPServer, Resolve, Sample
+from mcp.shared.exceptions import MCPDeprecationWarning
 from mcp.types import CreateMessageResult, SamplingMessage, TextContent
+
+# The SDK warns that logging (`ctx.info`) is deprecated in the 2026-07-28 MCP
+# spec. This demo uses it on purpose, to show the lesson's log notifications,
+# so hide that one warning. Remove this line if you drop `ctx.info`.
+warnings.filterwarnings("ignore", category=MCPDeprecationWarning)
 
 # The name shown to clients.
 mcp = MCPServer(name="Demo Server")
