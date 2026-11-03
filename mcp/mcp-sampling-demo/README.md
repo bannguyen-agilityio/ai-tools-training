@@ -5,7 +5,8 @@ A minimal MCP server that uses **sampling**: the server asks the *client's* LLM 
 | File | Role |
 |---|---|
 | `server.py` | MCP server with one tool, `summarize(text_to_summarize)`. It sends a sampling request and returns the client's answer. |
-| `client.py` | Test client. Its `sampling_callback` function answers the server's request by calling Claude with the Anthropic SDK. |
+| `client.py` | Test client. Its `sampling_callback` function answers the server's request by calling Claude with the Anthropic SDK. Needs an API key. |
+| `client_claude_cli.py` | Same client, but it answers with `claude -p` (Claude Code CLI). No API key needed. |
 
 > **Claude Desktop and Claude Code do not support sampling.** They don't declare the `sampling` capability, so `summarize` fails in both. That is why `client.py` acts as the MCP client: it handles the sampling request with a simple function that calls Claude. See [Why not Claude Desktop or Claude Code?](#why-not-claude-desktop-or-claude-code).
 
@@ -15,7 +16,9 @@ A minimal MCP server that uses **sampling**: the server asks the *client's* LLM 
 
 - Python 3.14
 - [uv](https://docs.astral.sh/uv/)
-- An [Anthropic API key](https://console.anthropic.com/). `client.py` calls Claude through the Anthropic SDK to write the summary.
+- **One** of these, depending on the client you use:
+  - An [Anthropic API key](https://console.anthropic.com/) for `client.py`, which calls Claude through the Anthropic SDK.
+  - [Claude Code](https://claude.com/claude-code), installed and logged in, with `claude` on your `PATH`, for `client_claude_cli.py`. No API key is needed.
 
 **Install**
 
@@ -24,32 +27,42 @@ cd mcp/mcp-sampling-demo
 uv sync
 ```
 
-**Set your API key**
+**Set your API key** (only for `client.py`)
 
 ```bash
 export ANTHROPIC_API_KEY="your-key"
 ```
 
+**Check Claude Code** (only for `client_claude_cli.py`)
+
+```bash
+claude --version
+```
+
 ## 2. Run
 
-Run the client with the text you want summarized. It starts `server.py` for you, so you don't start the server separately.
+Run a client with the text you want summarized. It starts `server.py` for you, so you don't start the server separately.
+
+With an API key:
 
 ```bash
 uv run client.py "The Model Context Protocol lets servers expose tools to LLM clients. Sampling lets a server ask the client's model to generate text, so the server needs no API key of its own."
 ```
 
-Without an argument, it summarizes a built-in sentence:
+Without an API key, using Claude Code:
 
 ```bash
-uv run client.py
+uv run client_claude_cli.py "The Model Context Protocol lets servers expose tools to LLM clients. Sampling lets a server ask the client's model to generate text, so the server needs no API key of its own."
 ```
+
+Without an argument, either client summarizes a built-in sentence.
 
 ## 3. Test
 
 **Expected output**
 
 ```
-[client] sampling request received -> calling Claude
+[client] sampling request received -> calling Claude   (or "calling claude -p")
 <a short summary of your text, written by Claude>
 ```
 
@@ -61,7 +74,9 @@ The first line goes to stderr and shows that the server's sampling request reach
 |---|---|
 | `[client] sampling request received` and a summary | Works: the server sent a sampling request and the client answered it. |
 | No `[client] ...` line, and an error | The server never reached the client. Check `uv sync` ran and `server.py` starts. |
-| `Could not resolve authentication method` | `ANTHROPIC_API_KEY` is not set in this shell. Export it and run again. |
+| `Could not resolve authentication method` | `client.py` needs `ANTHROPIC_API_KEY`. Export it, or use `client_claude_cli.py`. |
+| `` `claude` was not found `` | `client_claude_cli.py` needs Claude Code on your `PATH`. |
+| `claude -p failed: ...` | The message after the colon is the CLI's own error, for example not logged in. Run `claude` once to log in. |
 
 **Try it with other text**
 
@@ -71,10 +86,10 @@ uv run client.py "Your own paragraph here."
 
 ### How it works
 
-1. `client.py` starts `server.py` over stdio and declares the `sampling` capability by passing `sampling_callback`.
+1. The client (`client.py` or `client_claude_cli.py`) starts `server.py` over stdio and declares the `sampling` capability by passing `sampling_callback`.
 2. It calls the `summarize` tool.
 3. The server's `Resolve(...)` step sends a sampling request back to the client (the `[client] sampling request received` line).
-4. `sampling_callback` sends the server's messages and system prompt to Claude with the Anthropic SDK, using the `max_tokens` the server asked for.
+4. `sampling_callback` sends the server's messages and system prompt to Claude. `client.py` uses the Anthropic SDK and the `max_tokens` the server asked for. `client_claude_cli.py` runs `claude -p` with tools off and the prompt on stdin; the CLI has no token limit option, so `max_tokens` is not applied.
 5. The client returns Claude's answer to the server, and the tool returns it as the result.
 
 ## Why not Claude Desktop or Claude Code?
