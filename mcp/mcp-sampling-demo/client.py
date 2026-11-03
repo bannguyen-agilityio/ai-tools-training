@@ -50,11 +50,16 @@ async def chat(
     """Get an answer from Claude for the messages the server sent."""
 
     # Keep the text messages and their roles (user / assistant).
-    messages: list[MessageParam] = [
-        {"role": msg.role, "content": msg.content.text}
-        for msg in input_messages
-        if isinstance(msg.content, TextContent)
-    ]
+    # Each branch uses a literal role, because `MessageParam` is a union of
+    # TypedDicts and a `Literal["user", "assistant"]` value matches none of them.
+    messages: list[MessageParam] = []
+    for msg in input_messages:
+        if not isinstance(msg.content, TextContent):
+            continue
+        if msg.role == "user":
+            messages.append({"role": "user", "content": msg.content.text})
+        else:
+            messages.append({"role": "assistant", "content": msg.content.text})
     if not messages:
         raise ValueError("The sampling request has no text to answer")
 
