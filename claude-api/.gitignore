@@ -3,3 +3,4 @@
 __pycache__/
 !.env.sample
 lessons/dataset.json
+lessons/workspace/

@@ -1,11 +1,11 @@
 """Tool use: The text edit tool.
 
 Claude ships a built-in schema for file editing (str_replace_based_edit_tool), but
-it only *requests* edits: we implement the commands. Here they run inside a
-temporary directory so Claude cannot touch anything else.
+it only *requests* edits: we implement the commands. Here they run inside
+lessons/workspace/ (gitignored, reset each run) so Claude cannot touch anything
+else. Open lessons/workspace/greet.py afterwards to see the edit.
 """
 
-import tempfile
 from pathlib import Path
 
 from anthropic import Anthropic
@@ -63,36 +63,36 @@ def run_editor(root: Path, args: dict) -> str:
 
 
 if __name__ == "__main__":
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp).resolve()
-        (root / "greet.py").write_text("def greet(name):\n    print('Helo', name)\n")
+    root = (Path(__file__).resolve().parent / "workspace").resolve()
+    root.mkdir(exist_ok=True)
+    (root / "greet.py").write_text("def greet(name):\n    print('Helo', name)\n")
 
-        messages: list[MessageParam] = [
-            {
-                "role": "user",
-                "content": f"Workspace: {root}. Fix the typo in greet.py.",
-            }
-        ]
-        while True:
-            reply = client.messages.create(
-                model=MODEL, max_tokens=1000, tools=[EDITOR_TOOL], messages=messages
-            )
-            messages.append({"role": "assistant", "content": reply.content})
-            if reply.stop_reason != "tool_use":
-                break
-            results: list[ToolResultBlockParam] = []
-            for block in reply.content:
-                if block.type == "tool_use":
-                    print("command:", block.input)
-                    results.append(
-                        {
-                            "type": "tool_result",
-                            "tool_use_id": block.id,
-                            "content": run_editor(root, dict(block.input)),
-                        }
-                    )
-            messages.append({"role": "user", "content": results})
+    messages: list[MessageParam] = [
+        {
+            "role": "user",
+            "content": f"Workspace: {root}. Fix the typo in greet.py.",
+        }
+    ]
+    while True:
+        reply = client.messages.create(
+            model=MODEL, max_tokens=1000, tools=[EDITOR_TOOL], messages=messages
+        )
+        messages.append({"role": "assistant", "content": reply.content})
+        if reply.stop_reason != "tool_use":
+            break
+        results: list[ToolResultBlockParam] = []
+        for block in reply.content:
+            if block.type == "tool_use":
+                print("command:", block.input)
+                results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": run_editor(root, dict(block.input)),
+                    }
+                )
+        messages.append({"role": "user", "content": results})
 
-        print(text_of(reply))
-        print("--- greet.py ---")
-        print((root / "greet.py").read_text())
+    print(text_of(reply))
+    print("--- greet.py ---")
+    print((root / "greet.py").read_text())
