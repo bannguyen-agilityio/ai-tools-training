@@ -18,3 +18,17 @@ Each lesson is a standalone script; code is intentionally duplicated.
     uv run lessons/14_being_specific.py       # guidelines and steps
     uv run lessons/15_xml_tags.py
     uv run lessons/16_providing_examples.py   # multi-shot
+
+# Tool use with Claude lessons
+    uv run lessons/17_intro_tool_use.py            # Claude requests a tool
+    uv run lessons/18_project_overview.py          # baseline: no tools
+    uv run lessons/19_tool_functions.py            # offline, no API call
+    uv run lessons/20_tool_schemas.py
+    uv run lessons/21_message_blocks.py
+    uv run lessons/22_tool_results.py
+    uv run lessons/23_multi_turn_with_tools.py
+    uv run lessons/24_multiple_turns.py            # loop until no tool_use
+    uv run lessons/25_multiple_tools.py
+    uv run lessons/26_fine_grained_tool_calling.py
+    uv run lessons/27_text_edit_tool.py            # runs in a temp dir
+    uv run lessons/28_web_search_tool.py
