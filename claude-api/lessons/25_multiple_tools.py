@@ -6,6 +6,7 @@ are returned with is_error=True so Claude can see what went wrong and retry.
 
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, cast
 
 from anthropic import Anthropic
 from anthropic.types import Message, MessageParam, ToolParam, ToolResultBlockParam
@@ -82,7 +83,8 @@ def run_tools(message: Message) -> list[ToolResultBlockParam]:
         if block.type != "tool_use":
             continue
         try:
-            output, is_error = FUNCTIONS[block.name](**block.input), False
+            args = cast(dict[str, Any], block.input)
+            output, is_error = FUNCTIONS[block.name](**args), False
         except Exception as exc:
             output, is_error = str(exc), True
         results.append(

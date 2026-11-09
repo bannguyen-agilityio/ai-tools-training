@@ -8,7 +8,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from anthropic import Anthropic
-from anthropic.types import Message, MessageParam, ToolParam
+from anthropic.types import (
+    Message,
+    MessageParam,
+    ToolParam,
+    ToolResultBlockParam,
+)
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -60,7 +65,7 @@ def run_conversation(prompt: str) -> str:
         if reply.stop_reason != "tool_use":
             return text_of(reply)
 
-        results = []
+        results: list[ToolResultBlockParam] = []
         for block in reply.content:
             if block.type == "tool_use":
                 print(f"  tool: {block.name} {block.input}")
