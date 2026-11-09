@@ -9,7 +9,12 @@ import tempfile
 from pathlib import Path
 
 from anthropic import Anthropic
-from anthropic.types import Message, MessageParam, ToolTextEditor20250728Param
+from anthropic.types import (
+    Message,
+    MessageParam,
+    ToolResultBlockParam,
+    ToolTextEditor20250728Param,
+)
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -27,13 +32,17 @@ def text_of(message: Message) -> str:
 
 
 def run_editor(root: Path, args: dict) -> str:
-    path = (root / args["path"].lstrip("/")).resolve()
+    # Relative paths live under root; absolute ones are used as-is. Either way the
+    # resolved path must stay inside root.
+    path = (root / args["path"]).resolve()
     if not path.is_relative_to(root):
         return "Error: path is outside the workspace"
     match args["command"]:
         case "view":
             if not path.exists():
                 return f"Error: {args['path']} does not exist"
+            if path.is_dir():
+                return "\n".join(sorted(p.name for p in path.iterdir()))
             return path.read_text()
         case "str_replace":
             text = path.read_text()
@@ -59,7 +68,10 @@ if __name__ == "__main__":
         (root / "greet.py").write_text("def greet(name):\n    print('Helo', name)\n")
 
         messages: list[MessageParam] = [
-            {"role": "user", "content": "Fix the typo in greet.py, then confirm."}
+            {
+                "role": "user",
+                "content": f"Workspace: {root}. Fix the typo in greet.py.",
+            }
         ]
         while True:
             reply = client.messages.create(
@@ -68,7 +80,7 @@ if __name__ == "__main__":
             messages.append({"role": "assistant", "content": reply.content})
             if reply.stop_reason != "tool_use":
                 break
-            results = []
+            results: list[ToolResultBlockParam] = []
             for block in reply.content:
                 if block.type == "tool_use":
                     print("command:", block.input)
