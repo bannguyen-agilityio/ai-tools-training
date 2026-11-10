@@ -32,3 +32,13 @@ Each lesson is a standalone script; code is intentionally duplicated.
     uv run lessons/26_fine_grained_tool_calling.py
     uv run lessons/27_text_edit_tool.py            # runs in a temp dir
     uv run lessons/28_web_search_tool.py
+
+# RAG and agentic search lessons
+    uv run lessons/29_intro_rag.py                 # whole doc vs retrieved chunk
+    uv run lessons/30_text_chunking.py             # offline
+    uv run lessons/31_text_embeddings.py           # offline (toy embeddings)
+    uv run --group voyage lessons/31_text_embeddings_voyage.py  # needs VOYAGE_API_KEY
+    uv run lessons/32_rag_flow.py                  # offline, prints the prompt
+    uv run lessons/33_implementing_rag.py
+    uv run lessons/34_bm25_lexical_search.py       # offline
+    uv run lessons/35_multi_index_rag_pipeline.py  # vector + BM25 + RRF + rerank
