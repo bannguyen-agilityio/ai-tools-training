@@ -7,23 +7,25 @@ Setup: copy .env.sample to .env and set VOYAGE_API_KEY (https://dash.voyageai.co
 `uv sync --group voyage`.
 """
 
-import voyageai
+from collections.abc import Sequence
+
 from dotenv import load_dotenv
+from voyageai.client import Client
 
 load_dotenv()
 
 MODEL = "voyage-3.5"
 
-client = voyageai.Client()  # reads VOYAGE_API_KEY from the environment
+client = Client()  # reads VOYAGE_API_KEY from the environment
 
 
-def embed(texts: list[str], input_type: str) -> list[list[float]]:
+def embed(texts: list[str], input_type: str) -> Sequence[Sequence[float]]:
     """Embed texts. input_type is "document" for stored text, "query" for searches."""
     result = client.embed(texts, model=MODEL, input_type=input_type)
     return result.embeddings
 
 
-def cosine_similarity(a: list[float], b: list[float]) -> float:
+def cosine_similarity(a: Sequence[float], b: Sequence[float]) -> float:
     # Voyage embeddings are normalised to unit length, so dot product == cosine.
     return sum(x * y for x, y in zip(a, b, strict=True))
 
