@@ -3,7 +3,7 @@
 Same demo as 31_text_embeddings.py, but with real semantic embeddings from
 Voyage AI (Anthropic's recommended embeddings provider).
 
-Setup: put VOYAGE_API_KEY in .env (https://dash.voyageai.com), then
+Setup: copy .env.sample to .env and set VOYAGE_API_KEY (https://dash.voyageai.com), then
 `uv sync --group voyage`.
 """
 
