@@ -1,81 +1,84 @@
-# AI Fluency: Framework and Foundations
+# AI Training Notes
 
 ## Index
 
 - [AI Fluency: Framework and Foundations](#ai-fluency-framework-and-foundations)
-  - [Introduction to AI Fluency](#introduction-to-ai-fluency)
-  - [The 4Ds Framework](#the-4ds-framework)
-  - [Delegation — Deciding What AI Should Do](#delegation--deciding-what-ai-should-do)
-  - [Description — Communicating Effectively With AI](#description--communicating-effectively-with-ai)
-  - [Discernment — Evaluating AI's Work](#discernment--evaluating-ais-work)
-  - [The Description–Discernment Loop](#the-descriptiondiscernment-loop)
-  - [Diligence — Responsible AI Collaboration](#diligence--responsible-ai-collaboration)
+  - [1. Introduction to AI Fluency](#1-introduction-to-ai-fluency)
+  - [2. The 4Ds Framework](#2-the-4ds-framework)
+  - [3. Delegation — Deciding What AI Should Do](#3-delegation--deciding-what-ai-should-do)
+  - [4. Description — Communicating Effectively With AI](#4-description--communicating-effectively-with-ai)
+  - [5. Discernment — Evaluating AI's Work](#5-discernment--evaluating-ais-work)
+  - [6. The Description–Discernment Loop](#6-the-descriptiondiscernment-loop)
+  - [7. Diligence — Responsible AI Collaboration](#7-diligence--responsible-ai-collaboration)
 
 - [AI Capabilities and Limitations](#ai-capabilities-and-limitations)
-  - [Introduction to AI Capabilities and Limitations](#introduction-to-ai-capabilities-and-limitations)
-  - [What We Mean by AI](#what-we-mean-by-ai)
-  - [How AI Gets Its Character](#how-ai-gets-its-character)
-  - [Next Token Prediction](#next-token-prediction)
-  - [Knowledge](#knowledge)
-  - [Working Memory](#working-memory)
-  - [Steerability](#steerability)
+  - [1. Introduction to AI Capabilities and Limitations](#1-introduction-to-ai-capabilities-and-limitations)
+  - [2. What We Mean by AI](#2-what-we-mean-by-ai)
+  - [3. How AI Gets Its Character](#3-how-ai-gets-its-character)
+  - [4. Next Token Prediction](#4-next-token-prediction)
+  - [5. Knowledge](#5-knowledge)
+  - [6. Working Memory](#6-working-memory)
+  - [7. Steerability](#7-steerability)
 
 - [The AI-native SDLC Playbook](#the-ai-native-sdlc-playbook)
-  - [Introduction: Why the SDLC Has to Change](#introduction-why-the-sdlc-has-to-change)
-  - [Stage 1 Plan: Capture as intent.md](#stage-1-plan-capture-as-intentmd)
-  - [Stage 2 Design: Requirements and Design](#stage-2-design-requirements-and-design)
-  - [Stage 3 Build: Plan Mode as the Default Starting Point](#stage-3-build-plan-mode-as-the-default-starting-point)
-  - [Stage 3 Build: The CLAUDE.md](#stage-3-build-the-claudemd)
-  - [Stage 3 Build: Skills as Institutional Knowledge](#stage-3-build-skills-as-institutional-knowledge)
-  - [Stage 3 Build: Parallel Sessions and Subagents](#stage-3-build-parallel-sessions-and-subagents)
-  - [Stage 4 Test: Give Claude a Feedback Loop](#stage-4-test-give-claude-a-feedback-loop)
-  - [Stage 4 Test: Continuous Evals in CI](#stage-4-test-continuous-evals-in-ci)
-  - [Stage 5 Deploy: AI in the PR Review Loop](#stage-5-deploy-ai-in-the-pr-review-loop)
-  - [Stage 5 Deploy: Hooks as Approval Gates](#stage-5-deploy-hooks-as-approval-gates)
-  - [Stage 5 Deploy: CI/CD Integration and Deployment](#stage-5-deploy-cicd-integration-and-deployment)
-  - [Stage 6 Maintain: Closing the Loop on Metrics](#stage-6-maintain-closing-the-loop-on-metrics)
-  - [Closing: Play Dependencies and Resources](#closing-play-dependencies-and-resources)
-  - [Putting It All Together: The End-to-End Loop](#putting-it-all-together-the-end-to-end-loop)
+  - [1. Introduction: Why the SDLC Has to Change](#1-introduction-why-the-sdlc-has-to-change)
+  - [2. Stage 1 Plan: Capture as intent.md](#2-stage-1-plan-capture-as-intentmd)
+  - [3. Stage 2 Design: Requirements and Design](#3-stage-2-design-requirements-and-design)
+  - [4. Stage 3 Build: Plan Mode as the Default Starting Point](#4-stage-3-build-plan-mode-as-the-default-starting-point)
+  - [5. Stage 3 Build: The CLAUDE.md](#5-stage-3-build-the-claudemd)
+  - [6. Stage 3 Build: Skills as Institutional Knowledge](#6-stage-3-build-skills-as-institutional-knowledge)
+  - [7. Stage 3 Build: Parallel Sessions and Subagents](#7-stage-3-build-parallel-sessions-and-subagents)
+  - [8. Stage 4 Test: Give Claude a Feedback Loop](#8-stage-4-test-give-claude-a-feedback-loop)
+  - [9. Stage 4 Test: Continuous Evals in CI](#9-stage-4-test-continuous-evals-in-ci)
+  - [10. Stage 5 Deploy: AI in the PR Review Loop](#10-stage-5-deploy-ai-in-the-pr-review-loop)
+  - [11. Stage 5 Deploy: Hooks as Approval Gates](#11-stage-5-deploy-hooks-as-approval-gates)
+  - [12. Stage 5 Deploy: CI/CD Integration and Deployment](#12-stage-5-deploy-cicd-integration-and-deployment)
+  - [13. Stage 6 Maintain: Closing the Loop on Metrics](#13-stage-6-maintain-closing-the-loop-on-metrics)
+  - [14. Closing: Play Dependencies and Resources](#14-closing-play-dependencies-and-resources)
+  - [15. Putting It All Together: The End-to-End Loop](#15-putting-it-all-together-the-end-to-end-loop)
 
 - [Claude Code in Action](#claude-code-in-action)
-  - [Introduction: From Single Prompts to Hands-Off Sessions](#introduction-from-single-prompts-to-hands-off-sessions)
-  - [Steering Long Sessions](#steering-long-sessions)
-  - [A CLAUDE.md That Gets Followed](#a-claudemd-that-gets-followed)
-  - [Verification Skills](#verification-skills)
-  - [Permission Modes](#permission-modes)
-  - [Hooks](#hooks)
-  - [Routines and Headless Mode](#routines-and-headless-mode)
-  - [GitHub Actions and Code Review](#github-actions-and-code-review)
-  - [Trust It: Verifying Unsupervised Runs](#trust-it-verifying-unsupervised-runs)
-  - [Plugins](#plugins)
-  - [Putting It All Together: A Trusted Hands-Off Workflow](#putting-it-all-together-a-trusted-hands-off-workflow)
+  - [1. Introduction: From Single Prompts to Hands-Off Sessions](#1-introduction-from-single-prompts-to-hands-off-sessions)
+  - [2. Steering Long Sessions](#2-steering-long-sessions)
+  - [3. A CLAUDE.md That Gets Followed](#3-a-claudemd-that-gets-followed)
+  - [4. Verification Skills](#4-verification-skills)
+  - [5. Permission Modes](#5-permission-modes)
+  - [6. Hooks](#6-hooks)
+  - [7. Routines and Headless Mode](#7-routines-and-headless-mode)
+  - [8. GitHub Actions and Code Review](#8-github-actions-and-code-review)
+  - [9. Trust It: Verifying Unsupervised Runs](#9-trust-it-verifying-unsupervised-runs)
+  - [10. Plugins](#10-plugins)
+  - [11. Putting It All Together: A Trusted Hands-Off Workflow](#11-putting-it-all-together-a-trusted-hands-off-workflow)
 
 - [Building with the Claude API](#building-with-the-claude-api)
-  - [Introduction: Building Applications on the Claude API](#introduction-building-applications-on-the-claude-api)
-  - [Accessing Claude with the API](#accessing-claude-with-the-api)
-  - [Prompt Evaluation](#prompt-evaluation)
-  - [Prompt Engineering Techniques](#prompt-engineering-techniques)
-  - [Tool Use with Claude](#tool-use-with-claude)
-  - [RAG and Agentic Search](#rag-and-agentic-search)
-  - [Features of Claude](#features-of-claude)
-  - [Prompt Caching](#prompt-caching)
-  - [Model Context Protocol](#model-context-protocol)
-  - [Claude Code and Computer Use](#claude-code-and-computer-use)
-  - [Agents and Workflows](#agents-and-workflows)
-  - [Putting It All Together](#putting-it-all-together)
+  - [1. Introduction: Building Applications on the Claude API](#1-introduction-building-applications-on-the-claude-api)
+  - [2. Accessing Claude with the API](#2-accessing-claude-with-the-api)
+  - [3. Prompt Evaluation](#3-prompt-evaluation)
+  - [4. Prompt Engineering Techniques](#4-prompt-engineering-techniques)
+  - [5. Tool Use with Claude](#5-tool-use-with-claude)
+  - [6. RAG and Agentic Search](#6-rag-and-agentic-search)
+  - [7. Features of Claude](#7-features-of-claude)
+  - [8. Prompt Caching](#8-prompt-caching)
+  - [9. Model Context Protocol](#9-model-context-protocol)
+  - [10. Claude Code and Computer Use](#10-claude-code-and-computer-use)
+  - [11. Agents and Workflows](#11-agents-and-workflows)
+  - [12. Putting It All Together](#12-putting-it-all-together)
 
 
-## **12th October 2026**
+
+## **AI Fluency: Framework and Foundations**
+
+### **12th October 2026**
 
 Course: [Claude Academy – Anthropic](https://academy.claude.com/courses/ai-fluency-framework-foundations)
 
-1. # **Introduction to AI Fluency**
+### **1. Introduction to AI Fluency**
 
 AI Fluency is the ability to collaborate with AI effectively, efficiently, ethically, and safely.
 
 The goal is not simply to write better prompts, but to develop the skills needed to work with AI as a capable partner while maintaining human judgment and responsibility.
 
-## **Three ways to work with AI**
+#### **Three ways to work with AI**
 
 | Mode | Description | Example |
 | :---- | :---- | :---- |
@@ -83,7 +86,7 @@ The goal is not simply to write better prompts, but to develop the skills needed
 | Augmentation | Humans and AI collaborate to improve results. | Discuss system architecture together. |
 | Agency | AI operates more independently on your behalf within configured boundaries.	 | An AI agent handles a defined development workflow. |
 
-2. # **The 4Ds Framework**
+### **2. The 4Ds Framework**
 
 The framework introduces four essential competencies.
 
@@ -96,11 +99,11 @@ The framework introduces four essential competencies.
 
 The inner loop improves the work through instructions, evaluation, and feedback. The outer loop governs which work to delegate and who remains responsible for the result.
 
-3. # **Delegation — Deciding What AI Should Do**
+### **3. Delegation — Deciding What AI Should Do**
 
 Delegation consists of three components.
 
-## **Problem Awareness**
+#### **Problem Awareness**
 
 Understand the problem before deciding how AI should help.
 
@@ -111,13 +114,13 @@ Ask yourself:
 * What tasks are required?  
 * What decisions require human expertise?
 
-## **Platform Awareness**
+#### **Platform Awareness**
 
 Understand the capabilities and limitations of AI tools.
 
 Consider whether a tool can perform the task reliably, whether it has access to the necessary information, and whether another approach would be more appropriate.
 
-## **Task Delegation**
+#### **Task Delegation**
 
 Divide work strategically between humans and AI.
 
@@ -130,7 +133,7 @@ Divide work strategically between humans and AI.
 
 **Key lesson:** Effective delegation is not about automating everything. It is about finding the best division of work.
 
-4. # **Description — Communicating Effectively With AI**
+### **4. Description — Communicating Effectively With AI**
 
 Description involves three types of communication.
 
@@ -156,7 +159,7 @@ Description involves three types of communication.
 
 **Key lesson:** A good prompt describes not only what you want, but also how AI should work with you.
 
-5. # **Discernment — Evaluating AI's Work**
+### **5. Discernment — Evaluating AI's Work**
 
 Discernment is the ability to critically evaluate AI-generated outputs, processes, and behavior.
 
@@ -187,7 +190,7 @@ Suppose AI generates a FastAPI endpoint.
 
 **Key lesson:** AI-generated work should be evaluated against the same quality standards as human-created work.
 
-6. # **The Description–Discernment Loop**
+### **6. The Description–Discernment Loop**
 
 AI collaboration is an iterative process rather than a single prompt and response: 
 
@@ -204,7 +207,7 @@ AI collaboration is an iterative process rather than a single prompt and respons
 
 Avoid vague feedback like “Make it better.” Instead, clearly explain what the problem is, why it matters, and how it should be improved.
 
-7. # **Diligence — Responsible AI Collaboration**
+### **7. Diligence — Responsible AI Collaboration**
 
 Diligence focuses on ethical, transparent, and responsible AI use.
 
@@ -226,13 +229,13 @@ A **Diligence Statement** is a document that records which AI tools were used, h
 
 **Key lesson:** Delegating work to AI does not transfer accountability away from the human responsible for the project.
 
-# **AI Capabilities and Limitations**
+## **AI Capabilities and Limitations**
 
-## **13th October 2026**
+### **13th October 2026**
 
 Course: [Claude Academy – Anthropic](https://academy.claude.com/courses/ai-capabilities-and-limitations)
 
-1. # **Introduction to AI Capabilities and Limitations**
+### **1. Introduction to AI Capabilities and Limitations**
 
 Generative AI can produce impressive results, but it also has predictable limitations.
 
@@ -271,11 +274,11 @@ However, AI can also:
 
 Each property exists on a continuum between capability and limitation.
 
-2. # **What We Mean by AI**
+### **2. What We Mean by AI**
 
 Artificial Intelligence is a broad field that includes several types of systems.
 
-## **Classification AI**
+#### **Classification AI**
 
 Classification AI identifies categories or patterns in data.
 
@@ -287,7 +290,7 @@ Examples:
 
 * Classifying customer reviews as positive or negative.
 
-## **Prediction AI**
+#### **Prediction AI**
 
 Prediction AI estimates future outcomes using historical patterns.
 
@@ -299,7 +302,7 @@ Examples:
 
 * Estimating customer churn.
 
-## **Generative AI**
+#### **Generative AI**
 
 Generative AI creates new content based on patterns learned during training.
 
@@ -317,11 +320,11 @@ Examples:
 
 **Key takeaway:** Generative AI does not simply retrieve stored answers. It generates responses dynamically based on learned patterns, the current context, and available tools.
 
-3. # **How AI Gets Its Character**
+### **3. How AI Gets Its Character**
 
 Large Language Models typically undergo two major training stages.
 
-## **Pretraining**
+#### **Pretraining**
 
 During pretraining, a model learns patterns from large collections of data.
 
@@ -339,7 +342,7 @@ It develops capabilities involving:
 
 The fundamental learning objective commonly involves predicting missing or subsequent tokens.
 
-## **Fine-Tuning and Alignment**
+#### **Fine-Tuning and Alignment**
 
 After pretraining, additional training helps make the model more useful as an assistant.
 
@@ -355,7 +358,7 @@ This may involve:
 
 * Incorporating human or AI-generated feedback.
 
-## **Behavioral Fingerprints**
+#### **Behavioral Fingerprints**
 
 Training can lead to recognizable behaviors.
 
@@ -368,9 +371,9 @@ Training can lead to recognizable behaviors.
 
 **Practical lesson:** A confident, friendly, and well-written answer is not necessarily a correct answer.
 
-4. # **Next Token Prediction**
+### **4. Next Token Prediction**
 
-## **How It Works**
+#### **How It Works**
 
 An LLM generates text by predicting one token at a time.
 
@@ -384,7 +387,7 @@ For example:
 * Likely continuation: "Paris"  
 * The model continues predicting tokens until it completes its response.
 
-## **Capabilities**
+#### **Capabilities**
 
 Next Token Prediction enables AI to:
 
@@ -398,7 +401,7 @@ Next Token Prediction enables AI to:
 
 * Combine ideas across different topics.
 
-## **Limitations**
+#### **Limitations**
 
 Because generated text is not automatically verified against reality, the model may produce plausible but false information.
 
@@ -416,7 +419,7 @@ Common examples include:
 
 * False details about unfamiliar subjects.
 
-## **How to Reduce Fabrication**
+#### **How to Reduce Fabrication**
 
 * Provide reliable reference material.
 
@@ -432,9 +435,9 @@ Common examples include:
 
 **Key takeaway:** Fluency is not the same as factual accuracy.
 
-5. # **Knowledge**
+### **5. Knowledge**
 
-## **What Does AI Know?**
+#### **What Does AI Know?**
 
 An LLM acquires much of its general knowledge through training.
 
@@ -448,7 +451,7 @@ Its knowledge is influenced by:
 
 * The model's knowledge cutoff.
 
-## **Knowledge Strengths**
+#### **Knowledge Strengths**
 
 AI tends to perform better on:
 
@@ -462,7 +465,7 @@ AI tends to perform better on:
 
 * Frequently discussed subjects.
 
-## **Knowledge Limitations**
+#### **Knowledge Limitations**
 
 AI may be less reliable on:
 
@@ -478,7 +481,7 @@ AI may be less reliable on:
 
 * Controversial or inconsistently documented topics.
 
-## **Knowledge Cutoff**
+#### **Knowledge Cutoff**
 
 A model's training knowledge generally does not automatically include events that occurred after its training cutoff.
 
@@ -486,7 +489,7 @@ For example, a model may explain how a software framework works but lack knowled
 
 However, an AI system may overcome this limitation by using tools that retrieve current information.
 
-## **Improving Knowledge Reliability**
+#### **Improving Knowledge Reliability**
 
 | Problem | Recommended Solution |
 | :---- | :---- |
@@ -498,9 +501,9 @@ However, an AI system may overcome this limitation by using tools that retrieve 
 
 **Key takeaway:** A model's knowledge is not a complete or continuously updated database.
 
-6. # **Working Memory**
+### **6. Working Memory**
 
-## **What Is Working Memory?**
+#### **What Is Working Memory?**
 
 An AI model's working memory is primarily determined by its context window.
 
@@ -520,7 +523,7 @@ It may contain:
 
 * Generated responses.
 
-## **Context Window Limitations**
+#### **Context Window Limitations**
 
 Context windows have finite capacities.
 
@@ -536,7 +539,7 @@ When a conversation becomes too large:
 
 Even when content fits inside the context window, the model may not use every part of it equally effectively.
 
-## **Context Is Not Long-Term Memory**
+#### **Context Is Not Long-Term Memory**
 
 Context and persistent memory are different concepts.
 
@@ -548,7 +551,7 @@ Starting a new conversation does not inherently preserve everything from a previ
 
 Some AI products offer memory, projects, retrieval, or conversation-history features to help maintain continuity.
 
-## **Strategies for Managing Context**
+#### **Strategies for Managing Context**
 
 **Front-loading**
 
@@ -586,9 +589,9 @@ Instead of relying on one extremely long conversation:
 
 **Key takeaway:** More context is not always better. Relevant, well-organized context is more valuable than large amounts of unrelated information.
 
-7. # **Steerability**
+### **7. Steerability**
 
-## **What Is Steerability?**
+#### **What Is Steerability?**
 
 Steerability describes how effectively an AI model can follow instructions and adapt its behavior to user requirements.
 
@@ -606,7 +609,7 @@ Users can influence:
 
 * Output constraints.
 
-## **Strong Steerability**
+#### **Strong Steerability**
 
 AI often follows concrete, verifiable instructions effectively.
 
@@ -622,7 +625,7 @@ Examples:
 
 * "Keep the summary under 150 words."
 
-## **Weak Steerability**
+#### **Weak Steerability**
 
 AI may struggle with:
 
@@ -636,7 +639,7 @@ AI may struggle with:
 
 * Unstated intentions.
 
-## **Common Failure Mode**
+#### **Common Failure Mode**
 
 **Reasoning Drift**
 
@@ -650,7 +653,7 @@ The AI follows the literal wording of an instruction but misses its intended pur
 
 Untrusted content attempts to redirect the AI away from legitimate instructions.
 
-## **Improving Steerability**
+#### **Improving Steerability**
 
 * Use clear, specific instructions.  
 * Define acceptance criteria.  
@@ -668,13 +671,13 @@ Untrusted content attempts to redirect the AI away from legitimate instructions.
 
 **Key takeaway:** Precise instructions improve AI performance, but prompting alone cannot eliminate fundamental model limitations.
 
-## **8\. When AI Properties Collide**
+#### **8\. When AI Properties Collide**
 
 Real-world tasks usually involve multiple AI properties simultaneously.
 
 Understanding their interactions helps identify why an output failed.
 
-## **Example 1: Incorrect Research Summary**
+#### **Example 1: Incorrect Research Summary**
 
 Problem: AI summarizes a long technical document but invents supporting references.
 
@@ -691,7 +694,7 @@ Solutions:
 * Require references to source passages.  
 * Verify citations independently.
 
-## **Example 2: Incorrect Generated Code**
+#### **Example 2: Incorrect Generated Code**
 
 Problem: AI generates code using methods that do not exist in the installed library version.
 
@@ -708,7 +711,7 @@ Solutions:
 * Run tests and static analysis.  
 * Ask AI to correct failures using actual error messages.
 
-## **Example 3: Long Project Conversation**
+#### **Example 3: Long Project Conversation**
 
 Problem: AI begins contradicting earlier architectural decisions.
 
@@ -725,7 +728,7 @@ Solutions:
 * Reintroduce relevant constraints.  
 * Divide work into smaller, focused tasks.
 
-## **9\. Diagnosing AI Failures**
+#### **9\. Diagnosing AI Failures**
 
 When AI generates an unexpected result, do not automatically repeat the same prompt.
 
@@ -743,7 +746,7 @@ Identify the underlying limitation first.
 
 **Core principle:** Different failures require different solutions. Better prompting is only one possible intervention.
 
-## **10\. Connecting AI Properties to the 4D Framework**
+#### **10\. Connecting AI Properties to the 4D Framework**
 
 The course complements the AI Fluency Framework, which consists of Delegation, Description, Discernment, and Diligence.
 
@@ -757,7 +760,7 @@ The course complements the AI Fluency Framework, which consists of Delegation, D
 
 These relationships are practical connections rather than exclusive one-to-one mappings.
 
-## **Calibrated Trust**
+#### **Calibrated Trust**
 
 Calibrated trust means adjusting how much confidence and autonomy we give AI depending on the task and its associated risks.
 
@@ -784,19 +787,19 @@ For example:
 
 Trust should depend on the task, the evidence, the available tools, and the potential consequences of errors.
 
-# **The AI-native SDLC Playbook**
+## **The AI-native SDLC Playbook**
 
-## **27th October 2026**
+### **27th October 2026**
 
 Course: [Claude Academy – Anthropic](https://academy.claude.com/courses/ai-native-sdlc-playbook)
 
-1. # **Introduction: Why the SDLC Has to Change**
+### **1. Introduction: Why the SDLC Has to Change**
 
 AI agents now write code much faster than before, but the process around the code (approval gates, reviews, handoffs, policies) still runs at human speed. That process stalls the productivity gained from tools like Claude Code.
 
 The traditional SDLC was designed for a time when writing code was the slowest and most expensive stage. PRDs, estimation rituals and security reviews existed to force alignment before weeks or months of coding.
 
-## **When code is no longer the bottleneck**
+#### **When code is no longer the bottleneck**
 
 * The bottleneck moves to the stages around Build: planning, review/testing and deployment, which still run at human speed.  
 * Controls stop matching reality. Reviewing every line by hand worked when a person wrote it, not when agents write most of the diff.  
@@ -804,7 +807,7 @@ The traditional SDLC was designed for a time when writing code was the slowest a
 
 **Example:** Security teams are sized for human output. When agents multiply code output, either the review queue grows or code ships under-reviewed. A regulated company can accept neither.
 
-## **Traditional vs AI-native SDLC**
+#### **Traditional vs AI-native SDLC**
 
 The AI-native SDLC keeps the old control objectives but enforces them in new ways. The linear flow becomes a loop, with AI embedded at every stage and humans above the loop instigating, directing and governing.
 
@@ -817,7 +820,7 @@ The AI-native SDLC keeps the old control objectives but enforces them in new way
 | Deploy | Humans review every line; governance happens in review cycles. | Layers of agentic review; human review for regulated or critical code; hooks as approval gates. |
 | Maintain | Humans watch production for bugs. | Agents monitor deployments; a breached control band becomes a new intent.md. |
 
-## **The committed artifact chain**
+#### **The committed artifact chain**
 
 Each stage ends by committing an artifact to version control, and the next stage starts by reading it. The chain of commits is also the audit trail: who asked for what, what the agent produced, and who approved it.
 
@@ -829,7 +832,7 @@ Each stage ends by committing an artifact to version control, and the next stage
 | Merged PR | Deploy | CI/CD pipeline |
 | Breached control band | Maintain | A new intent.md |
 
-## **How each play is structured**
+#### **How each play is structured**
 
 The course has 12 plays grouped into 6 stages. Plays are modular, so a team can adopt them in any order that their prerequisites allow. Each play covers:
 
@@ -841,13 +844,13 @@ The course has 12 plays grouped into 6 stages. Plays are modular, so a team can 
 
 **Key lesson:** At first each step is prompted by hand. The end state is a loop where each accepted artifact fires the next gate, and human attention concentrates at the gates. Humans stay accountable for every decision that needs judgment.
 
-2. # **Stage 1 Plan: Capture as intent.md**
+### **2. Stage 1 Plan: Capture as intent.md**
 
 intent.md is a short, version-controlled proto-spec that states what is wanted, why, and under which constraints. It can start from a person's idea, a ticket, or a production alert (Stage 6).
 
 Instead of passing an idea through backlog entries, user stories, story points and refinement meetings, the originator brainstorms with Claude and writes it down in their own words.
 
-## **Steps**
+#### **Steps**
 
 * The originator describes the problem to Claude in plain words: what is not possible today, who is affected, what better looks like, what is out of scope.  
 * Brainstorm until the idea is concrete. Claude asks the questions an analyst would ask: scope, users, constraints, success criteria.  
@@ -855,7 +858,7 @@ Instead of passing an idea through backlog entries, user stories, story points a
 * The originator corrects anything Claude misunderstood.  
 * Commit intent.md to the shared intent home, usually an intent/ folder in the product repo. Non-engineers can commit through a GitHub connector from claude.ai.
 
-## **intent.md template**
+#### **intent.md template**
 
 A typical intent.md has these sections:
 
@@ -868,19 +871,19 @@ A typical intent.md has these sections:
 | Constraints | Security, data, auth or technical limits |
 | Open questions | What still needs a decision |
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Git records author, timestamp and revisions. The product owner accepts (merge) or rejects (close) the intent.  
 * **Leading indicator:** Time from first conversation to committed intent.md, expected to fall from weeks to hours.  
 * **Lagging indicator:** Survival rate, the share of intent.md files accepted into Design.
 
-3. # **Stage 2 Design: Requirements and Design**
+### **3. Stage 2 Design: Requirements and Design**
 
 After the product owner accepts intent.md, Claude produces a requirements and design spec (spec.md) in one session. The spec is constrained by the organization's skills for brand, security, compliance and UX, and it flags areas of concern. The product owner reviews the spec but does not write it.
 
 For front-end work, the product owner can mock the design in Claude Design from intent.md, iterate on it, and export it to Claude Code to build.
 
-## **Steps**
+#### **Steps**
 
 * Open a session with the organization's skills loaded and attach intent.md.  
 * Prompt Claude to produce spec.md, apply the skills, and clearly flag concerns, especially conflicting policies.  
@@ -891,17 +894,17 @@ For front-end work, the product owner can mock the design in Claude Design from 
 
 **Automation path:** Run the pass by hand first, then turn it into an organization slash command, and finally a CI job that runs when intent.md is merged and opens spec.md as a PR.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Live policy is applied while the spec is written, instead of being discovered in a review weeks later. The spec, the prompt and the skill versions are all in version control.  
 * **Leading indicator:** Time between the intent.md commit and the spec.md commit.  
 * **Lagging indicator:** Requirements rework, counted as spec.md commits after the first plan.md commit.
 
-4. # **Stage 3 Build: Plan Mode as the Default Starting Point**
+### **4. Stage 3 Build: Plan Mode as the Default Starting Point**
 
 Engineers start Claude Code sessions in plan mode, where Claude can read the codebase without changing anything. They give it the approved spec.md, let it interview them, and iterate on the plan before any code is written.
 
-## **Steps**
+#### **Steps**
 
 * Start the session in plan mode.  
 * Give Claude intent.md and spec.md and ask for an implementation plan: files that change, order of work, tests that prove it.  
@@ -913,11 +916,11 @@ Engineers start Claude Code sessions in plan mode, where Claude can read the cod
 
 **plan.md contains:** files that change, order of work, risks, and proof (tests, screenshots).
 
-## **Auto mode**
+#### **Auto mode**
 
 In auto mode the engineer approves the plan and Claude applies each change without a per-edit prompt. As guardrails mature (tuned CLAUDE.md, skills, hooks, a runnable test suite), auto mode becomes the default for routine work. Review shifts from watching each edit to reviewing artifacts after longer autonomous sessions, and it enables parallel work with worktrees.
 
-## **Legacy systems and the source of truth**
+#### **Legacy systems and the source of truth**
 
 Existing tools (Jira, requirements tools, Figma, change boards) are hard to replace because auditors and other teams rely on them. For each artifact, name one system as the source of truth:
 
@@ -927,17 +930,17 @@ Existing tools (Jira, requirements tools, Figma, change boards) are hard to repl
 | Legacy system as source of truth | Jira/ServiceNow holds the record; Claude reads it at session start and writes back via an MCP connector. |
 | Linkage (minimum bar) | Artifacts note the record ID, records note the commit SHA. A good starting point during transition. |
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Design review happens before code exists, when changing course means editing a document. Higher-risk plans go to a tech lead or architect.  
 * **Leading indicator:** Share of changes merged from the first implementation pass; time from plan approval to merged PR.  
 * **Lagging indicator:** Rework cycles per change and how often the merged diff still matches plan.md.
 
-5. # **Stage 3 Build: The CLAUDE.md**
+### **5. Stage 3 Build: The CLAUDE.md**
 
 CLAUDE.md gives Claude the context a new joiner would need: conventions, commands, architecture and the mistakes the team sees most often. Claude reads it at the start of every session, and the whole team maintains it.
 
-## **Steps**
+#### **Steps**
 
 * Run /init in the repo to generate a starting CLAUDE.md.  
 * Cut it down to what a new joiner needs on day one: build, test and lint commands, important conventions, things Claude keeps getting wrong.  
@@ -947,17 +950,17 @@ CLAUDE.md gives Claude the context a new joiner would need: conventions, command
 
 **Typical sections:** Commands, Conventions, Architecture, Things Claude gets wrong.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** The file is version controlled, so the agent's instructions are reviewable; code owners approve changes in PR review.  
 * **Leading indicator:** How often Claude repeats a mistake CLAUDE.md should have caught.  
 * **Lagging indicator:** Time to first merged PR for a new team member.
 
-6. # **Stage 3 Build: Skills as Institutional Knowledge**
+### **6. Stage 3 Build: Skills as Institutional Knowledge**
 
 Skills turn institutional knowledge into explicit, version-controlled instructions that are applied consistently and updated centrally when policy changes. Write a skill for knowledge that must be applied consistently; put general project context in CLAUDE.md or a prompt instead.
 
-## **Steps**
+#### **Steps**
 
 * Pick one piece of knowledge that is enforced inconsistently today, such as a security standard, an API convention or a brand rule.  
 * Write it as a skill: a folder with a SKILL.md whose frontmatter says when it triggers and whose body says what to do.  
@@ -965,7 +968,7 @@ Skills turn institutional knowledge into explicit, version-controlled instructio
 * Test that it triggers by asking for the relevant task in different ways.  
 * When the policy changes, update the skill and have the policy owner sign off. Engineers get the new version in their next session.
 
-## **Skills vs hooks**
+#### **Skills vs hooks**
 
 A skill is advisory: it makes Claude likely to follow a policy, but nothing forces it. A policy that must always hold needs a deterministic control behind it.
 
@@ -977,13 +980,13 @@ A skill is advisory: it makes Claude likely to follow a policy, but nothing forc
 
 Build-phase hooks run on every matching action, so keep them fast and scoped to the changed file. Heavy checks (full test suite) belong at commit or PR, and hooks that ask a human for approval belong at the Deploy gates.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Skill invocations are logged in session traces; the policy owner reviews skill changes like code.  
 * **Leading indicator:** Time from a policy change being approved to the updated skill merging.  
 * **Lagging indicator:** PR review findings that cite the policy, which should fall toward zero.
 
-7. # **Stage 3 Build: Parallel Sessions and Subagents**
+### **7. Stage 3 Build: Parallel Sessions and Subagents**
 
 One engineer can drive several streams of work at once. The engineer's job shifts from writing code to steering and reviewing, and eventually to building and monitoring loops.
 
@@ -993,26 +996,26 @@ One engineer can drive several streams of work at once. The engineer's job shift
 | Purpose | More tasks in flight per engineer | Keeps each session focused; handles recurring jobs |
 | Example | claude \--worktree feature-auth | verifier, code simplifier, researcher |
 
-## **Steps**
+#### **Steps**
 
 * Use plan.md to split work into tasks that touch different files. Tasks sharing files run one after another in a single session.  
 * Give each parallel task its own worktree so sessions do not collide on files.  
 * Start with 2 or 3 sessions. The limit is how many streams one person can review properly.  
 * Define recurring jobs as subagents in .claude/agents/ (name, when to use it, allowed tools) and commit them to Git.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Hooks and permission settings in the repo apply to all sessions; each session's actions are attributed to the engineer who ran it.  
 * **Leading indicator:** Concurrent sessions per engineer while review quality holds.  
 * **Lagging indicator:** Changes merged per engineer per week, read alongside the rework rate.
 
-8. # **Stage 4 Test: Give Claude a Feedback Loop**
+### **8. Stage 4 Test: Give Claude a Feedback Loop**
 
 Always give Claude a way to verify its own work: tests, a build, or a screenshot diff. Claude iterates until the check passes, so what reaches the engineer has already passed it.
 
 The feedback loop runs throughout the task. A verifier subagent is different: it is a final check in a fresh context once the session thinks the work is done.
 
-## **Steps**
+#### **Steps**
 
 * Wrap verification in single commands (make test, npm test) that exit non-zero on failure.  
 * List each command in the CLAUDE.md Commands section with an example of healthy output.  
@@ -1022,17 +1025,17 @@ The feedback loop runs throughout the task. A verifier subagent is different: it
 * Make verification part of done: run the tests before reporting complete and show the output.  
 * Protect the loop: a hook blocks edits to test files during a fix task.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Evidence:** The literal test output, build log or screenshot diff, logged in the session transcript and the PR check run.  
 * **Leading indicator:** First-pass CI success rate for agent-written changes.  
 * **Lagging indicator:** Review time per PR and change failure rate.
 
-9. # **Stage 4 Test: Continuous Evals in CI**
+### **9. Stage 4 Test: Continuous Evals in CI**
 
 Evals are the AI-native version of stage-gate QA. An eval suite runs whenever the agent's configuration changes (new model, rewritten prompt, changed skill) and shows whether the agent still works to the same standard. The suite is live: add new cases as old ones stop discriminating.
 
-## **Steps**
+#### **Steps**
 
 * Collect 20 to 50 real tasks from recent work, each with its expected or accepted outcome.  
 * Write each task as an eval: the prompt plus checks that define acceptable (tests pass, lint clean, behavior unchanged, policy followed).  
@@ -1040,17 +1043,17 @@ Evals are the AI-native version of stage-gate QA. An eval suite runs whenever th
 * Gate configuration changes on the results: a change that drops the pass rate is reviewed before merging.  
 * Every production incident becomes a permanent regression eval.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** The pass-rate threshold is a merge check; runs are logged so results can be compared over time.  
 * **Leading indicator:** Eval pass rate over time and how quickly an incident becomes an eval.  
 * **Lagging indicator:** Regressions caught in CI vs regressions found in production.
 
-10. # **Stage 5 Deploy: AI in the PR Review Loop**
+### **10. Stage 5 Deploy: AI in the PR Review Loop**
 
 Claude both reviews incoming PRs against the organization's policies and addresses review comments on its own PRs. Every PR gets the same review passes with findings ranked by severity, so engineers can focus on intent and risk.
 
-## **Steps**
+#### **Steps**
 
 * Enable the managed Code Review service (fastest start) or run claude-code-action in your own CI for more control.  
 * The tech lead writes REVIEW.md at the repo root: the review passes, what counts as Important vs Nit, and what to skip.  
@@ -1067,17 +1070,17 @@ Typical review passes in REVIEW.md:
 | Security | Injection risks, authentication gaps, PII in logs |
 | Compliance | Change matches spec.md, plan.md and design principles |
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Separation of duties is preserved: the agent that wrote the code cannot approve it. The PR history is the audit record.  
 * **Leading indicator:** Time to first review (minutes) and share of comments resolved without a human touching the branch.  
 * **Lagging indicator:** Defects caught before merge vs defects escaping to production.
 
-11. # **Stage 5 Deploy: Hooks as Approval Gates**
+### **11. Stage 5 Deploy: Hooks as Approval Gates**
 
 In Build, hooks allow or block actions automatically. A hook can also ask, pausing the action until a specific person approves, which is what release gating needs. Hooks run wherever Claude acts, not only at deploy.
 
-## **Steps**
+#### **Steps**
 
 * Leadership, change management and compliance list the human approval gates that must survive, such as change sign-off, release authorization and edits to protected paths.  
 * The platform engineer expresses each gate as a hook: a script that runs before Claude acts and can allow, ask or block.  
@@ -1086,7 +1089,7 @@ In Build, hooks allow or block actions automatically. A hook can also ask, pausi
 
 **Example:** A PreToolUse hook on Bash checks whether a command deploys to production without a release approval and blocks it (exit code 2 blocks the action and sends the message to Claude).
 
-## **Managed settings for a regulated enterprise**
+#### **Managed settings for a regulated enterprise**
 
 Managed settings are deployed by the platform team (MDM or admin console) and cannot be overridden by engineers. Key controls:
 
@@ -1100,17 +1103,17 @@ Managed settings are deployed by the platform team (MDM or admin console) and ca
 | allowManagedMcpServersOnly | The agent's tool surface is an allowlist |
 | requiredMinimumVersion | Refuse to start on an unassessed version |
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** The gate is enforced every time, for everyone; allow and block decisions are logged with timestamps.  
 * **Leading indicator:** Time spent waiting on each approval gate (from the OpenTelemetry export).  
 * **Lagging indicator:** Gate violations reaching production before and after hooks.
 
-12. # **Stage 5 Deploy: CI/CD Integration and Deployment**
+### **12. Stage 5 Deploy: CI/CD Integration and Deployment**
 
 Run Claude Code non-interactively inside the pipeline for steps that need judgment (triaging a broken build, a flaky test, writing the changelog). Sandbox the execution, expose deployment through MCP, and rehearse rollback before the agent needs it.
 
-## **Steps**
+#### **Steps**
 
 * Start with read-only steps: claude \-p in a pipeline job to triage a failed build or draft the changelog.  
 * Add write steps behind existing gates (fix lint, update docs, address @claude comments). Everything arrives as a PR; the agent cannot push to main.  
@@ -1129,16 +1132,16 @@ Autonomy by environment:
 
 **Key principle:** The agent may act up to the production gate and cannot pass it.
 
-## **Metrics**
+#### **Metrics**
 
 * **Leading indicator:** Share of pipeline failures triaged without paging a human.  
 * **Lagging indicator:** DORA metrics from the CI system and deployment tooling.
 
-13. # **Stage 6 Maintain: Closing the Loop on Metrics**
+### **13. Stage 6 Maintain: Closing the Loop on Metrics**
 
 Every earlier stage needs a person to start it. In Stage 6, a trigger (a control-band breach, a ticket, a channel message or a schedule) invokes Claude with no person in the path. Claude diagnoses, acts only through gated routes, and writes what it finds as a new intent.md, which restarts the loop. People triage and review instead of starting the work.
 
-## **Steps**
+#### **Steps**
 
 * Pick one metric with a stable rolling baseline: CI test failure rate, post-deploy 5xx rate or PR cycle time.  
 * Write a deterministic, unit-tested detection script (rolling mean and standard deviation with Western Electric rules) that catches both slow drift and spikes. No model is involved in detection.  
@@ -1156,17 +1159,17 @@ Response tiers:
 | 2σ | Claude diagnoses, read-only |
 | 3σ | Claude may act: open a PR into the review gate or trigger a pre-approved runbook such as rollback |
 
-## **Claude on call with Claude Tag**
+#### **Claude on call with Claude Tag**
 
 Incidents also arrive through Slack or Teams. Claude Tag makes Claude a member of incident channels, so each incident gets a first responder. Anyone in the channel can guide the response, Claude verifies the metric is back at baseline through MCP, and writes the post-mortem to a version-controlled lessons file. Small fixes arrive as PRs; larger work becomes an intent.md.
 
-## **Governance and metrics**
+#### **Governance and metrics**
 
 * **Governance:** Tier boundaries are enforced from config; managed settings deny production access; runbooks are approved in advance.  
 * **Leading indicator:** Time from band breach to an intent.md in the triage queue.  
 * **Lagging indicator:** Share of findings that become merged fixes, and repeat incidents of the same class.
 
-14. # **Closing: Play Dependencies and Resources**
+### **14. Closing: Play Dependencies and Resources**
 
 Models and harnesses can now transform the whole SDLC, not only code production, while keeping human judgment central and meeting enterprise governance needs. Plays without prerequisites are good places to start.
 
@@ -1184,11 +1187,11 @@ Models and harnesses can now transform the whole SDLC, not only code production,
 
 **Key takeaway:** Speed up the process around the code, not just the code. Each stage commits an artifact that triggers the next, gates enforce governance as the AI acts, and humans focus on judgment at the gates.
 
-15. # **Putting It All Together: The End-to-End Loop**
+### **15. Putting It All Together: The End-to-End Loop**
 
 The 12 plays are not separate tools. They form one loop: each stage reads the artifact the previous stage committed, Claude does the work, and a human approves at a gate before the next stage starts. The loop then feeds itself, because production issues come back in as new intents.
 
-## **The full loop at a glance**
+#### **The full loop at a glance**
 
 Each row is one step of the loop, in order:
 
@@ -1201,7 +1204,7 @@ Each row is one step of the loop, in order:
 | Deploy | Reviews against REVIEW.md, fixes comments, prepares the release in CI/CD | Reviewed PR, release | Code owner approves; release manager authorizes production |
 | Maintain | Diagnoses control-band breaches and incidents | A new intent.md | Service owner triages |
 
-## **What supports every stage**
+#### **What supports every stage**
 
 Three building blocks run underneath the whole loop:
 
@@ -1209,7 +1212,7 @@ Three building blocks run underneath the whole loop:
 * **Skills:** policies (security, brand, API, compliance) applied while the work is done, from Design through Review.  
 * **Hooks and managed settings:** deterministic controls that block unsafe actions and enforce approval gates wherever Claude acts.
 
-## **Example: one change through the loop**
+#### **Example: one change through the loop**
 
 A claims team wants customers to see their claim status in the portal:
 
@@ -1220,14 +1223,14 @@ A claims team wants customers to see their claim status in the portal:
 * **Deploy:** The AI review checks the PR against spec.md and plan.md, a code owner approves, and the release manager authorizes production.  
 * **Maintain:** A monitoring script sees the status API error rate break its 3σ band. Claude diagnoses it and writes a new intent.md, and the loop starts again.
 
-## **How each role's work changes**
+#### **How each role's work changes**
 
 * **Product owners** review intent.md and spec.md instead of writing requirements by hand.  
 * **Engineers** steer several sessions and review plans and diffs instead of writing every line.  
 * **Tech leads and policy owners** maintain CLAUDE.md, REVIEW.md and skills instead of repeating the same feedback.  
 * **Platform teams** own the hooks, managed settings, evals and pipelines that connect the stages.
 
-## **Suggested adoption path**
+#### **Suggested adoption path**
 
 Start with the plays that have no prerequisites, then build up:
 
@@ -1239,13 +1242,13 @@ Start with the plays that have no prerequisites, then build up:
 
 **Key takeaway:** The AI-native SDLC is one loop held together by committed artifacts: intent.md, spec.md, plan.md, the PR and the incident record. Claude does the work at each stage, controls are enforced as it acts, and humans spend their time at the gates making the judgment calls.
 
-# **Claude Code in Action**
+## **Claude Code in Action**
 
-## **27th October 2026**
+### **27th October 2026**
 
 Course: [Claude Academy – Anthropic](https://academy.claude.com/courses/claude-code-in-action)
 
-1. # **Introduction: From Single Prompts to Hands-Off Sessions**
+### **1. Introduction: From Single Prompts to Hands-Off Sessions**
 
 The course is for developers who already use Claude Code for single prompts and want to run longer, less supervised sessions that the whole team can trust. It assumes basic Git and command-line skills.
 
@@ -1258,16 +1261,16 @@ It is organized around four skills:
 | Automate repeat work | Routines, headless mode, the Agent SDK, Code Review and the GitHub Action |
 | Verify and share | Checking unsupervised runs and packaging a setup as a plugin |
 
-2. # **Steering Long Sessions**
+### **2. Steering Long Sessions**
 
 Long tasks such as multi-file refactors or new features can run for hours. Two habits keep them on track: scope the work before Claude starts, and steer it while it runs.
 
-## **Scope first with plan mode**
+#### **Scope first with plan mode**
 
 * In plan mode Claude researches read-only, reads the code and proposes a plan for you to review.  
 * Read the plan carefully and ask Claude to revise anything wrong or missing. Fixing a plan is faster than cleaning up after a bad run.
 
-## **Steer while Claude works**
+#### **Steer while Claude works**
 
 * **Compact:** /compact summarizes the conversation to free up context. Add a focus, for example /compact Focus on the \--version flag implementation, so the summary keeps what matters.  
 * **Rewind:** every prompt is a checkpoint. Double-tap Escape on an empty prompt to open the rewind menu.
@@ -1282,7 +1285,7 @@ Rewind menu options:
 | Summarize from here | Compresses everything after the checkpoint, useful after a side conversation |
 | Summarize up to here | Compresses everything before the checkpoint, useful after a long setup phase |
 
-## **Let Claude run more autonomously**
+#### **Let Claude run more autonomously**
 
 * **Goal:** /goal sets a completion condition, for example all tests in src/billing pass and the type checker reports zero errors. Claude keeps working until an evaluator confirms it, and /goal clear cancels it. The condition must be checkable from Claude's visible output.  
 * **Loop:** /loop reruns a prompt on a fixed or self-paced interval, useful for watching a CI run or a deployment. Escape stops it.  
@@ -1290,15 +1293,15 @@ Rewind menu options:
 
 **Key lesson:** Scope first, then steer. Use a goal when describing done is easier than describing the steps.
 
-3. # **A CLAUDE.md That Gets Followed**
+### **3. A CLAUDE.md That Gets Followed**
 
 CLAUDE.md is guidance, not enforced configuration. Every line competes for Claude's attention, so the leaner the file, the more of it Claude follows.
 
-## **Pick the right tool**
+#### **Pick the right tool**
 
 CLAUDE.md is for soft conventions and preferences. Hard rules such as never pushing to main belong in a PreToolUse hook, which blocks the action even if Claude tries it.
 
-## **The four CLAUDE.md locations**
+#### **The four CLAUDE.md locations**
 
 Claude loads all four at launch, and they stack:
 
@@ -1309,7 +1312,7 @@ Claude loads all four at launch, and they stack:
 | Project | The team | Checked into the repo |
 | Local | You, this repo only | Git-ignored; good for personal notes on a branch |
 
-## **Writing rules that stick**
+#### **Writing rules that stick**
 
 * **Imports:** split a long file with lines like @.claude/conventions/testing.md. This organizes the file but does not reduce context, since everything still loads at launch.  
 * **Be specific and checkable:** write “Put new API routes in src/api/handlers, one per file” instead of “follow best practices”.  
@@ -1319,11 +1322,11 @@ Claude loads all four at launch, and they stack:
 
 **Key lesson:** Treat CLAUDE.md like production code. If a line cannot be justified, delete it.
 
-4. # **Verification Skills**
+### **4. Verification Skills**
 
 Verification is the first skill to build. Without it, checking Claude's work depends on someone remembering to ask. A verification skill fires automatically when a finished task matches its description and runs the same checks every time.
 
-## **What the skill does**
+#### **What the skill does**
 
 * Runs the test suite.  
 * Reads the diff and checks that no test was weakened to make it pass.  
@@ -1331,14 +1334,14 @@ Verification is the first skill to build. Without it, checking Claude's work dep
 
 Done means the gates were run, the results were observed and they were reported, not that the diff looks right. Rule of thumb: if you have typed the same multi-step instruction twice, make it a skill.
 
-## **Skill structure**
+#### **Skill structure**
 
 * **skill.md:** the name, the trigger description and the procedure. Keep it lean.  
 * **reference.md:** detailed material Claude reads only when it needs it.  
 * **Scripts (for example check.sh):** Claude runs them instead of loading them into context, so a skill can carry its own tooling.  
 * Only skill descriptions load into context until a skill is needed, so many skills cost little. Commit them to .claude/skills so the team shares them.
 
-## **Which surface owns which rule**
+#### **Which surface owns which rule**
 
 Each kind of rule has a home:
 
@@ -1350,7 +1353,7 @@ Each kind of rule has a home:
 
 **Key lesson:** CLAUDE.md and skills are instructions Claude follows; a hook is code that runs. Non-negotiable rules need a hook.
 
-5. # **Permission Modes**
+### **5. Permission Modes**
 
 A permission mode sets which actions Claude can take without asking. Deny rules still apply in every mode.
 
@@ -1363,24 +1366,24 @@ A permission mode sets which actions Claude can take without asking. Deny rules 
 | dontAsk | Reads and pre-approved tools; anything else is denied | Locked-down CI and scripts |
 | bypassPermissions | Everything | Isolated containers and VMs only |
 
-## **Switching modes**
+#### **Switching modes**
 
 * Press Shift+Tab during a session to cycle through modes.  
 * Start in a mode with claude \--permission-mode plan.  
 * Set a default with permissions.defaultMode in settings.json.  
 * For headless runs, pass the mode explicitly, for example claude \-p "..." \--permission-mode dontAsk.
 
-## **Auto mode vs bypass**
+#### **Auto mode vs bypass**
 
 * **Auto mode:** a separate classifier blocks actions that go beyond the request, touch unknown infrastructure or look driven by hostile content, such as force pushes, production deploys or curl \| bash. After 3 blocks in a row or 20 in total it falls back to prompting.  
 * **bypassPermissions:** no checks at all and no protection against prompt injection. Use it only in sandboxes without internet access; admins can disable it.  
 * **Limit:** the classifier judges danger, not correctness, so the work still needs verifying.
 
-6. # **Hooks**
+### **6. Hooks**
 
 A CLAUDE.md rule is a request; a hook is deterministic code that runs at a fixed point in the agent loop. Use hooks for anything that must happen every time, including on unattended runs.
 
-## **Main hook events**
+#### **Main hook events**
 
 Claude Code fires around 30 events; these matter most:
 
@@ -1393,7 +1396,7 @@ Claude Code fires around 30 events; these matter most:
 | PreCompact / PostCompact | Around compaction | Compaction handling |
 | InstructionsLoaded | When a CLAUDE.md or rule file loads | Audit what entered context |
 
-## **Controlling the outcome**
+#### **Controlling the outcome**
 
 * **PreToolUse JSON:** return permissionDecision as allow, deny or ask (defer only for \-p runs). updatedInput rewrites the call but replaces the whole input, so echo back the fields you are not changing.  
 * **Exit 0:** success, and JSON on stdout is parsed. Plain text is added to context only on SessionStart, UserPromptSubmit and UserPromptExpansion.  
@@ -1401,25 +1404,25 @@ Claude Code fires around 30 events; these matter most:
 * **Any other code, including exit 1:** logged only, nothing is blocked. This is a common mistake.  
 * **Config:** a matcher picks the tool (for example Bash), and an optional if clause narrows it to specific commands.
 
-## **Examples**
+#### **Examples**
 
 * **Redact instead of block:** a PreToolUse hook spots an sk\_live\_ secret in a Bash command and replaces it with a placeholder through updatedInput, so the task still completes.  
 * **Keep state after compaction:** a SessionStart hook with the compact matcher prints a short list of recently edited files, so Claude does not resume cold.
 
 **Key lesson:** Use exit 2 to block. PostToolUse runs after the tool, so it can give feedback but cannot prevent the call.
 
-7. # **Routines and Headless Mode**
+### **7. Routines and Headless Mode**
 
 Once Claude handles a task reliably by hand, stop running it by hand. The options range from fully managed (routines) to fully custom (the Agent SDK).
 
-## **Routines**
+#### **Routines**
 
 * A routine is a saved prompt plus a repo and any connectors, run on Anthropic's infrastructure with nothing to host.  
 * Triggers: a cron schedule, an HTTP POST to its API endpoint, or a GitHub event such as a new PR.  
 * Create one at claude.ai/code/routines or with /schedule, for example /schedule daily dependency audit at 9am.  
 * Limits: research preview, at most once per hour, and each run starts from a fresh clone and can only push to claude/ branches by default.
 
-## **Headless mode and the Agent SDK**
+#### **Headless mode and the Agent SDK**
 
 * claude \-p runs once with no UI and composes with shell tools through stdin and stdout.  
 * \-p skips auto-discovery of CLAUDE.md, hooks, skills, plugins and MCP servers, so pass what you need explicitly. In return, startup is much faster.  
@@ -1439,7 +1442,7 @@ Which to choose:
 
 **Key lesson:** Start with routines and move to more control only when the job needs it.
 
-8. # **GitHub Actions and Code Review**
+### **8. GitHub Actions and Code Review**
 
 Pull requests are where review and much of the busywork happen, so they are the natural place to hand work to Claude. There are two options:
 
@@ -1452,30 +1455,30 @@ Pull requests are where review and much of the busywork happen, so they are the 
 | Fixes | Apply locally with /code-review \--fix | The agent can push commits |
 | Approval | Never approves or blocks; humans decide | Depends on your configuration |
 
-## **Code Review**
+#### **Code Review**
 
 * Reviews the diff against the whole codebase, then deduplicates findings and ranks them by severity.  
 * Triggers: when a PR opens, on every push, or only on an @claude review comment.  
 * Research preview on Team and Enterprise plans.
 
-## **The GitHub Action**
+#### **The GitHub Action**
 
 * Run /install-github-app (repo admin needed) to install the app and add the API key secret, then add .github/workflows/claude.yaml using anthropics/claude-code-action@v1.  
 * Key inputs: trigger\_phrase (default @claude), prompt, claude\_args, and use\_bedrock or use\_vertex.  
 * **Example:** a reviewer comments @claude asking it to implement a linked spec, and Claude pushes commits and explains them.  
 * **Scheduled jobs:** a cron trigger for a daily rollup, plus workflow\_dispatch to run it manually.
 
-## **Tuning unattended jobs**
+#### **Tuning unattended jobs**
 
 * Cap the loop with \--max-turns.  
 * Use a permission mode that never stops to ask, since nobody is there to answer.  
 * Grant only the tools the job needs; report jobs should be read-only.
 
-9. # **Trust It: Verifying Unsupervised Runs**
+### **9. Trust It: Verifying Unsupervised Runs**
 
 Verify in proportion to how little you watched. A short session you followed needs a glance; an unattended CI run needs a check that reconstructs what happened.
 
-## **Practices**
+#### **Practices**
 
 * **Auto mode, not bypass:** keep the classifier as a safety net, but remember it checks danger, not correctness.  
 * **Diff before summary:** run /code-review and read git diff yourself. Start with the files in the plan, then look for changes outside it. A tidy summary can hide an unexpected file.  
@@ -1485,34 +1488,34 @@ Verify in proportion to how little you watched. A short session you followed nee
 
 **Key lesson:** Work Claude did while you were not watching should never be accepted on Claude's word alone.
 
-10. # **Plugins**
+### **10. Plugins**
 
 A plugin packages a Claude Code setup into one installable, versioned unit: skills, subagents, hooks, MCP server configs, LSP servers, monitors, themes and a small part of settings.json.
 
-## **Installing**
+#### **Installing**
 
 * Install by name with /plugin install github@claude-plugins-official, then run /reload-plugins.  
 * Add a team marketplace with /plugin marketplace add your-org/claude-plugins. Later installs resolve through it, and the Discover tab lists its plugins.  
 * Public sources: the community marketplace (automated review) and the curated official marketplace.
 
-## **Read before you install**
+#### **Read before you install**
 
 * A plugin runs code with your privileges, and its hooks fire on every matching tool call.  
 * Check its hooks, agents, MCP servers and estimated context cost first. Reviewed is not the same as trusted.  
 * Components run alongside yours: hooks stack, and skills, agents and commands are namespaced under the plugin name.  
 * Only two settings.json keys are honored. The agent key can promote a plugin subagent to the main thread and change default behavior.
 
-## **Packaging your own**
+#### **Packaging your own**
 
 * Keep the working .claude layout: skill folders, agents/\*.md, hooks/hooks.json and .mcp.json.  
 * Add .claude-plugin/plugin.json with a name (used as the namespace) and a version.  
 * Publish through a team marketplace so everyone installs the same version.
 
-11. # **Putting It All Together: A Trusted Hands-Off Workflow**
+### **11. Putting It All Together: A Trusted Hands-Off Workflow**
 
 The nine lessons build one workflow: steer the work, configure Claude so it behaves the same way every time, automate the repeat work, then verify and share the setup.
 
-## **The workflow at a glance**
+#### **The workflow at a glance**
 
 Each layer builds on the one before:
 
@@ -1524,7 +1527,7 @@ Each layer builds on the one before:
 | Verify | Diff review, Stop and PostToolUse hooks, fresh-context review | Evidence instead of trust |
 | Share | Plugins and a team marketplace | The same trusted setup for everyone |
 
-## **Guidance, procedure or guarantee**
+#### **Guidance, procedure or guarantee**
 
 The most important decision in the course is where each rule lives:
 
@@ -1533,7 +1536,7 @@ The most important decision in the course is where each rule lives:
 * **Permission modes:** how much Claude may do without asking (auto for long work, dontAsk for CI).  
 * **Hooks:** rules that must hold every time, such as blocking pushes to main or refusing to stop while tests fail.
 
-## **Example: an overnight dependency upgrade**
+#### **Example: an overnight dependency upgrade**
 
 How the pieces work together on one task:
 
@@ -1544,7 +1547,7 @@ How the pieces work together on one task:
 * **Automate next time:** turn the job into a weekly routine with /schedule, which pushes only to a claude/ branch.  
 * **Share:** package the skill, hooks and settings as a plugin so teammates get the same setup.
 
-## **Suggested adoption path**
+#### **Suggested adoption path**
 
 * **Start:** plan mode, a lean CLAUDE.md and a verification skill.  
 * **Enforce:** hooks for rules that must hold, and auto mode for long sessions.  
@@ -1554,13 +1557,13 @@ How the pieces work together on one task:
 
 **Key takeaway:** Trust in an unsupervised run comes from the setup, not from watching it: lean instructions, skills for procedures, hooks for guarantees, and verification scaled to how little you watched.
 
-# **Building with the Claude API**
+## **Building with the Claude API**
 
-## **11th November 2026**
+### **11th November 2026**
 
 Course: [Claude Academy – Anthropic](https://academy.claude.com/courses/building-with-the-claude-api)
 
-1. # **Introduction: Building Applications on the Claude API**
+### **1. Introduction: Building Applications on the Claude API**
 
 The course is for software engineers who want to integrate Claude into their own applications through the API. It assumes Python skills, basic JSON handling and an Anthropic API key. It runs about 9 hours: 67 lessons and 8 quizzes, ending with a final assessment.
 
@@ -1578,11 +1581,11 @@ It is organized in nine sections:
 | Claude Code and computer use | Anthropic's own agent apps, extended with MCP servers |
 | Agents and workflows | Parallelization, chaining and routing workflows, and agent design |
 
-2. # **Accessing Claude with the API**
+### **2. Accessing Claude with the API**
 
 Every interaction is a request to the Messages API. The examples use the anthropic Python SDK, with the key stored as ANTHROPIC\_API\_KEY in a .env file that is listed in .gitignore.
 
-## **Making a request**
+#### **Making a request**
 
 client.messages.create() takes three required parameters:
 
@@ -1594,13 +1597,13 @@ client.messages.create() takes three required parameters:
 
 message.content\[0\].text returns the generated text without the response metadata.
 
-## **Multi-turn conversations**
+#### **Multi-turn conversations**
 
 * **No memory:** the API does not store conversation history. Each request is independent, and Claude sees only what you send.  
 * **Keep the history yourself:** append each user message and each assistant reply to a list, and send the whole list with every request.  
 * **Helpers:** add\_user\_message(), add\_assistant\_message() and chat() keep the calling code short.
 
-## **Controlling the output**
+#### **Controlling the output**
 
 * **System prompt:** the system parameter sets the role, tone and rules for the whole conversation, separate from the user's messages.  
 * **Temperature (0 to 1):** low values make output predictable, high values make it varied. It changes the odds of each token but guarantees nothing.  
@@ -1617,11 +1620,11 @@ Suggested temperature ranges:
 
 **Key lesson:** Claude is stateless. Your application owns the conversation history, and parameters like system, temperature and stop\_sequences shape each reply.
 
-3. # **Prompt Evaluation**
+### **3. Prompt Evaluation**
 
 Prompt evaluation replaces guesswork with a score. Instead of reading a few outputs and deciding a prompt looks better, you run it over a dataset and compare averages.
 
-## **A typical eval workflow**
+#### **A typical eval workflow**
 
 * **Draft a prompt:** write a baseline version.  
 * **Build a dataset:** collect inputs that reflect real requests. Write them by hand or have Claude generate them.  
@@ -1629,7 +1632,7 @@ Prompt evaluation replaces guesswork with a score. Instead of reading a few outp
 * **Grade:** a grader scores each input and response pair, usually from 1 to 10, and the scores are averaged.  
 * **Change and repeat:** edit the prompt, rerun everything and compare the new average with the baseline. In the lesson, asking for more detail raised the average from 7.66 to 8.7.
 
-## **Grader types**
+#### **Grader types**
 
 There are three kinds of grader:
 
@@ -1639,7 +1642,7 @@ There are three kinds of grader:
 | Model | Quality, instruction following, completeness, safety | Flexible, but scores vary and each grade is another API call |
 | Human | Anything | Most flexible, but slow and tedious |
 
-## **Writing a model grader**
+#### **Writing a model grader**
 
 * Ask for a JSON object with strengths, weaknesses, reasoning and a score. Asking for reasoning keeps the grader from defaulting to middling scores around 6\.  
 * Prefill a \`\`\`json fence and use a stop sequence so the result always parses.  
@@ -1647,7 +1650,7 @@ There are three kinds of grader:
 
 **Key lesson:** The absolute score matters less than the trend. Keep the best-scoring prompt and keep iterating against the same dataset.
 
-4. # **Prompt Engineering Techniques**
+### **4. Prompt Engineering Techniques**
 
 Each technique was measured with the eval pipeline from the previous section, so every change shows up as a score.
 
@@ -1658,7 +1661,7 @@ Each technique was measured with the eval pipeline from the previous section, so
 | Structure with XML tags | Wrap large or mixed content in descriptive tags such as \<sales\_records\> or \<my\_code\> | Instructions stay separate from the data |
 | Provide examples | Give one-shot or multi-shot input and output pairs, wrapped in tags such as \<sample\_input\> and \<ideal\_output\> | Sarcastic tweets stopped being read as positive |
 
-## **Tips for examples**
+#### **Tips for examples**
 
 * **Mine your evals:** use the highest-scoring outputs from earlier eval runs as examples.  
 * **Explain why:** say what makes an example ideal, not just the pair itself.  
@@ -1666,18 +1669,18 @@ Each technique was measured with the eval pipeline from the previous section, so
 
 **Key lesson:** Lead with a clear instruction, then add guidelines, structure and examples, and check each change with an eval.
 
-5. # **Tool Use with Claude**
+### **5. Tool Use with Claude**
 
 Tools let Claude reach information and actions outside its training data, such as live weather or a database. Claude never runs a tool itself: it asks for a call, your code runs it, and you send back the result.
 
-## **The tool use flow**
+#### **The tool use flow**
 
 * **Request:** send the user's question with the tool schemas in the tools parameter.  
 * **Tool call:** if Claude needs data, the reply holds a text block and a tool\_use block with an id, the tool name and its input, and stop\_reason is "tool\_use".  
 * **Run:** your code calls the function with the input arguments.  
 * **Result:** send a user message with a tool\_result block, and Claude writes the final answer.
 
-## **Tool schemas**
+#### **Tool schemas**
 
 Each schema has three parts:
 
@@ -1689,20 +1692,20 @@ Each schema has three parts:
 
 Claude can write the schema for you from the function code and Anthropic's tool use docs. Naming it function\_name\_schema and typing it as ToolParam keeps the code organized.
 
-## **Sending tool results**
+#### **Sending tool results**
 
 * **tool\_use\_id:** must match the id of the tool\_use block. When Claude asks for several tools in one reply, each call has its own id.  
 * **content:** the tool's output as a string.  
 * **is\_error:** set to true when the tool failed, so Claude can react to it.  
 * **Full history:** the follow-up request carries the user message, the assistant's tool\_use message and the tool\_result message, plus the tool schemas again.
 
-## **Multi-turn tool loops**
+#### **Multi-turn tool loops**
 
 * Call Claude, append response.content (all blocks) to the history, run every requested tool, send the results and repeat.  
 * Stop when stop\_reason is anything other than "tool\_use".  
 * A run\_tool() router maps tool names to functions, so a new tool needs only a function, a schema and one new case.
 
-## **Built-in tools and streaming**
+#### **Built-in tools and streaming**
 
 Three more tool features:
 
@@ -1714,11 +1717,11 @@ Three more tool features:
 
 **Key lesson:** Claude decides when to call a tool; your code decides what the tool does. Keep the whole history, match every result to its id, and loop until stop\_reason is no longer "tool\_use".
 
-6. # **RAG and Agentic Search**
+### **6. RAG and Agentic Search**
 
 Retrieval Augmented Generation (RAG) finds the parts of a large document set that are relevant to a question and puts only those in the prompt, instead of sending everything.
 
-## **Chunking strategies**
+#### **Chunking strategies**
 
 Poor chunks add irrelevant context and lead to wrong answers. There are four ways to split text:
 
@@ -1729,14 +1732,14 @@ Poor chunks add irrelevant context and lead to wrong answers. There are four way
 | Sentence-based | Groups of sentences, optionally overlapping | Most prose |
 | Semantic-based | Consecutive sentences grouped by meaning | Most relevant chunks, but expensive and complex |
 
-## **The RAG flow**
+#### **The RAG flow**
 
 * **Preprocess once:** chunk the text, turn each chunk into an embedding with an embedding model, and store the normalized vectors in a vector database.  
 * **Query:** embed the user's question with the same model and find the closest chunks.  
 * **Prompt:** send the question together with the retrieved chunks to Claude.  
 * **Similarity:** cosine similarity runs from \-1 to 1, and values near 1 mean very similar. Cosine distance is 1 minus the similarity.
 
-## **Hybrid search with BM25**
+#### **Hybrid search with BM25**
 
 * **The gap:** semantic search finds related meaning but can miss exact terms such as an incident ID (INC-2023-Q4-011).  
 * **BM25:** lexical search that weights rare terms more than common ones, so IDs and technical phrases rank well.  
@@ -1745,28 +1748,28 @@ Poor chunks add irrelevant context and lead to wrong answers. There are four way
 
 **Key lesson:** Chunk quality decides answer quality. Combine semantic and lexical search so both meaning and exact terms are found.
 
-7. # **Features of Claude**
+### **7. Features of Claude**
 
 Beyond plain text, the API supports longer reasoning, images and PDFs, citations and server-side code execution.
 
-## **Extended thinking**
+#### **Extended thinking**
 
 * Enable it with thinking: {"type": "enabled", "budget\_tokens": N}. The minimum budget is 1024, and max\_tokens must be larger than the budget.  
 * Replies hold thinking blocks (the reasoning, with a signature that proves it was not changed), redacted thinking blocks when safety systems flag the reasoning, and text blocks with the answer.  
 * It costs more, adds latency, does not work with prefilling and limits temperature. Use it only when an optimized prompt is still not accurate enough.
 
-## **Images and PDFs**
+#### **Images and PDFs**
 
 * **Images:** an image block with a base64 or URL source and a media\_type such as image/png, sent with a text block in the same user message.  
 * **Image limits:** 100 images per request, 5 MB each, 8000 px per side (2000 px when sending several). Cost is about width × height / 750 tokens.  
 * **Prompting images:** use the same techniques as for text: step-by-step instructions, one-shot examples and smaller sub-tasks.  
 * **PDFs:** a document block with media\_type application/pdf. Claude reads the text, images, charts and tables.
 
-## **Citations**
+#### **Citations**
 
 Add a title and citations: {"enabled": true} to a document block. Each citation returns the cited text, the document and its location: page numbers for PDFs, character positions for plain text. Use them when users need to check claims against the source.
 
-## **Code execution and the Files API**
+#### **Code execution and the Files API**
 
 * **Files API:** upload a file once, get a file ID, and reference the ID instead of sending base64 again.  
 * **Code execution:** a server-side tool where Claude runs Python in an isolated container with no network access, so files go in through the Files API.  
@@ -1774,11 +1777,11 @@ Add a title and citations: {"enabled": true} to a document block. Each citation 
 
 **Key lesson:** Reach for extended thinking last, after the prompt itself. Citations make answers checkable, and the Files API avoids resending large inputs.
 
-8. # **Prompt Caching**
+### **8. Prompt Caching**
 
 Prompt caching stores the work Claude does processing the start of a prompt, so later requests with identical content are faster and cheaper.
 
-## **Rules of prompt caching**
+#### **Rules of prompt caching**
 
 * **Not automatic:** add cache\_control: {"type": "ephemeral"} to a block. This needs the longhand block form, for example a system prompt written as a list of text blocks.  
 * **Prefix match:** everything up to and including the breakpoint is cached, and a later request reuses it only if that part is identical. Adding a single word forces a full reprocess.  
@@ -1794,25 +1797,25 @@ Where breakpoints work well:
 | The system prompt | Caches content that rarely changes between requests |
 | A later message | Caches all earlier messages too, useful for long conversations |
 
-## **Checking the cache**
+#### **Checking the cache**
 
 The usage field shows cache\_creation\_input\_tokens on the request that writes the cache and cache\_read\_input\_tokens on requests that read it. If only the system prompt changes, the tools are still read from the cache and the system prompt is written again.
 
 **Key lesson:** Put stable content first (tools, then the system prompt) and changing content last, so the cached prefix stays identical between requests.
 
-9. # **Model Context Protocol**
+### **9. Model Context Protocol**
 
 MCP is a communication layer that moves tool definitions and their execution out of your application and into MCP servers. Your application is the MCP client. Instead of writing every GitHub tool yourself, you connect to a GitHub MCP server, often published by the service provider.
 
 MCP does not replace tool use: tool use is how Claude calls tools, and MCP decides who builds and maintains them.
 
-## **How client and server talk**
+#### **How client and server talk**
 
 * **Transport:** usually standard input and output on the same machine, but HTTP, WebSockets and others also work.  
 * **Messages:** ListToolsRequest returns the server's tools, and CallToolRequest runs one with arguments.  
 * **Flow:** your app gets the tool list from the client and sends it to Claude with the query. When Claude asks for a tool, the client forwards the call to the server, and the result goes back to Claude.
 
-## **The three server primitives**
+#### **The three server primitives**
 
 A server can expose three kinds of capability:
 
@@ -1822,7 +1825,7 @@ A server can expose three kinds of capability:
 | Resources | @mcp.resource("docs://documents/{doc\_id}") | Data the app reads, like GET handlers: direct (static URI) or templated (URI with parameters) |
 | Prompts | @mcp.prompt | Tested instruction templates that return messages ready to send to Claude |
 
-## **Building and testing**
+#### **Building and testing**
 
 * **Server:** FastMCP from the Python SDK creates the server. Raise a clear ValueError so Claude understands a failure.  
 * **Inspector:** mcp dev mcp\_server.py opens a browser inspector on port 6277 to run tools, read resources and check prompts without an app.  
@@ -1830,7 +1833,7 @@ A server can expose three kinds of capability:
 
 **Key lesson:** MCP separates who builds integrations from who uses them. Test each server in the inspector before wiring it into a client.
 
-10. # **Claude Code and Computer Use**
+### **10. Claude Code and Computer Use**
 
 Claude Code and Computer Use are Anthropic's own agents. They rely on the same ideas as the rest of the course: tools, multi-step work and checking the environment.
 
@@ -1841,7 +1844,7 @@ Claude Code and Computer Use are Anthropic's own agents. They rely on the same i
 
 **Key lesson:** More context and structure give better results: a good CLAUDE.md, a plan before code, and MCP servers for the systems the team uses.
 
-11. # **Agents and Workflows**
+### **11. Agents and Workflows**
 
 Both handle tasks a single request cannot. A workflow is a fixed series of Claude calls; an agent gets a goal and tools and decides the steps itself.
 
@@ -1852,7 +1855,7 @@ Both handle tasks a single request cannot. A workflow is a fixed series of Claud
 | Chaining | Run sequential steps, each focused on one part, with code checks in between | Claude ignores some constraints in a long prompt |
 | Routing | Classify the input first, then send it to a specialized prompt | Requests are diverse but fall into clear categories |
 
-## **Designing agents**
+#### **Designing agents**
 
 * **Workflows first:** use one when you can picture the steps. Agents are more flexible but less reliable and cost more.  
 * **General tools:** prefer abstract tools that combine, like Claude Code's bash, read, write and grep, over narrow single-purpose tools.  
@@ -1860,7 +1863,7 @@ Both handle tasks a single request cannot. A workflow is a fixed series of Claud
 
 **Key lesson:** Start with the simplest workflow that solves the task, and move to an agent only when the steps cannot be known in advance.
 
-12. # **Putting It All Together**
+### **12. Putting It All Together**
 
 The sections build from a single request to a full application:
 
